@@ -1,27 +1,767 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safety Vault | Simple Solutions</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Solutions | Corporate Consulting &amp; Software</title>
+  <meta name="description" content="Let's keep things simple. Safety compliance, automated & tracked. AI-powered solutions for modern businesses.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+          },
+          colors: {
+            primary: '#1e3a5f',
+            'primary-foreground': '#ffffff',
+            foreground: '#1a1a2e',
+            muted: '#6b7280',
+            border: '#e5e7eb',
+            card: '#ffffff',
+            'dark-bg': '#0a0a14',
+            'dark-card': '#12121f',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .text-balance { text-wrap: balance; }
+    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    details summary::-webkit-details-marker { display: none; }
+    details summary { list-style: none; }
+    details[open] summary svg { transform: rotate(180deg); }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="font-sans antialiased bg-white text-foreground">
+  <main class="min-h-screen">
 
-    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
-        <h1 class="text-2xl font-bold tracking-tight">Simple Solutions</h1>
-        <button class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition">Client Login</button>
-    </nav>
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full border-b border-gray-200/40 bg-white/95 backdrop-blur">
+      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2">
+          <span class="font-serif text-xl font-semibold tracking-tight text-foreground">
+            Simple Solutions
+          </span>
+        </a>
 
-    <main class="flex flex-col items-center justify-center text-center mt-24 px-4">
-        <h2 class="text-5xl font-extrabold mb-6">Digital Safety Training,<br> Automated & Compliant.</h2>
-        <p class="text-xl text-gray-600 mb-8 max-w-2xl">
-            Give your workforce access to AI-generated safety training videos. Monthly subscriptions for manufacturing and agriculture.
-        </p>
-        <button class="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition shadow-lg">
-            Get Access for R500/mo
+        <!-- Desktop Navigation -->
+        <nav class="hidden items-center gap-8 md:flex">
+          <a href="#services" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Services</a>
+          <a href="#pricing" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Pricing</a>
+          <a href="#faq" class="text-sm font-medium text-muted transition-colors hover:text-foreground">FAQ</a>
+          <a href="#contact" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Contact</a>
+        </nav>
+
+        <!-- Desktop CTA -->
+        <div class="hidden md:block">
+          <button class="bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90 transition-colors">
+            Client Login
+          </button>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button type="button" class="inline-flex items-center justify-center rounded-md p-2 text-foreground md:hidden" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" aria-label="Toggle menu">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </button>
-    </main>
+      </div>
 
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden border-t border-gray-200 md:hidden">
+        <div class="space-y-1 px-4 py-4">
+          <a href="#services" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Services</a>
+          <a href="#pricing" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Pricing</a>
+          <a href="#faq" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">FAQ</a>
+          <a href="#contact" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Contact</a>
+          <div class="pt-4">
+            <button class="w-full bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90">Client Login</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-28">
+      <!-- Subtle background pattern -->
+      <div class="absolute inset-0 -z-10">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem]" style="mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);-webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);"></div>
+      </div>
+
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <!-- Left Column - Content -->
+          <div class="max-w-xl">
+            <p class="mb-4 text-sm font-medium uppercase tracking-widest text-muted">
+              Let&apos;s keep things simple.
+            </p>
+            <h1 class="font-serif text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <span class="text-balance">Safety Compliance, Automated &amp; Tracked.</span>
+            </h1>
+            <p class="mt-6 text-lg leading-relaxed text-muted">
+              Streamline your operations with enterprise-grade compliance automation. 
+              From AI-powered safety videos to workflow optimization, we deliver 
+              solutions that scale with your business.
+            </p>
+
+            <div class="mt-10 flex flex-col gap-4 sm:flex-row">
+              <button class="inline-flex items-center justify-center bg-primary px-8 py-3 text-base font-medium text-white rounded-md hover:bg-primary/90 transition-colors">
+                <!-- Lock Icon -->
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Unlock the Vault
+              </button>
+              <button class="inline-flex items-center justify-center border border-gray-200 bg-white px-8 py-3 text-base font-medium text-foreground rounded-md hover:bg-gray-50 transition-colors">
+                <!-- Play Icon -->
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <polygon points="6 3 20 12 6 21 6 3"/>
+                </svg>
+                View Sample
+              </button>
+            </div>
+
+            <!-- Trust indicators -->
+            <div class="mt-12 flex items-center gap-8 border-t border-gray-200 pt-8">
+              <div>
+                <p class="text-2xl font-semibold text-foreground">500+</p>
+                <p class="text-sm text-muted">Clients Served</p>
+              </div>
+              <div class="h-10 w-px bg-gray-200"></div>
+              <div>
+                <p class="text-2xl font-semibold text-foreground">99.9%</p>
+                <p class="text-sm text-muted">Uptime SLA</p>
+              </div>
+              <div class="h-10 w-px bg-gray-200"></div>
+              <div>
+                <p class="text-2xl font-semibold text-foreground">ISO</p>
+                <p class="text-sm text-muted">Certified</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column - Dashboard Mockup -->
+          <div class="relative lg:pl-8">
+            <div class="relative">
+              <!-- Laptop frame -->
+              <div class="relative mx-auto w-full max-w-2xl">
+                <!-- Screen bezel -->
+                <div class="rounded-t-xl bg-[#1a1a2e] p-2">
+                  <!-- Browser chrome -->
+                  <div class="flex items-center gap-2 rounded-t-lg bg-[#16162a] px-4 py-2">
+                    <div class="flex gap-1.5">
+                      <div class="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
+                      <div class="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></div>
+                      <div class="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                      <div class="mx-auto flex h-6 max-w-xs items-center justify-center rounded-md bg-[#0f0f1a] px-3">
+                        <span class="text-xs text-gray-400">simplesolutions.app/dashboard</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dashboard content -->
+                  <div class="overflow-hidden rounded-b-lg bg-[#0f0f1a]">
+                    <div class="p-4">
+                      <!-- Dashboard header -->
+                      <div class="mb-4 flex items-center justify-between">
+                        <div>
+                          <h3 class="text-sm font-medium text-white">Compliance Dashboard</h3>
+                          <p class="text-xs text-gray-400">Real-time monitoring</p>
+                        </div>
+                        <div class="flex items-center gap-2 rounded-md bg-green-500/20 px-2 py-1">
+                          <div class="h-2 w-2 animate-pulse rounded-full bg-green-400"></div>
+                          <span class="text-xs text-green-400">All Systems Operational</span>
+                        </div>
+                      </div>
+
+                      <!-- Stats grid -->
+                      <div class="mb-4 grid grid-cols-3 gap-3">
+                        <div class="rounded-lg bg-[#1a1a2e] p-3">
+                          <div class="mb-1 flex items-center gap-1">
+                            <!-- Shield Icon -->
+                            <svg class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                            </svg>
+                            <span class="text-xs text-gray-400">Compliance</span>
+                          </div>
+                          <p class="text-xl font-semibold text-white">98.5%</p>
+                        </div>
+                        <div class="rounded-lg bg-[#1a1a2e] p-3">
+                          <div class="mb-1 flex items-center gap-1">
+                            <!-- Users Icon -->
+                            <svg class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                              <circle cx="9" cy="7" r="4"/>
+                              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            <span class="text-xs text-gray-400">Trained</span>
+                          </div>
+                          <p class="text-xl font-semibold text-white">2,451</p>
+                        </div>
+                        <div class="rounded-lg bg-[#1a1a2e] p-3">
+                          <div class="mb-1 flex items-center gap-1">
+                            <!-- BarChart Icon -->
+                            <svg class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <line x1="12" x2="12" y1="20" y2="10"/>
+                              <line x1="18" x2="18" y1="20" y2="4"/>
+                              <line x1="6" x2="6" y1="20" y2="16"/>
+                            </svg>
+                            <span class="text-xs text-gray-400">Videos</span>
+                          </div>
+                          <p class="text-xl font-semibold text-white">128</p>
+                        </div>
+                      </div>
+
+                      <!-- Video player mockup -->
+                      <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1a]">
+                        <div class="aspect-video p-4">
+                          <div class="flex h-full flex-col items-center justify-center">
+                            <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+                              <!-- Play Icon Filled -->
+                              <svg class="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                <polygon points="6 3 20 12 6 21 6 3"/>
+                              </svg>
+                            </div>
+                            <p class="text-sm font-medium text-white">Safety Training Module 12</p>
+                            <p class="text-xs text-gray-400">Fire Safety Protocols - 8:24</p>
+                          </div>
+                        </div>
+                        <!-- Video progress bar -->
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-[#1a1a2e]">
+                          <div class="h-full w-2/3 bg-primary"></div>
+                        </div>
+                      </div>
+
+                      <!-- Recent completions -->
+                      <div class="mt-4 space-y-2">
+                        <p class="text-xs font-medium text-gray-400">Recent Completions</p>
+                        <div class="flex items-center justify-between rounded-md bg-[#1a1a2e] px-3 py-2">
+                          <div class="flex items-center gap-2">
+                            <!-- CheckCircle Icon -->
+                            <svg class="h-3.5 w-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span class="text-xs text-white">J. Smith</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">Module 11</span>
+                            <span class="text-xs text-gray-500">2m ago</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between rounded-md bg-[#1a1a2e] px-3 py-2">
+                          <div class="flex items-center gap-2">
+                            <svg class="h-3.5 w-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span class="text-xs text-white">A. Johnson</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">Module 12</span>
+                            <span class="text-xs text-gray-500">5m ago</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between rounded-md bg-[#1a1a2e] px-3 py-2">
+                          <div class="flex items-center gap-2">
+                            <svg class="h-3.5 w-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span class="text-xs text-white">M. Williams</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">Module 10</span>
+                            <span class="text-xs text-gray-500">12m ago</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Laptop base -->
+                <div class="relative">
+                  <div class="h-4 rounded-b-xl bg-gradient-to-b from-[#1a1a2e] to-[#0f0f1a]"></div>
+                  <div class="mx-auto h-1 w-20 rounded-b-lg bg-[#0f0f1a]"></div>
+                </div>
+
+                <!-- Laptop stand/reflection -->
+                <div class="mx-auto mt-1 h-2 w-40 rounded-full bg-gradient-to-r from-transparent via-gray-300/20 to-transparent"></div>
+              </div>
+
+              <!-- Decorative elements -->
+              <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl"></div>
+              <div class="absolute -bottom-4 -left-4 h-32 w-32 rounded-full bg-primary/5 blur-2xl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section id="services" class="bg-gray-50/50 py-20 sm:py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Section header -->
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-sm font-medium uppercase tracking-widest text-muted">
+            What we do
+          </p>
+          <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            <span class="text-balance">Our collection of tech services spans every stage of transformation.</span>
+          </h2>
+          <p class="mt-4 text-lg text-muted">
+            Explore how we help businesses transform.
+          </p>
+        </div>
+
+        <!-- Services grid -->
+        <div class="mt-16 grid gap-8 lg:grid-cols-3">
+          <!-- AI Safety Videos -->
+          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
+            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+              <!-- Video Icon -->
+              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+                <rect x="2" y="6" width="14" height="12" rx="2"/>
+              </svg>
+            </div>
+            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Automated Compliance</p>
+            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">AI Safety Videos</h3>
+            <p class="mb-6 leading-relaxed text-muted">
+              Generate customized safety training content with AI. Automatically track completion rates, certifications, and compliance across your entire organization.
+            </p>
+            <ul class="mb-8 space-y-2">
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Auto-generated scripts</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Multi-language support</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Progress tracking</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Certification management</li>
+            </ul>
+            <a href="#" class="inline-flex items-center text-sm font-medium text-foreground transition-colors hover:text-primary">
+              Learn more
+              <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- ClickUp Workflow -->
+          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
+            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+              <!-- Workflow Icon -->
+              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect width="8" height="8" x="3" y="3" rx="2"/>
+                <path d="M7 11v4a2 2 0 0 0 2 2h4"/>
+                <rect width="8" height="8" x="13" y="13" rx="2"/>
+              </svg>
+            </div>
+            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Operational Efficiency</p>
+            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">ClickUp Workflow Optimization</h3>
+            <p class="mb-6 leading-relaxed text-muted">
+              Streamline your project management with expertly configured ClickUp workspaces. We design workflows that eliminate bottlenecks and accelerate delivery.
+            </p>
+            <ul class="mb-8 space-y-2">
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Custom automations</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Dashboard design</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Team training</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Ongoing optimization</li>
+            </ul>
+            <a href="#" class="inline-flex items-center text-sm font-medium text-foreground transition-colors hover:text-primary">
+              Learn more
+              <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- AI Integration -->
+          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
+            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+              <!-- Bot Icon -->
+              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M12 8V4H8"/>
+                <rect width="16" height="12" x="4" y="8" rx="2"/>
+                <path d="M2 14h2"/>
+                <path d="M20 14h2"/>
+                <path d="M15 13v2"/>
+                <path d="M9 13v2"/>
+              </svg>
+            </div>
+            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Future-Proofing Operations</p>
+            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">AI Integration</h3>
+            <p class="mb-6 leading-relaxed text-muted">
+              Integrate cutting-edge AI tools seamlessly into your existing infrastructure. From chatbots to document processing, we build solutions that scale.
+            </p>
+            <ul class="mb-8 space-y-2">
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Custom AI agents</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Process automation</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Data analytics</li>
+              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>API integrations</li>
+            </ul>
+            <a href="#" class="inline-flex items-center text-sm font-medium text-foreground transition-colors hover:text-primary">
+              Learn more
+              <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section id="pricing" class="relative overflow-hidden">
+      <!-- Light background top -->
+      <div class="bg-white pb-48 pt-20 sm:pt-24 lg:pb-56 lg:pt-32">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-sm font-medium uppercase tracking-widest text-muted">Pricing</p>
+            <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              <span class="text-balance">Transparent pricing for every scale</span>
+            </h2>
+            <p class="mt-4 text-lg text-muted">Choose the plan that fits your organization. No hidden fees.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dark background bottom -->
+      <div class="bg-dark-bg pb-20 pt-32 sm:pb-24 lg:pb-32">
+        <!-- Pricing cards container - positioned to overlap -->
+        <div class="absolute left-0 right-0 top-[280px] z-10 sm:top-[300px] lg:top-[340px]">
+          <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid gap-6 lg:grid-cols-3 lg:gap-8">
+              
+              <!-- Standard Vault -->
+              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl sm:p-8">
+                <div class="mb-6 text-center">
+                  <h3 class="font-serif text-xl font-semibold text-foreground">Standard Vault</h3>
+                  <p class="mt-1 text-sm text-muted">Essential compliance tools for growing teams.</p>
+                </div>
+                <div class="mb-6 text-center">
+                  <span class="text-4xl font-semibold text-foreground">R1,200</span>
+                  <span class="text-muted">/mo</span>
+                </div>
+                <ul class="mb-8 space-y-3">
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Up to 50 users</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">25 AI-generated videos/month</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Basic compliance tracking</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Email support</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Standard reporting</span>
+                  </li>
+                </ul>
+                <button class="w-full bg-gray-100 text-foreground py-3 rounded-md font-medium hover:bg-gray-200 transition-colors">Get Started</button>
+              </div>
+
+              <!-- Integrated System (Featured) -->
+              <div class="relative z-20 scale-105 rounded-xl border-2 border-primary bg-white p-6 shadow-2xl lg:-mt-4 sm:p-8">
+                <!-- Featured badge -->
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div class="flex items-center gap-1 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white">
+                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Most Popular
+                  </div>
+                </div>
+                <div class="mb-6 text-center">
+                  <h3 class="font-serif text-xl font-semibold text-foreground">Integrated System</h3>
+                  <p class="mt-1 text-sm text-muted">Complete solution for established organizations.</p>
+                </div>
+                <div class="mb-6 text-center">
+                  <span class="text-4xl font-semibold text-foreground">R2,500</span>
+                  <span class="text-muted">/mo</span>
+                </div>
+                <ul class="mb-8 space-y-3">
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Up to 200 users</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Unlimited AI videos</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Advanced analytics</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">ClickUp integration</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Priority support</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Custom workflows</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">API access</span>
+                  </li>
+                </ul>
+                <button class="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-primary/90 transition-colors">Get Started</button>
+              </div>
+
+              <!-- Enterprise -->
+              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl sm:p-8">
+                <div class="mb-6 text-center">
+                  <h3 class="font-serif text-xl font-semibold text-foreground">Enterprise</h3>
+                  <p class="mt-1 text-sm text-muted">Tailored solutions for large-scale operations.</p>
+                </div>
+                <div class="mb-6 text-center">
+                  <span class="text-4xl font-semibold text-foreground">Custom</span>
+                  <span class="text-muted"> pricing</span>
+                </div>
+                <ul class="mb-8 space-y-3">
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Unlimited users</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Dedicated AI instance</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Full AI integration suite</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">24/7 dedicated support</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">Custom development</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">On-premise option</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="text-sm text-muted">SLA guarantee</span>
+                  </li>
+                </ul>
+                <button class="w-full bg-gray-100 text-foreground py-3 rounded-md font-medium hover:bg-gray-200 transition-colors">Contact Sales</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="bg-dark-bg py-20 sm:py-24 lg:py-32">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-12 text-center">
+          <p class="text-sm font-medium uppercase tracking-widest text-gray-400">FAQ</p>
+          <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Frequently Asked Questions
+          </h2>
+          <p class="mt-4 text-gray-400">Everything you need to know about our services.</p>
+        </div>
+
+        <!-- FAQ Accordion using details/summary -->
+        <div class="space-y-4">
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              How quickly can we get started with the Standard Vault?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              Most clients are fully onboarded within 48 hours. Our team handles the initial setup, including user provisioning and basic configuration. You&apos;ll receive comprehensive training materials and dedicated support during the transition period.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              Can I upgrade my plan at any time?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              Yes, you can upgrade your plan at any time. When you upgrade, you&apos;ll immediately gain access to all new features. We&apos;ll prorate your billing so you only pay the difference for the remainder of your billing cycle.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              How does the AI video generation work?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              Our AI analyzes your safety requirements and industry standards to generate customized training scripts. You can review, edit, and approve the content before it&apos;s rendered into professional-quality videos with voiceover and subtitles.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              Is my data secure?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              Absolutely. We employ enterprise-grade security measures including end-to-end encryption, SOC 2 Type II compliance, and regular third-party audits. Your data is stored in ISO 27001 certified data centers with 99.99% uptime guarantee.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              Do you offer implementation support?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              Yes, all plans include implementation support. Integrated System and Enterprise clients receive dedicated implementation managers who work directly with your team to ensure a smooth rollout and adoption.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              What integrations are available?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400">
+              We integrate with popular tools including ClickUp, Slack, Microsoft Teams, Zapier, and various HRIS systems. Enterprise clients can request custom integrations with their existing technology stack.
+            </p>
+          </details>
+        </div>
+
+        <div class="mt-12 text-center">
+          <p class="text-gray-400">
+            Still have questions? 
+            <a href="#contact" class="font-medium text-white underline-offset-4 hover:underline">Contact our team</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="border-t border-gray-800 bg-dark-bg">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div class="grid gap-12 lg:grid-cols-4">
+          <!-- Brand column -->
+          <div class="lg:col-span-1">
+            <a href="#" class="inline-block">
+              <span class="font-serif text-xl font-semibold tracking-tight text-white">Simple Solutions</span>
+            </a>
+            <p class="mt-4 text-sm leading-relaxed text-gray-400">
+              Enterprise compliance automation and AI integration solutions for modern businesses.
+            </p>
+
+            <!-- Contact info -->
+            <div class="mt-6 space-y-3">
+              <a href="mailto:contact@simplesolutions.com" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+                <!-- Mail Icon -->
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect width="20" height="16" x="2" y="4" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+                contact@simplesolutions.com
+              </a>
+              <a href="tel:+27123456789" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+                <!-- Phone Icon -->
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                +27 12 345 6789
+              </a>
+              <div class="flex items-start gap-2 text-sm text-gray-400">
+                <!-- MapPin Icon -->
+                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>123 Business Park<br>Johannesburg, 2000<br>South Africa</span>
+              </div>
+            </div>
+
+            <!-- Social links -->
+            <div class="mt-6 flex gap-4">
+              <a href="#" class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white" aria-label="LinkedIn">
+                <!-- LinkedIn Icon -->
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
+                </svg>
+              </a>
+              <a href="#" class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white" aria-label="Twitter">
+                <!-- Twitter Icon -->
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Links columns -->
+          <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Services</h3>
+              <ul class="mt-4 space-y-3">
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">AI Safety Videos</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">ClickUp Optimization</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">AI Integration</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Custom Solutions</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Company</h3>
+              <ul class="mt-4 space-y-3">
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">About Us</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Careers</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Blog</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Press</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Legal</h3>
+              <ul class="mt-4 space-y-3">
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Privacy Policy</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Terms of Service</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">Cookie Policy</a></li>
+                <li><a href="#" class="text-sm text-gray-400 transition-colors hover:text-white">GDPR</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="mt-12 border-t border-gray-800 pt-8">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-gray-500">&copy; 2026 Simple Solutions. All rights reserved.</p>
+            <p class="text-sm text-gray-500">Powered by <span class="text-gray-400">Simple Solutions</span></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </main>
 </body>
 </html>
