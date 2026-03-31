@@ -116,7 +116,7 @@
       
       <!-- Main Navigation -->
       <nav class="p-4 space-y-1">
-        <a href="vault.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
+        <a href="vault.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg bg-black/5 text-black font-medium transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -227,44 +227,93 @@
       </header>
 
       <!-- Page Content -->
-      <div class="max-w-2xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
-        <h2 class="text-2xl font-serif text-foreground mb-6">Contact Support</h2>
-        <p class="text-muted mb-8 text-sm" id="support-subtitle">Need help with a module or have a question about your account? Drop us a message below and our team will get back to you within 24 hours.</p>
-
-        <form id="support-form" action="https://formspree.io/f/xvzvarrz" method="POST" class="space-y-6">
+      <div class="max-w-4xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <label for="name" class="block text-sm font-medium text-foreground mb-2">Your name</label>
-            <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
-          </div>
-          
-          <div>
-            <label for="email" class="block text-sm font-medium text-foreground mb-2">Your email</label>
-            <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
+            <h2 class="text-2xl font-serif text-foreground mb-2">Training Records</h2>
+            <p class="text-muted text-sm">View your completed safety modules and compliance status.</p>
           </div>
 
-          <div>
-            <label for="message" class="block text-sm font-medium text-foreground mb-2">Your message</label>
-            <textarea id="message" name="message" rows="5" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors resize-none"></textarea>
+          <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-md">
+            <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span class="text-xs font-medium text-green-700">Actively syncing to Organization HR</span>
           </div>
+        </div>
 
-          <button type="submit" class="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors">
-            Submit Ticket
-          </button>
-        </form>
-
-        <div id="success-message" class="hidden text-center py-12">
-          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <div class="relative w-full sm:w-72">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+            <input type="text" placeholder="Search employee or video..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
           </div>
-          <h3 class="text-xl font-medium text-foreground mb-2">Ticket Submitted Successfully</h3>
-          <p class="text-muted">Thanks for reaching out! Our team has received your message and will get back to you shortly.</p>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <select class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
+              <option>All Categories</option>
+              <option>Heavy Machinery</option>
+              <option>Power Tools</option>
+            </select>
+            <button class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-slate-200">
+          <table class="w-full text-left text-sm text-muted whitespace-nowrap">
+            <thead class="bg-slate-50 text-xs uppercase text-foreground border-b border-slate-200">
+              <tr>
+                <th scope="col" class="px-6 py-4 font-medium">Employee Name</th>
+                <th scope="col" class="px-6 py-4 font-medium">ID Number</th>
+                <th scope="col" class="px-6 py-4 font-medium">Training Module</th>
+                <th scope="col" class="px-6 py-4 font-medium">Date Completed</th>
+                <th scope="col" class="px-6 py-4 font-medium text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-foreground">Sipho Nkosi</td>
+                <td class="px-6 py-4 font-mono text-xs">920412 5054 081</td>
+                <td class="px-6 py-4">Forklift Operation & Safety</td>
+                <td class="px-6 py-4">Oct 24, 2025</td>
+                <td class="px-6 py-4 text-right">
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-foreground">David van der Merwe</td>
+                <td class="px-6 py-4 font-mono text-xs">881105 5123 088</td>
+                <td class="px-6 py-4">Tractor PTO Safety</td>
+                <td class="px-6 py-4">Jan 22, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-foreground">Sarah Johnson</td>
+                <td class="px-6 py-4 font-mono text-xs">950321 0045 082</td>
+                <td class="px-6 py-4">Chemical Handling (HAZMAT)</td>
+                <td class="px-6 py-4">Mar 19, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
+          <p class="text-xs text-muted">Need a physical copy for a site inspection?</p>
+          <a href="request.html" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+            Request PDF Certificate &rarr;
+          </a>
         </div>
       </div>
-    </main>
-    
-  </div>
 
   <script>
     const sidebar = document.getElementById('sidebar');
@@ -272,9 +321,6 @@
     const mainContent = document.getElementById('mainContent');
     const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
     const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
-    const form = document.getElementById('support-form');
-    const successMessage = document.getElementById('success-message');
-    const subtitle = document.getElementById('support-subtitle');
 
     const setActiveSidebarButton = (buttons, activeButton) => {
       buttons.forEach((button) => {
@@ -286,7 +332,7 @@
       activeButton.classList.remove('text-muted');
     };
 
-    const currentPage = window.location.pathname.split('/').pop() || 'support.html';
+    const currentPage = window.location.pathname.split('/').pop() || 'records.html';
     sidebarNavButtons.forEach((button) => {
       const href = button.getAttribute('href');
       if (href && href !== '#' && href === currentPage) {
@@ -320,39 +366,6 @@
       sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
       sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
     });
-
-    if (form && successMessage && subtitle) {
-      form.addEventListener('submit', async (event) => {
-        // Stop the default page reload
-        event.preventDefault();
-
-        // Grab the form data
-        const data = new FormData(event.target);
-
-        try {
-          // Send it to Formspree behind the scenes
-          const response = await fetch(event.target.action, {
-            method: form.method,
-            body: data,
-            headers: {
-              Accept: 'application/json'
-            }
-          });
-
-          if (response.ok) {
-            // If successful, hide the form and subtitle, show the success message
-            form.classList.add('hidden');
-            subtitle.classList.add('hidden');
-            successMessage.classList.remove('hidden');
-            form.reset(); // Clear the inputs for the next time
-          } else {
-            alert('Oops! There was a problem submitting your form. Please try again.');
-          }
-        } catch (error) {
-          alert('Oops! There was a network error. Please check your connection.');
-        }
-      });
-    }
   </script>
 </body>
 </html>
