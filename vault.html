@@ -230,49 +230,49 @@
       <div class="p-8">
         
         <!-- Featured Training Banner -->
+        <div id="continue-watching-block">
         <section class="mb-10">
           <div class="relative bg-gradient-to-r from-primary to-[#2a5285] rounded-2xl overflow-hidden shadow-lg border border-primary/20">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
             <div class="relative flex items-center gap-8 p-8">
               <!-- Video Thumbnail -->
-              <div class="relative w-80 aspect-video rounded-xl overflow-hidden flex items-center justify-center group cursor-pointer flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1581092588429-7f8a7d5f0f4c?auto=format&fit=crop&w=1200&q=80');">
-                <div class="absolute inset-0 bg-black/40 rounded-xl"></div>
-                <!-- Play Button -->
-                <div class="relative w-16 h-16 bg-white/95 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
-                  <svg class="w-7 h-7 text-primary ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
+              <a id="continueWatchingVisualLink" href="module.html?v=1179583326&t=120" class="relative w-full md:w-1/2 aspect-video rounded-lg overflow-hidden shadow-2xl border border-white/10 bg-black block" aria-label="Resume video from where you left off">
+                <img id="continueWatchingThumbnail" src="https://vumbnail.com/1179583326.jpg" alt="Continue watching thumbnail" class="absolute top-0 left-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/35"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
                 </div>
-                <!-- Progress Bar -->
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/20 rounded-b-xl overflow-hidden">
-                  <div class="h-full w-2/5 bg-white/80"></div>
-                </div>
-              </div>
+              </a>
               
               <!-- Content -->
               <div class="text-white flex-1">
                 <span class="inline-block px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
-                <h2 class="font-serif text-3xl font-semibold mb-3">Forklift Operation & Safety Essentials</h2>
-                <p class="text-white/80 mb-4 max-w-lg">Master the fundamentals of safe forklift operation with our comprehensive training module. OSHA-compliant certification included.</p>
+                <h2 id="continueWatchingTitle" class="font-serif text-3xl font-semibold mb-3">Agricultural Sprayer Calibration &amp; Safety</h2>
+                <p id="continueWatchingDescription" class="text-white/80 mb-4 max-w-lg">Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.</p>
                 <div class="flex items-center gap-6 text-sm text-white/70">
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    24:35 remaining
+                    <span id="continueWatchingRemaining">3:50 remaining</span>
                   </span>
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
-                    Module 3 of 5
+                    <span id="continueWatchingModule">Agriculture Module</span>
                   </span>
                 </div>
-                <button type="button" class="mt-5 bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</button>
+                <a id="continueWatchingLink" href="module.html?v=1179583326&t=120" class="mt-5 inline-flex bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
               </div>
             </div>
           </div>
         </section>
+        </div>
         
         <!-- Video Library Section -->
         <section>
@@ -286,185 +286,32 @@
           
           <!-- Video Cards Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            
-            <!-- Video Card 1 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <!-- Play Overlay -->
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
+
+            <a href="module.html" class="group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
+              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
+                <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
+                  5:50
+                </div>
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
+                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                   </div>
                 </div>
-                <!-- Duration Badge -->
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">8:24</span>
               </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Tractor PTO Safety</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Completed</span>
+              <div class="p-4 flex flex-col justify-between">
+                <div>
+                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Agricultural Sprayer Calibration &amp; Safety</h3>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
-                <p class="text-sm text-muted">Agriculture</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 2 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">In Progress</span>
+                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
+                    <div class="bg-primary h-1.5 rounded-full" style="width: 35%"></div>
                   </div>
                 </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">12:15</span>
               </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Circular Saw Fundamentals</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Pending</span>
-                </div>
-                <p class="text-sm text-muted">Power Tools</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 3 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">6:42</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Ladder Safety Best Practices</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Completed</span>
-                </div>
-                <p class="text-sm text-muted">Working at Heights</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 4 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">18:30</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Excavator Operation Basics</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Pending</span>
-                </div>
-                <p class="text-sm text-muted">Heavy Machinery</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 5 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">9:58</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Fire Extinguisher Training</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Completed</span>
-                </div>
-                <p class="text-sm text-muted">General Safety</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 6 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">15:22</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Chemical Handling & MSDS</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">In Progress</span>
-                </div>
-                <p class="text-sm text-muted">General Safety</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 7 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">11:45</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Scaffolding Setup & Inspection</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Pending</span>
-                </div>
-                <p class="text-sm text-muted">Working at Heights</p>
-              </div>
-            </article>
-            
-            <!-- Video Card 8 -->
-            <article class="bg-white rounded-xl border border-border overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
-              <div class="relative aspect-video bg-slate-800 border border-slate-700">
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-700/30 to-slate-900/60"></div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <svg class="w-5 h-5 text-primary ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/85 text-white text-xs font-medium rounded">7:18</span>
-              </div>
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="font-semibold text-foreground leading-tight">Angle Grinder Safety</h4>
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Completed</span>
-                </div>
-                <p class="text-sm text-muted">Power Tools</p>
-              </div>
-            </article>
-            
+            </a>
+
           </div>
         </section>
         
@@ -479,6 +326,103 @@
     const mainContent = document.getElementById('mainContent');
     const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
     const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
+    const continueWatchingBlock = document.getElementById('continue-watching-block');
+    const continueWatchingTitle = document.getElementById('continueWatchingTitle');
+    const continueWatchingDescription = document.getElementById('continueWatchingDescription');
+    const continueWatchingRemaining = document.getElementById('continueWatchingRemaining');
+    const continueWatchingModule = document.getElementById('continueWatchingModule');
+    const continueWatchingThumbnail = document.getElementById('continueWatchingThumbnail');
+    const continueWatchingLink = document.getElementById('continueWatchingLink');
+    const continueWatchingVisualLink = document.getElementById('continueWatchingVisualLink');
+
+    const videoLibrary = {
+      '1179583326': {
+        title: 'Agricultural Sprayer Calibration & Safety',
+        module: 'Agriculture Module',
+        description: 'Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.',
+        totalSeconds: 350,
+        thumbnail: 'https://vumbnail.com/1179583326.jpg'
+      }
+    };
+
+    const formatClock = (seconds) => {
+      const safeSeconds = Math.max(0, Math.floor(seconds));
+      const minutes = Math.floor(safeSeconds / 60);
+      const remainder = safeSeconds % 60;
+      return `${minutes}:${String(remainder).padStart(2, '0')}`;
+    };
+
+    const getLatestIncompleteVideo = () => {
+      const rawProgress = localStorage.getItem('vaultVideoProgress');
+      if (!rawProgress) {
+        return null;
+      }
+
+      let progressByVideo;
+      try {
+        progressByVideo = JSON.parse(rawProgress);
+      } catch (error) {
+        return null;
+      }
+
+      if (!progressByVideo || typeof progressByVideo !== 'object') {
+        return null;
+      }
+
+      const resumable = Object.entries(progressByVideo)
+        .map(([videoId, progress]) => {
+          const libraryItem = videoLibrary[videoId];
+          if (!libraryItem || !progress) {
+            return null;
+          }
+
+          const watchedSeconds = Number(progress.watchedSeconds || 0);
+          const totalSeconds = Number(progress.totalSeconds || libraryItem.totalSeconds || 0);
+          const lastWatchedAt = Number(progress.lastWatchedAt || 0);
+          const hasRemaining = watchedSeconds > 0 && watchedSeconds < totalSeconds;
+
+          if (!hasRemaining) {
+            return null;
+          }
+
+          return {
+            videoId,
+            watchedSeconds,
+            totalSeconds,
+            lastWatchedAt,
+            ...libraryItem
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.lastWatchedAt - a.lastWatchedAt);
+
+      return resumable[0] || null;
+    };
+
+    const renderContinueWatching = () => {
+      const latestVideo = getLatestIncompleteVideo();
+
+      if (!latestVideo) {
+        continueWatchingBlock.classList.add('hidden');
+        return;
+      }
+
+      const remainingSeconds = Math.max(0, latestVideo.totalSeconds - latestVideo.watchedSeconds);
+
+      continueWatchingTitle.textContent = latestVideo.title;
+      continueWatchingDescription.textContent = latestVideo.description;
+      continueWatchingModule.textContent = latestVideo.module;
+      continueWatchingRemaining.textContent = `${formatClock(remainingSeconds)} remaining`;
+      continueWatchingThumbnail.src = latestVideo.thumbnail;
+      continueWatchingThumbnail.alt = `${latestVideo.title} thumbnail`;
+      const resumeHref = `module.html?v=${encodeURIComponent(latestVideo.videoId)}&t=${Math.floor(latestVideo.watchedSeconds)}`;
+      continueWatchingLink.href = resumeHref;
+      continueWatchingVisualLink.href = resumeHref;
+
+      continueWatchingBlock.classList.remove('hidden');
+    };
+
+    renderContinueWatching();
 
     const setActiveSidebarButton = (buttons, activeButton) => {
       buttons.forEach((button) => {
