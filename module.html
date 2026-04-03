@@ -157,7 +157,7 @@
 
       <div class="p-3 border-t border-border mt-auto">
         <button
-          id="sidebarToggle"
+          id="sidebar-toggle"
           type="button"
           aria-expanded="true"
           aria-label="Collapse sidebar"
@@ -191,7 +191,7 @@
           <div class="w-full max-w-5xl mx-auto aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
             <iframe
               id="moduleVideoPlayer"
-              src="https://player.vimeo.com/video/1179583326?autoplay=1"
+              src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0"
               class="w-full h-full"
               frameborder="0"
               allow="autoplay; fullscreen; picture-in-picture"
@@ -199,8 +199,8 @@
             </iframe>
           </div>
 
-          <div class="mt-10 grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <section class="xl:col-span-2 space-y-5">
+          <div class="mt-10">
+            <section class="space-y-5 max-w-3xl mx-auto">
               <div class="rounded-xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center gap-3 mb-3">
                   <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Agriculture Module</span>
@@ -246,19 +246,17 @@
                   <p>Chemical spill quick response guide</p>
                 </div>
               </details>
-            </section>
 
-            <aside class="space-y-5">
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                <h3 class="font-serif text-lg text-foreground mb-2">Compliance Registration</h3>
-                <p class="text-sm text-muted mb-5">Submit completion after watching to sync results with your HR dashboard.</p>
-                <div class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center bg-white">
-                  <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  <p class="text-xs text-slate-500 font-medium">Record submission form will appear here after watching.</p>
+              <div class="mt-8 pt-8 border-t border-slate-200">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center max-w-2xl mx-auto">
+                  <h3 class="font-serif text-2xl text-foreground mb-2">Compliance Registration</h3>
+                  <p class="text-slate-500 mb-6">Submit your completion data to sync with your organization's HR dashboard.</p>
+                  <a href="https://tally.so/r/D4DAAE" target="_blank" rel="noopener noreferrer" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
+                    Open Registration Form &rarr;
+                  </a>
                 </div>
               </div>
-
-            </aside>
+            </section>
           </div>
         </div>
       </div>
@@ -267,7 +265,7 @@
 
   <script>
     const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
     const mainContent = document.getElementById('mainContent');
     const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
     const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
@@ -277,7 +275,7 @@
     const requestedVideoId = urlParams.get('v') || '1179583326';
     const requestedStartTime = Math.max(0, Number(urlParams.get('t') || 0));
 
-    moduleVideoPlayer.src = `https://player.vimeo.com/video/${encodeURIComponent(requestedVideoId)}?autoplay=1#t=${Math.floor(requestedStartTime)}s`;
+    moduleVideoPlayer.src = `https://player.vimeo.com/video/${encodeURIComponent(requestedVideoId)}?title=0&byline=0&portrait=0&badge=0&autoplay=1#t=${Math.floor(requestedStartTime)}s`;
 
     const player = new Vimeo.Player(moduleVideoPlayer);
 
@@ -361,6 +359,14 @@
       sidebarToggle.textContent = isCollapsed ? '>>' : '<<';
       sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
       sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      if (sidebarToggle) {
+        sidebarToggle.click();
+      }
     });
   </script>
 </body>

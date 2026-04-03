@@ -237,7 +237,7 @@
             <div class="relative flex items-center gap-8 p-8">
               <!-- Video Thumbnail -->
               <a id="continueWatchingVisualLink" href="module.html?v=1179583326&t=120" class="relative w-full md:w-1/2 aspect-video rounded-lg overflow-hidden shadow-2xl border border-white/10 bg-black block" aria-label="Resume video from where you left off">
-                <img id="continueWatchingThumbnail" src="https://vumbnail.com/1179583326.jpg" alt="Continue watching thumbnail" class="absolute top-0 left-0 w-full h-full object-cover">
+                <img id="continueWatchingThumbnail" src="assets/thumbnails/Thumbnail_1.png" alt="Continue watching thumbnail" class="absolute top-0 left-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-black/35"></div>
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
@@ -289,6 +289,7 @@
 
             <a href="module.html" class="group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
               <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
+                <img src="assets/thumbnails/Thumbnail_1.png" alt="Agricultural Sprayer Calibration and Safety thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
                 <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
                   5:50
                 </div>
@@ -304,9 +305,9 @@
                   <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">In Progress</span>
+                  <span id="videoCardStatus" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div class="bg-primary h-1.5 rounded-full" style="width: 35%"></div>
+                    <div id="videoCardProgressFill" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
                 </div>
               </div>
@@ -334,6 +335,8 @@
     const continueWatchingThumbnail = document.getElementById('continueWatchingThumbnail');
     const continueWatchingLink = document.getElementById('continueWatchingLink');
     const continueWatchingVisualLink = document.getElementById('continueWatchingVisualLink');
+    const videoCardStatus = document.getElementById('videoCardStatus');
+    const videoCardProgressFill = document.getElementById('videoCardProgressFill');
 
     const videoLibrary = {
       '1179583326': {
@@ -341,7 +344,7 @@
         module: 'Agriculture Module',
         description: 'Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.',
         totalSeconds: 350,
-        thumbnail: 'https://vumbnail.com/1179583326.jpg'
+        thumbnail: 'assets/thumbnails/Thumbnail_1.png'
       }
     };
 
@@ -422,7 +425,43 @@
       continueWatchingBlock.classList.remove('hidden');
     };
 
+    const getSavedProgress = (videoId) => {
+      const rawProgress = localStorage.getItem('vaultVideoProgress');
+      if (!rawProgress) {
+        return null;
+      }
+
+      try {
+        const progressByVideo = JSON.parse(rawProgress);
+        return progressByVideo && typeof progressByVideo === 'object' ? progressByVideo[videoId] || null : null;
+      } catch (error) {
+        return null;
+      }
+    };
+
+    const renderVideoCardProgress = (videoId) => {
+      if (!videoCardStatus || !videoCardProgressFill || !videoLibrary[videoId]) {
+        return;
+      }
+
+      const saved = getSavedProgress(videoId);
+      const watchedSeconds = Math.max(0, Number(saved && saved.watchedSeconds ? saved.watchedSeconds : 0));
+      const totalSeconds = Math.max(1, Number(saved && saved.totalSeconds ? saved.totalSeconds : videoLibrary[videoId].totalSeconds || 1));
+      const percentComplete = Math.min(100, Math.round((watchedSeconds / totalSeconds) * 100));
+
+      videoCardProgressFill.style.width = `${percentComplete}%`;
+
+      if (percentComplete >= 100) {
+        videoCardStatus.textContent = 'Completed';
+      } else if (percentComplete > 0) {
+        videoCardStatus.textContent = 'In Progress';
+      } else {
+        videoCardStatus.textContent = 'Not Started';
+      }
+    };
+
     renderContinueWatching();
+    renderVideoCardProgress('1179583326');
 
     const setActiveSidebarButton = (buttons, activeButton) => {
       buttons.forEach((button) => {
