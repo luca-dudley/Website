@@ -102,6 +102,7 @@
       display: none;
     }
   </style>
+  <script async src="https://tally.so/widgets/embed.js"></script>
 </head>
 <body class="font-sans bg-gray-50 text-foreground antialiased">
   <div class="flex min-h-screen">
@@ -190,7 +191,7 @@
         <div class="max-w-6xl mx-auto">
           <div class="w-full max-w-5xl mx-auto aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
             <iframe
-              id="moduleVideoPlayer"
+              id="videoPlayer"
               src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0"
               class="w-full h-full"
               frameborder="0"
@@ -204,10 +205,11 @@
               <div class="rounded-xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center gap-3 mb-3">
                   <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Agriculture Module</span>
-                  <span class="text-xs text-muted font-medium">Duration: 5:50</span>
+                  <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: 5:50</span>
+                  <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: English, isiZulu</span>
                 </div>
-                <h1 class="text-3xl font-serif text-foreground mb-3">Agricultural Sprayer Calibration &amp; Safety</h1>
-                <p class="text-sm text-muted leading-relaxed">
+                <h1 id="moduleTitle" class="text-3xl font-serif text-foreground mb-3">Agricultural Sprayer Calibration &amp; Safety</h1>
+                <p id="moduleDescription" class="text-sm text-muted leading-relaxed">
                   Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.
                 </p>
               </div>
@@ -218,23 +220,11 @@
                   <span class="text-xs text-muted">Expand/Collapse</span>
                 </summary>
                 <div class="px-6 pb-5">
-                  <ul class="space-y-3 text-sm text-muted">
-                    <li class="flex items-start gap-2">
-                      <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                      Identify and inspect critical sprayer components prior to operation.
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                      Demonstrate the correct selection and donning of HAZMAT PPE.
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                      Execute safe chemical mixing and tank calibration procedures.
-                    </li>
-                  </ul>
+                  <ul id="moduleObjectives" class="space-y-3 text-sm text-muted"></ul>
                 </div>
               </details>
 
+              <!--
               <details class="rounded-xl border border-slate-200 bg-white">
                 <summary class="cursor-pointer px-6 py-4 flex items-center justify-between">
                   <h3 class="text-sm font-semibold text-foreground uppercase tracking-wider">Module Resources</h3>
@@ -246,14 +236,15 @@
                   <p>Chemical spill quick response guide</p>
                 </div>
               </details>
+              -->
 
               <div class="mt-8 pt-8 border-t border-slate-200">
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center max-w-2xl mx-auto">
                   <h3 class="font-serif text-2xl text-foreground mb-2">Compliance Registration</h3>
                   <p class="text-slate-500 mb-6">Submit your completion data to sync with your organization's HR dashboard.</p>
-                  <a href="https://tally.so/r/D4DAAE" target="_blank" rel="noopener noreferrer" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
+                  <button onclick="openTallyCompliance()" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
                     Open Registration Form &rarr;
-                  </a>
+                  </button>
                 </div>
               </div>
             </section>
@@ -269,7 +260,7 @@
     const mainContent = document.getElementById('mainContent');
     const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
     const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
-    const moduleVideoPlayer = document.getElementById('moduleVideoPlayer');
+    const moduleVideoPlayer = document.getElementById('videoPlayer');
 
     const urlParams = new URLSearchParams(window.location.search);
     const requestedVideoId = urlParams.get('v') || '1179583326';
@@ -366,6 +357,80 @@
       const sidebarToggle = document.getElementById('sidebar-toggle');
       if (sidebarToggle) {
         sidebarToggle.click();
+      }
+    });
+  </script>
+  <script>
+    // 1. The Video Database (All your video data lives here now, NOT hardcoded in HTML)
+    const videoDatabase = {
+      "sprayer": {
+        title: "Agricultural Sprayer Calibration & Safety",
+        videoUrl: "https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0", 
+        description: "Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.",
+        duration: "Duration: 5:50",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify and inspect critical sprayer components prior to operation.",
+          "Demonstrate the correct selection and donning of HAZMAT PPE.",
+          "Execute safe chemical mixing and tank calibration procedures."
+        ]
+      },
+      "placeholder": {
+        title: "New Training Module",
+        videoUrl: "", 
+        description: "Module description loading...",
+        duration: "--:-- remaining",
+        language: "English",
+        objectives: ["Objective 1 loading...", "Objective 2 loading..."]
+      }
+    };
+
+    function openTallyCompliance() {
+      const currentModule = document.getElementById('moduleTitle').innerText;
+      
+      Tally.openPopup('D4DAAE', {
+        layout: 'modal',
+        width: 600,
+        hiddenFields: {
+          module_name: currentModule
+        }
+      });
+    }
+
+    // 2. The Dynamic Loader (Overwrites the HTML skeleton)
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('v'); 
+
+      const data = videoDatabase[videoId] || videoDatabase["placeholder"];
+      
+      // Overwrite basic text
+      const titleEl = document.getElementById('moduleTitle');
+      if (titleEl) titleEl.innerText = data.title;
+      
+      const descEl = document.getElementById('moduleDescription');
+      if (descEl) descEl.innerText = data.description;
+      
+      const durationEl = document.getElementById('moduleDuration');
+      if (durationEl) durationEl.innerText = data.duration;
+      
+      const langEl = document.getElementById('moduleLanguage');
+      if (langEl) langEl.innerText = data.language;
+
+      // Overwrite Video iframe
+      const playerEl = document.getElementById('videoPlayer');
+      if (playerEl && data.videoUrl) playerEl.src = data.videoUrl;
+
+      // Dynamically build the Objectives List
+      const objContainer = document.getElementById('moduleObjectives');
+      if (objContainer && data.objectives) {
+        objContainer.innerHTML = ''; // Clear existing
+        data.objectives.forEach(obj => {
+          const li = document.createElement('li');
+          li.className = "flex items-start gap-2";
+          li.innerHTML = `<svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> ${obj}`;
+          objContainer.appendChild(li);
+        });
       }
     });
   </script>
