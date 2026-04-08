@@ -212,7 +212,7 @@
             <button data-ms-modal="profile" class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left">
               <div class="text-right hidden sm:block">
                 <p class="text-sm font-medium text-foreground"><span data-ms-member="first-name">Client</span> <span data-ms-member="last-name">Name</span></p>
-                <p class="text-xs text-muted">Safety Manager</p>
+                <p class="text-xs text-muted" data-ms-member="job-title">Job Title</p>
               </div>
               <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
                 <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
@@ -327,13 +327,9 @@
     
   </div>
 
+  <script src="assets/java_files/main.js"></script>
+
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const mainContent = document.getElementById('mainContent');
-    const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
-    const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
     const continueWatchingBlock = document.getElementById('continue-watching-block');
     const continueWatchingTitle = document.getElementById('continueWatchingTitle');
     const continueWatchingDescription = document.getElementById('continueWatchingDescription');
@@ -469,75 +465,6 @@
 
     renderContinueWatching();
     renderVideoCardProgress('1179583326');
-
-    const setActiveSidebarButton = (buttons, activeButton) => {
-      buttons.forEach((button) => {
-        button.classList.remove('bg-black/5', 'text-black', 'font-medium');
-        button.classList.add('text-muted');
-      });
-
-      activeButton.classList.add('bg-black/5', 'text-black', 'font-medium');
-      activeButton.classList.remove('text-muted');
-    };
-
-    const currentPage = window.location.pathname.split('/').pop() || 'vault.html';
-    sidebarNavButtons.forEach((button) => {
-      const href = button.getAttribute('href');
-      if (href && href !== '#' && href === currentPage) {
-        setActiveSidebarButton(sidebarNavButtons, button);
-      }
-    });
-
-    sidebarNavButtons.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const href = button.getAttribute('href');
-        const isRealRoute = href && href !== '#';
-
-        if (!isRealRoute) {
-          event.preventDefault();
-          setActiveSidebarButton(sidebarNavButtons, button);
-        }
-      });
-    });
-
-    sidebarFilterButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        setActiveSidebarButton(sidebarFilterButtons, button);
-      });
-    });
-
-    if (mobileMenuBtn && sidebar) {
-      mobileMenuBtn.addEventListener('click', () => {
-        const isClosed = sidebar.classList.contains('-translate-y-full');
-        sidebar.classList.toggle('-translate-y-full', !isClosed);
-        sidebar.classList.toggle('opacity-0', !isClosed);
-        sidebar.classList.toggle('pointer-events-none', !isClosed);
-        mobileMenuBtn.setAttribute('aria-expanded', String(isClosed));
-      });
-    }
-
-    sidebarNavButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        if (window.innerWidth < 1024) {
-          sidebar.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
-          mobileMenuBtn?.setAttribute('aria-expanded', 'false');
-        }
-      });
-    });
-
-    if (sidebarToggle && sidebar && mainContent) {
-      sidebarToggle.addEventListener('click', () => {
-        if (window.innerWidth < 1024) {
-          return;
-        }
-
-        const isCollapsed = sidebar.classList.toggle('collapsed');
-        mainContent.style.marginLeft = isCollapsed ? '5rem' : '16rem';
-        sidebarToggle.textContent = isCollapsed ? '>>' : '<<';
-        sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
-        sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
-      });
-    }
   </script>
 
   <script>
@@ -568,39 +495,6 @@
       if (searchInput) searchInput.addEventListener('input', filterLibrary);
       if (categoryFilter) categoryFilter.addEventListener('change', filterLibrary);
       if (languageFilter) languageFilter.addEventListener('change', filterLibrary);
-    });
-  </script>
-
-  <script>
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const memberstack = window.$memberstackDom;
-        if (!memberstack) {
-          return;
-        }
-
-        const { data: member } = await memberstack.getCurrentMember();
-        if (!member) {
-          return;
-        }
-
-        const fName = member.customFields?.['first-name'] || '';
-        const lName = member.customFields?.['last-name'] || '';
-        const initials = `${fName.charAt(0)}${lName.charAt(0)}`.toUpperCase() || 'U';
-
-        document.querySelectorAll('[data-dynamic-initials]').forEach((initialsEl) => {
-          initialsEl.textContent = initials;
-        });
-
-        if (member.profileImage) {
-          document.querySelectorAll('[data-dynamic-profile-img]').forEach((imgEl) => {
-            imgEl.src = member.profileImage;
-            imgEl.classList.remove('hidden');
-          });
-        }
-      } catch (error) {
-        console.error('Memberstack initialization pending.');
-      }
     });
   </script>
 
