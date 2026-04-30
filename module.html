@@ -205,8 +205,8 @@
             Back to Training Library
           </a>
           <div class="text-right">
-            <p class="text-sm font-medium text-foreground">Agricultural Sprayer Calibration &amp; Safety</p>
-            <p class="text-xs text-muted">Agriculture Module • 5:50</p>
+            <p id="headerTitle" class="text-sm font-medium text-foreground">Agricultural Sprayer Calibration &amp; Safety</p>
+            <p id="headerMeta" class="text-xs text-muted">Agriculture Module • 5:50</p>
           </div>
         </div>
       </header>
@@ -344,8 +344,9 @@
   <script>
     // 1. The Video Database (All your video data lives here now, NOT hardcoded in HTML)
     const videoDatabase = {
-      "sprayer": {
-        title: "Agricultural Sprayer Calibration & Safety",
+      "1179583326": {
+        title: "Chemical Spraying",
+        module: "Agriculture Module",
         videoUrl: "https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0", 
         description: "Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.",
         duration: "Duration: 5:50",
@@ -356,8 +357,139 @@
           "Execute safe chemical mixing and tank calibration procedures."
         ]
       },
+      "1187071672": {
+        title: "Oxy Torch",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071672?title=0&byline=0&portrait=0&badge=0",
+        description: "Learn the critical safety protocols for operating oxy-acetylene cutting torches. This module covers pre-use inspections, safe lighting and extinguishing procedures, cylinder storage, and the mandatory PPE required to prevent burns and inhalation hazards.",
+        duration: "Duration: 5:46",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify the components of an oxy-acetylene torch and perform a standard pre-use safety inspection.",
+          "Demonstrate the correct sequence for safely lighting, adjusting, and extinguishing the torch.",
+          "Select and properly wear the necessary personal protective equipment (PPE) for hot work operations."
+        ]
+      },
+      "1187071582": {
+        title: "Chainsaw",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071582?title=0&byline=0&portrait=0&badge=0",
+        description: "Master the fundamentals of safe chainsaw operation, maintenance, and timber cutting. This module covers pre-start checks, kickback prevention, and the mandatory forestry-grade PPE required for clearing tasks.",
+        duration: "Duration: 6:15",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify and inspect critical chainsaw safety features (chain brake, catch pin) prior to operation.",
+          "Demonstrate the correct selection and donning of forestry-grade PPE (chaps, face shield, hearing protection).",
+          "Execute safe starting procedures and identify safe cutting zones to prevent kickback."
+        ]
+      },
+      "1187071549": {
+        title: "Band/Prop Saw",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071549?title=0&byline=0&portrait=0&badge=0",
+        description: "Understand the specific risks and operational guidelines for using stationary band and prop saws. This module emphasizes blade inspection, secure material handling, and the use of guards to prevent severe lacerations or amputations.",
+        duration: "Duration: 4:50",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Perform a visual inspection of the saw blade for tension, sharpness, and missing teeth.",
+          "Demonstrate how to securely position and feed material through the saw while keeping hands clear of the blade path.",
+          "Ensure all safety guards and emergency stop mechanisms are functional before use."
+        ]
+      },
+      "1187071612": {
+        title: "Farm Saw",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071612?title=0&byline=0&portrait=0&badge=0",
+        description: "Essential safety training for operating general-purpose farm saws (circular or table saws). Focuses on preventing blade binding, managing kickback, and maintaining a clean work area free of offcuts and sawdust hazards.",
+        duration: "Duration: 5:53",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Recognize the signs of blade wear and understand when a replacement is necessary.",
+          "Apply correct feeding techniques to prevent material binding and sudden kickback.",
+          "Maintain a safe, clutter-free workspace around the saw to prevent slips, trips, and falls."
+        ]
+      },
+      "1187071628": {
+        title: "General Farm Staff",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071628?title=0&byline=0&portrait=0&badge=0",
+        description: "A comprehensive safety overview for all general farm laborers. This introductory module covers hazard identification, the importance of situational awareness, standard PPE requirements, and basic emergency response protocols on a working farm.",
+        duration: "Duration: 7:04",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify common hazards found in a dynamic farm environment (moving machinery, uneven terrain, livestock).",
+          "Understand the purpose and correct usage of standard farm PPE (boots, overalls, sun protection).",
+          "Locate emergency assembly points and understand how to report incidents or unsafe conditions."
+        ]
+      },
+      "1187071597": {
+        title: "Farm Noise",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071597?title=0&byline=0&portrait=0&badge=0",
+        description: "Learn about the dangers of prolonged exposure to high decibel levels from farm machinery and equipment. This module educates staff on identifying hazardous noise zones and the mandatory use of hearing protection devices (HPDs).",
+        duration: "Duration: 5:38",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify the difference between continuous, impulse, and mechanical noise sources on a farm.",
+          "Recognize high-noise areas and the long-term health risks of unprotected exposure.",
+          "Select, correctly fit, and maintain appropriate hearing protection (earplugs or earmuffs)."
+        ]
+      },
+      "1187071647": {
+        title: "Irrigation Pump House",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071647?title=0&byline=0&portrait=0&badge=0",
+        description: "Safety protocols for operating and maintaining farm irrigation systems and pump houses. Covers the hazards of high-pressure water, electrical safety in wet environments, and safe pump start-up/shut-down procedures.",
+        duration: "Duration: 5:03",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Identify the hazards associated with high-pressure lines, pumps, and unguarded PTO shafts.",
+          "Demonstrate safe entry and inspection procedures for irrigation pump houses.",
+          "Recognize electrical hazards near water and understand that only qualified electricians should handle wiring."
+        ]
+      },
+      "1187071561": {
+        title: "Brush Cutter",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071561?title=0&byline=0&portrait=0&badge=0",
+        description: "Guidelines for the safe operation of motorized brush cutters and strimmers. This training highlights the dangers of flying debris, blade selection, harness adjustment, and maintaining a safe exclusion zone around the operator.",
+        duration: "Duration: 5:46",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Select the correct cutting attachment (nylon line vs. steel blade) for the specific clearing task.",
+          "Properly adjust the harness and handles to maintain balance and reduce fatigue during operation.",
+          "Establish a safe working distance from other workers to prevent injury from flying debris."
+        ]
+      },
+      "1187071529": {
+        title: "Angle Grinder",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071529?title=0&byline=0&portrait=0&badge=0",
+        description: "Crucial safety instructions for using angle grinders in farm workshops. Emphasizes the severe risks of disc shattering, the necessity of guards, securing workpieces, and protecting against sparks and hot metal.",
+        duration: "Duration: 5:16",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Inspect the grinder, power cord, and ensure the correct disc guard is securely in place before use.",
+          "Verify that the selected disc matches the grinder's RPM rating and the material being cut/ground.",
+          "Securely clamp all materials before grinding and direct sparks away from self, others, and flammable materials."
+        ]
+      },
+      "1187071697": {
+        title: "Welding",
+        module: "Agriculture Module",
+        videoUrl: "https://player.vimeo.com/video/1187071697?title=0&byline=0&portrait=0&badge=0",
+        description: "Essential health and safety training for arc and MIG welding operations. This module covers electrical hazards, the prevention of 'arc eye' (welder's flash), fire prevention strategies, and required protective clothing.",
+        duration: "Duration: 4:53",
+        language: "Audio Tracks: English, isiZulu",
+        objectives: [
+          "Inspect the welding machine, cables, and electrode holder for damage before striking an arc.",
+          "Select and use the correct welding helmet, fire-resistant gauntlets, and protective clothing to prevent UV damage and burns.",
+          "Ensure the welding area is free of flammable materials, grease, and trip hazards before commencing work."
+        ]
+      },
       "placeholder": {
         title: "New Training Module",
+        module: "Agriculture Module",
         videoUrl: "", 
         description: "Module description loading...",
         duration: "--:-- remaining",
@@ -379,38 +511,43 @@
     }
 
     // 2. The Dynamic Loader (Overwrites the HTML skeleton)
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const videoId = urlParams.get('v'); 
+      const videoId = urlParams.get('v');
 
-      const data = videoDatabase[videoId] || videoDatabase["placeholder"];
-      
-      // Overwrite basic text
+      const videoData = videoDatabase[videoId] || videoDatabase['placeholder'];
+
+      const videoPlayer = document.getElementById('videoPlayer');
+      if (videoPlayer && videoData.videoUrl) {
+        videoPlayer.src = videoData.videoUrl;
+      }
+
+      const headerTitle = document.getElementById('headerTitle');
+      const headerMeta = document.getElementById('headerMeta');
+      if (headerTitle) headerTitle.textContent = videoData.title;
+      if (headerMeta) {
+        const cleanDuration = videoData.duration ? videoData.duration.replace('Duration: ', '') : '';
+        headerMeta.textContent = `${videoData.module || 'Agriculture Module'} • ${cleanDuration}`;
+      }
+
       const titleEl = document.getElementById('moduleTitle');
-      if (titleEl) titleEl.innerText = data.title;
-      
       const descEl = document.getElementById('moduleDescription');
-      if (descEl) descEl.innerText = data.description;
-      
       const durationEl = document.getElementById('moduleDuration');
-      if (durationEl) durationEl.innerText = data.duration;
-      
       const langEl = document.getElementById('moduleLanguage');
-      if (langEl) langEl.innerText = data.language;
 
-      // Overwrite Video iframe
-      const playerEl = document.getElementById('videoPlayer');
-      if (playerEl && data.videoUrl) playerEl.src = data.videoUrl;
+      if (titleEl) titleEl.textContent = videoData.title;
+      if (descEl) descEl.textContent = videoData.description;
+      if (durationEl) durationEl.textContent = videoData.duration;
+      if (langEl) langEl.textContent = videoData.language;
 
-      // Dynamically build the Objectives List
-      const objContainer = document.getElementById('moduleObjectives');
-      if (objContainer && data.objectives) {
-        objContainer.innerHTML = ''; // Clear existing
-        data.objectives.forEach(obj => {
+      const objectivesList = document.getElementById('moduleObjectives');
+      if (objectivesList && videoData.objectives) {
+        objectivesList.innerHTML = '';
+        videoData.objectives.forEach(obj => {
           const li = document.createElement('li');
-          li.className = "flex items-start gap-2";
-          li.innerHTML = `<svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> ${obj}`;
-          objContainer.appendChild(li);
+          li.className = 'flex items-start gap-2 text-sm text-muted';
+          li.innerHTML = `<span class="text-green-500 mr-2">&#10003;</span>${obj}`;
+          objectivesList.appendChild(li);
         });
       }
     });

@@ -235,29 +235,29 @@
               <div class="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
               <!-- Video Thumbnail -->
               <a id="continueWatchingVisualLink" href="module.html?v=1179583326&t=120" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
-                <img id="continueWatchingThumbnail" src="assets/thumbnails/Chemical_Spraying.svg" alt="Continue watching thumbnail" class="w-full h-full aspect-video object-cover rounded-md">
+                <img id="bannerThumbnail" src="assets/thumbnails/Chemical_Spraying.svg" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
               </a>
               
               <!-- Content -->
               <div class="text-white flex flex-col w-full md:w-1/2">
                 <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
-                <h2 id="continueWatchingTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Sprayer Training</h2>
-                <p id="continueWatchingDescription" class="text-sm md:text-base text-slate-200 mb-4 w-full">Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.</p>
+                <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Sprayer Training</h2>
+                <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
                 <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span id="continueWatchingRemaining">3:50 remaining</span>
+                    <span id="bannerTimeRemaining">3:50 remaining</span>
                   </span>
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
-                    <span id="continueWatchingModule">Agriculture Module</span>
+                    <span id="continueWatchingModule">Agriculture</span>
                   </span>
                 </div>
-                <a id="continueWatchingLink" href="module.html?v=1179583326&t=120" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
+                <a id="bannerResumeBtn" href="module.html?v=1179583326&t=120" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
               </div>
               </div>
             </div>
@@ -293,7 +293,7 @@
           <!-- Video Cards Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-            <a href="module.html?v=sprayer" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="agricultural sprayer calibration safety" data-category="agriculture" data-language="zu">
+            <a href="module.html?v=1179583326" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="agricultural sprayer calibration safety" data-category="agriculture" data-language="zu">
               <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
                 <img src="assets/thumbnails/Chemical_Spraying.svg" alt="Agricultural Sprayer Calibration and Safety thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
                 <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
@@ -307,13 +307,13 @@
               </div>
               <div class="p-4 flex flex-col justify-between">
                 <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Sprayer Training</h3>
+                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Chemical Spraying</h3>
                   <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span id="videoCardStatus" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1179583326" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="videoCardProgressFill" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+                    <div id="progress-1179583326" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
                 </div>
               </div>
@@ -331,10 +331,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Oxy Acetlyne</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071672" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071672" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -354,10 +354,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Chainsaw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071582" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071582" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -377,10 +377,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Band/Prop Saw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071549" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071549" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -400,10 +400,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Farm Saw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071612" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071612" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -423,10 +423,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">General Farm Employees</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071628" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071628" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -446,10 +446,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Farm Noise</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071597" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071597" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -469,10 +469,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Irrigation Pump House</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071647" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071647" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -492,10 +492,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Brush Cutter</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071561" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071561" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -515,10 +515,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Angle Grinder</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071529" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071529" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -538,10 +538,10 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Welding</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture Module</p>
+                  <p class="text-xs text-muted mb-3">Agriculture</p>
                 </div>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                  <span id="status-1187071697" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
                   <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
                     <div id="progress-1187071697" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
                   </div>
@@ -560,172 +560,127 @@
   <script src="assets/java_files/main.js"></script>
 
   <script>
-    const continueWatchingBlock = document.getElementById('continue-watching-block');
-    const continueWatchingTitle = document.getElementById('continueWatchingTitle');
-    const continueWatchingDescription = document.getElementById('continueWatchingDescription');
-    const continueWatchingRemaining = document.getElementById('continueWatchingRemaining');
-    const continueWatchingModule = document.getElementById('continueWatchingModule');
-    const continueWatchingThumbnail = document.getElementById('continueWatchingThumbnail');
-    const continueWatchingLink = document.getElementById('continueWatchingLink');
-    const continueWatchingVisualLink = document.getElementById('continueWatchingVisualLink');
-    const videoCardStatus = document.getElementById('videoCardStatus');
-    const videoCardProgressFill = document.getElementById('videoCardProgressFill');
-
     const videoLibrary = {
       '1179583326': {
-        title: 'Agricultural Sprayer Calibration & Safety',
-        module: 'Agriculture Module',
+        title: 'Chemical Spraying',
+        module: 'Agriculture',
         description: 'Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.',
         totalSeconds: 350,
-        thumbnail: 'assets/thumbnails/Thumbnail_1.png'
+        thumbnail: 'assets/thumbnails/Chemical_Spraying.svg' // Fixed image path
       },
       '1187071672': {
         title: 'Oxy Acetlyne',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
-        thumbnail: 'assets/thumbnails/Oxy_Acetlyne.svg'
+        module: 'Agriculture',
+        description: 'Learn the critical safety protocols for operating oxy-acetylene cutting torches, including pre-use inspections and safe lighting procedures.',
+        totalSeconds: 346, 
+        thumbnail: 'assets/thumbnails/Oxy_Acetlyene.svg'
       },
       '1187071582': {
         title: 'Chainsaw',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Master the fundamentals of safe chainsaw operation, maintenance, and timber cutting to prevent kickback and injury.',
+        totalSeconds: 375,
         thumbnail: 'assets/thumbnails/Chainsaw.svg'
       },
       '1187071549': {
         title: 'Band/Prop Saw',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Understand the specific risks and operational guidelines for using stationary band and prop saws safely.',
+        totalSeconds: 290,
         thumbnail: 'assets/thumbnails/Band_Prop_Saw.svg'
       },
       '1187071612': {
         title: 'Farm Saw',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Essential safety training for operating general-purpose farm saws. Focuses on preventing blade binding and managing kickback.',
+        totalSeconds: 353,
         thumbnail: 'assets/thumbnails/Farm_Saw.svg'
       },
       '1187071628': {
         title: 'General Farm Employees',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'A comprehensive safety overview for all general farm laborers covering hazard identification and standard PPE requirements.',
+        totalSeconds: 424,
         thumbnail: 'assets/thumbnails/General_Farm_Employees.svg'
       },
       '1187071597': {
         title: 'Farm Noise',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Learn about the dangers of prolonged exposure to high decibel levels from farm machinery and the mandatory use of hearing protection.',
+        totalSeconds: 338,
         thumbnail: 'assets/thumbnails/Farm_Noise.svg'
       },
       '1187071647': {
         title: 'Irrigation Pump House',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Safety protocols for operating and maintaining farm irrigation systems, including handling high-pressure lines and electrical hazards.',
+        totalSeconds: 303,
         thumbnail: 'assets/thumbnails/Irrigation_Pump_House.svg'
       },
       '1187071561': {
         title: 'Brush Cutter',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Guidelines for the safe operation of motorized brush cutters, highlighting the dangers of flying debris and proper harness adjustment.',
+        totalSeconds: 346,
         thumbnail: 'assets/thumbnails/Brush_Cutter.svg'
       },
       '1187071529': {
         title: 'Angle Grinder',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Crucial safety instructions for using angle grinders in farm workshops, emphasizing guards, securing workpieces, and spark protection.',
+        totalSeconds: 316,
         thumbnail: 'assets/thumbnails/Angle_Grinder.svg'
       },
       '1187071697': {
         title: 'Welding',
-        module: 'Agriculture Module',
-        description: '',
-        totalSeconds: 300,
+        module: 'Agriculture',
+        description: 'Essential health and safety training for arc and MIG welding operations to prevent flash burns, electrical shocks, and fires.',
+        totalSeconds: 293,
         thumbnail: 'assets/thumbnails/Welding.svg'
       }
     };
 
-    const formatClock = (seconds) => {
-      const safeSeconds = Math.max(0, Math.floor(seconds));
-      const minutes = Math.floor(safeSeconds / 60);
-      const remainder = safeSeconds % 60;
-      return `${minutes}:${String(remainder).padStart(2, '0')}`;
-    };
-
-    const getLatestIncompleteVideo = () => {
+    const updateFeaturedBanner = () => {
       const rawProgress = localStorage.getItem('vaultVideoProgress');
-      if (!rawProgress) {
-        return null;
-      }
+      if (!rawProgress) return;
 
-      let progressByVideo;
       try {
-        progressByVideo = JSON.parse(rawProgress);
+        const progress = JSON.parse(rawProgress);
+        let lastWatchedId = null;
+        let latestTime = 0;
+
+        for (const [id, data] of Object.entries(progress)) {
+          if (data.lastWatchedAt > latestTime && data.watchedSeconds < data.totalSeconds) {
+            latestTime = data.lastWatchedAt;
+            lastWatchedId = id;
+          }
+        }
+
+        if (lastWatchedId && videoLibrary[lastWatchedId]) {
+          const videoData = videoLibrary[lastWatchedId];
+          const savedData = progress[lastWatchedId];
+
+          const bannerTitle = document.getElementById('bannerTitle');
+          const bannerDesc = document.getElementById('bannerDescription');
+          const bannerThumb = document.getElementById('bannerThumbnail');
+          const bannerBtn = document.getElementById('bannerResumeBtn');
+
+          if (bannerTitle) bannerTitle.textContent = videoData.title;
+          if (bannerDesc) bannerDesc.textContent = videoData.description;
+          if (bannerThumb) bannerThumb.src = videoData.thumbnail;
+          if (bannerBtn) bannerBtn.href = `module.html?v=${lastWatchedId}`;
+
+          const timeRemainingEl = document.getElementById('bannerTimeRemaining');
+          if (timeRemainingEl) {
+            const secondsLeft = Math.max(0, videoData.totalSeconds - savedData.watchedSeconds);
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = Math.floor(secondsLeft % 60).toString().padStart(2, '0');
+            timeRemainingEl.textContent = `${mins}:${secs} remaining`;
+          }
+        }
       } catch (error) {
-        return null;
+        console.error("Error updating banner:", error);
       }
-
-      if (!progressByVideo || typeof progressByVideo !== 'object') {
-        return null;
-      }
-
-      const resumable = Object.entries(progressByVideo)
-        .map(([videoId, progress]) => {
-          const libraryItem = videoLibrary[videoId];
-          if (!libraryItem || !progress) {
-            return null;
-          }
-
-          const watchedSeconds = Number(progress.watchedSeconds || 0);
-          const totalSeconds = Number(progress.totalSeconds || libraryItem.totalSeconds || 0);
-          const lastWatchedAt = Number(progress.lastWatchedAt || 0);
-          const hasRemaining = watchedSeconds > 0 && watchedSeconds < totalSeconds;
-
-          if (!hasRemaining) {
-            return null;
-          }
-
-          return {
-            videoId,
-            watchedSeconds,
-            totalSeconds,
-            lastWatchedAt,
-            ...libraryItem
-          };
-        })
-        .filter(Boolean)
-        .sort((a, b) => b.lastWatchedAt - a.lastWatchedAt);
-
-      return resumable[0] || null;
-    };
-
-    const renderContinueWatching = () => {
-      const latestVideo = getLatestIncompleteVideo();
-
-      if (!latestVideo) {
-        continueWatchingBlock.classList.add('hidden');
-        return;
-      }
-
-      const remainingSeconds = Math.max(0, latestVideo.totalSeconds - latestVideo.watchedSeconds);
-
-      continueWatchingTitle.textContent = latestVideo.title;
-      continueWatchingDescription.textContent = latestVideo.description;
-      continueWatchingModule.textContent = latestVideo.module;
-      continueWatchingRemaining.textContent = `${formatClock(remainingSeconds)} remaining`;
-      continueWatchingThumbnail.src = latestVideo.thumbnail;
-      continueWatchingThumbnail.alt = `${latestVideo.title} thumbnail`;
-      const resumeHref = `module.html?v=${encodeURIComponent(latestVideo.videoId)}&t=${Math.floor(latestVideo.watchedSeconds)}`;
-      continueWatchingLink.href = resumeHref;
-      continueWatchingVisualLink.href = resumeHref;
-
-      continueWatchingBlock.classList.remove('hidden');
     };
 
     const getSavedProgress = (videoId) => {
@@ -742,29 +697,30 @@
       }
     };
 
-    const renderVideoCardProgress = (videoId) => {
-      if (!videoCardStatus || !videoCardProgressFill || !videoLibrary[videoId]) {
-        return;
-      }
+    const renderAllVideoProgress = () => {
+      Object.keys(videoLibrary).forEach(videoId => {
+        const progressFill = document.getElementById(`progress-${videoId}`);
+        const statusText = document.getElementById(`status-${videoId}`);
 
-      const saved = getSavedProgress(videoId);
-      const watchedSeconds = Math.max(0, Number(saved && saved.watchedSeconds ? saved.watchedSeconds : 0));
-      const totalSeconds = Math.max(1, Number(saved && saved.totalSeconds ? saved.totalSeconds : videoLibrary[videoId].totalSeconds || 1));
-      const percentComplete = Math.min(100, Math.round((watchedSeconds / totalSeconds) * 100));
+        if (progressFill) {
+          const saved = getSavedProgress(videoId);
+          const watched = Math.max(0, Number(saved?.watchedSeconds || 0));
+          const total = Math.max(1, Number(saved?.totalSeconds || videoLibrary[videoId].totalSeconds));
+          const percent = Math.min(100, Math.round((watched / total) * 100));
 
-      videoCardProgressFill.style.width = `${percentComplete}%`;
+          progressFill.style.width = `${percent}%`;
 
-      if (percentComplete >= 100) {
-        videoCardStatus.textContent = 'Completed';
-      } else if (percentComplete > 0) {
-        videoCardStatus.textContent = 'In Progress';
-      } else {
-        videoCardStatus.textContent = 'Not Started';
-      }
+          if (statusText) {
+            if (percent >= 100) statusText.textContent = 'Completed';
+            else if (percent > 0) statusText.textContent = 'In Progress';
+            else statusText.textContent = 'Not Started';
+          }
+        }
+      });
     };
 
-    renderContinueWatching();
-    renderVideoCardProgress('1179583326');
+    updateFeaturedBanner();
+    renderAllVideoProgress();
   </script>
 
   <script>
