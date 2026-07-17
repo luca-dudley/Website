@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -121,10 +121,10 @@
           </svg>
           <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
         </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
+        <button class="h-10 w-10 flex items-center justify-center" aria-label="Open profile" onclick="openProfileModal()">
           <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
             <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+            <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
           </div>
         </button>
       </div>
@@ -192,7 +192,7 @@
     </aside>
     
     <!-- Main Content Area -->
-    <main id="mainContent" class="flex-1 ml-0 lg:ml-64 pt-16 lg:pt-0 bg-white">
+    <main id="mainContent" class="flex-1 ml-0 lg:ml-64 pt-16 lg:pt-0 bg-white min-h-screen flex flex-col justify-between">
       
       <!-- Top Navbar -->
       <header class="hidden lg:block bg-slate-50 sticky top-0 z-10">
@@ -210,14 +210,14 @@
             </button>
             
             <!-- User Profile -->
-            <button data-ms-modal="profile" class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left">
+            <button class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left" onclick="openProfileModal()">
               <div class="text-right hidden sm:block">
-                <p class="text-sm font-medium text-foreground"><span data-ms-member="first-name">Client</span> <span data-ms-member="last-name">Name</span></p>
-                <p class="text-xs text-muted" data-ms-member="job-title">Safety Manager</p>
+                <p class="text-sm font-medium text-foreground"><span>Client</span> <span>Name</span></p>
+                <p class="text-xs text-muted">Safety Manager</p>
               </div>
               <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
                 <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-                <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+                <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
               </div>
             </button>
           </div>
@@ -225,64 +225,24 @@
       </header>
 
       <!-- Page Content -->
-      <div class="max-w-2xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
-        <h2 class="text-2xl font-serif text-foreground mb-6">Contact Support</h2>
-        <p class="text-muted mb-8 text-sm" id="support-subtitle">Need help with a module or have a question about your account? Drop us a message below and our team will get back to you within 24 hours.</p>
-
-        <form id="support-form" action="https://formspree.io/f/xvzvarrz" method="POST" class="space-y-6">
-          <div class="mb-6">
-            <label for="inquiryType" class="block text-sm font-medium text-slate-700 mb-2">How can we help you today?</label>
-            <select id="inquiryType" name="Inquiry Type" class="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-blue-600 focus:border-blue-600 bg-white" onchange="toggleFormFields()">
-              <option value="technical">Technical Support (Bugs, Access, Billing)</option>
-              <option value="module_request">Request a New Safety Module</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="name" class="block text-sm font-medium text-foreground mb-2">Your name</label>
-            <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
-          </div>
-          
-          <div>
-            <label for="email" class="block text-sm font-medium text-foreground mb-2">Your email</label>
-            <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
-          </div>
-
-          <div id="techSupportFields" class="block">
-            <div>
-              <label for="subject" class="block text-sm font-medium text-slate-700 mb-2">Subject</label>
-              <input type="text" id="subject" name="Subject" class="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-blue-600 focus:border-blue-600" placeholder="Briefly describe the issue">
-            </div>
-            <div class="mt-6">
-              <label for="message" class="block text-sm font-medium text-foreground mb-2">Your message</label>
-              <textarea id="message" name="message" rows="5" required class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors resize-none"></textarea>
-            </div>
-          </div>
-
-          <div id="moduleRequestFields" class="hidden space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">What machinery or topic needs covering?</label>
-              <input type="text" name="Requested Topic" class="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-blue-600 focus:border-blue-600" placeholder="e.g., Forklift Operation">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">What are the primary hazards or protocols to highlight?</label>
-              <textarea name="Requested Details" rows="4" class="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-blue-600 focus:border-blue-600" placeholder="Describe the specific safety procedures..."></textarea>
-            </div>
-          </div>
-
-          <button type="submit" class="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors">
-            Submit Ticket
-          </button>
-        </form>
-
-        <div id="success-message" class="hidden text-center py-12">
-          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-medium text-foreground mb-2">Ticket Submitted Successfully</h3>
-          <p class="text-muted">Thanks for reaching out! Our team has received your message and will get back to you shortly.</p>
+      <div class="mx-auto mt-8 max-w-xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+          <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6l6 6v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v5h5" />
+          </svg>
+        </div>
+        <h2 class="font-serif text-3xl font-semibold text-foreground">Open Support Ticket</h2>
+        <p class="mt-4 text-sm leading-6 text-muted">
+          Need help with your account, experiencing technical difficulties, or want to suggest a brand-new training module? Choose an option below to submit directly to our team.
+        </p>
+        <div class="mt-6 flex flex-col gap-3">
+          <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Technical%20Support" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90">
+            Open Technical Support Ticket
+          </a>
+          <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Video%20Module%20Request" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-primary hover:bg-slate-50 hover:text-primary">
+            Open Video Request Ticket
+          </a>
         </div>
       </div>
 
@@ -379,5 +339,6 @@
   </script>
 
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -121,10 +121,10 @@
           </svg>
           <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
         </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
+        <button class="h-10 w-10 flex items-center justify-center" aria-label="Open profile" onclick="openProfileModal()">
           <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
             <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+            <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
           </div>
         </button>
       </div>
@@ -210,14 +210,14 @@
             </button>
             
             <!-- User Profile -->
-            <button data-ms-modal="profile" class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left">
+            <button class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left" onclick="openProfileModal()">
               <div class="text-right hidden sm:block">
-                <p class="text-sm font-medium text-foreground"><span data-ms-member="first-name">Client</span> <span data-ms-member="last-name">Name</span></p>
-                <p class="text-xs text-muted" data-ms-member="job-title">Safety Manager</p>
+                <p class="text-sm font-medium text-foreground"><span>Client</span> <span>Name</span></p>
+                <p class="text-xs text-muted">Safety Manager</p>
               </div>
               <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
                 <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-                <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+                <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
               </div>
             </button>
           </div>
@@ -401,7 +401,10 @@
           © 2026 Simple Solutions. All rights reserved.
         </div>
       </footer>
+    </main>
+  </div>
 
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
 </body>
 </html>

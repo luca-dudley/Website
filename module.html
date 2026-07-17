@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -130,10 +130,10 @@
           </svg>
           <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
         </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
+        <button class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
           <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
             <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+            <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
           </div>
         </button>
       </div>
@@ -553,5 +553,23 @@
     });
   </script>
   <script src="assets/java_files/main.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Initialize Supabase
+    const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+    const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // 2. Check memory for the login ticket
+    const { data: { session } } = await dbClient.auth.getSession();
+    
+    if (!session) {
+      console.warn("No valid session found. Redirecting to login...");
+      window.location.replace('index.html');
+    } else {
+      console.log("Access Granted. Session verified for user:", session.user.id);
+    }
+  });
+  </script>
 </body>
 </html>
