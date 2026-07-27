@@ -56,6 +56,21 @@
       transform: translateY(2px);
     }
 
+    .employee-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.25s ease;
+    }
+
+    .employee-panel.is-open {
+      opacity: 1;
+    }
+
+    .employee-chevron {
+      transition: transform 0.25s ease;
+    }
+
     @media (min-width: 1024px) {
       #sidebar.collapsed {
         width: 5rem;
@@ -225,24 +240,11 @@
       </header>
 
       <!-- Page Content -->
-      <div class="max-w-4xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
-        <!-- Development Notice Banner -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 flex items-start gap-3 max-w-6xl mx-auto shadow-sm">
-          <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <div>
-            <h3 class="text-sm font-medium text-blue-800">Automated Dashboard in Development</h3>
-            <p class="text-sm text-blue-700 mt-1 leading-relaxed">
-              The full organization analytics and automated training records dashboard is currently being built and will be available in an upcoming update. 
-              <br><span class="font-semibold text-blue-900">Note: The "Request PDF Certificate" functionality is fully active. You can request your compliance certificates right now!</span>
-            </p>
-          </div>
-        </div>
+      <div class="max-w-5xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 class="text-2xl font-serif text-foreground mb-2">Training Records</h2>
-            <p class="text-muted text-sm">View your completed safety modules and compliance status.</p>
+            <h2 class="text-2xl font-serif text-foreground mb-2">Employee Directory</h2>
+            <p class="text-muted text-sm">Find all recorded employees down below with the record of the modules they have completed.</p>
           </div>
 
           <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-md">
@@ -256,105 +258,45 @@
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input type="text" placeholder="Search employee or video..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
+            <input id="searchInput" type="text" placeholder="Search employee or SA ID..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
-            <select class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
-              <option>All Categories</option>
-              <option>Heavy Machinery</option>
-              <option>Power Tools</option>
+            <select id="sortSelect" class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
+              <option value="all">All Employees</option>
+              <option value="recent">Recently Completed</option>
+              <option value="modules">Longest Module List</option>
             </select>
-            <button class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2">
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filter
-            </button>
+            <div class="relative">
+              <button id="filterToggleBtn" type="button" class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2" aria-expanded="false" aria-haspopup="true">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter
+              </button>
+              <div id="filterMenu" class="absolute right-0 top-full z-20 mt-2 hidden min-w-44 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="all">All Types</button>
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Individual">Individual Only</button>
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Group">Group Only</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="w-full overflow-hidden md:overflow-visible rounded-lg border border-slate-200">
-          <table class="block md:table w-full text-left text-sm text-muted whitespace-nowrap">
-            <thead class="hidden md:table-header-group bg-slate-50 text-xs uppercase text-foreground border-b border-slate-200">
-              <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Employee Name</th>
-                <th scope="col" class="px-6 py-4 font-medium">ID Number</th>
-                <th scope="col" class="px-6 py-4 font-medium">Training Module</th>
-                <th scope="col" class="px-6 py-4 font-medium">Date Completed</th>
-                <th scope="col" class="px-6 py-4 font-medium text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody class="block md:table-row-group divide-y divide-slate-200 bg-white">
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>Sipho Nkosi</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>920412 5054 081</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Forklift Operation & Safety</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Oct 24, 2025</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
+        <div id="recordsLoadingState" class="flex min-h-[16rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+            <div>
+              <p class="text-sm font-medium text-foreground">Loading employee directory</p>
+              <p class="text-xs text-muted">Fetching completed training records from Supabase.</p>
+            </div>
+          </div>
+        </div>
 
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>David van der Merwe</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>881105 5123 088</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Tractor PTO Safety</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Jan 22, 2026</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
+        <div id="recordsDirectory" class="hidden space-y-4"></div>
 
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>Sarah Johnson</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>950321 0045 082</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Chemical Handling (HAZMAT)</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Mar 19, 2026</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="recordsEmptyState" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+          <p class="text-sm font-medium text-foreground">No verified training records logged yet.</p>
+          <p class="mt-1 text-xs text-muted">Once employees complete modules, they will appear here by name.</p>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
@@ -406,5 +348,434 @@
 
   <script src="assets/java_files/main.js"></script>
   <script src="assets/java_files/profile-engine.js"></script>
+  <script>
+    let allEmployeesData = [];
+    let activeTrainingTypeFilter = 'all';
+
+    const recordsLoadingState = document.getElementById('recordsLoadingState');
+    const recordsDirectory = document.getElementById('recordsDirectory');
+    const recordsEmptyState = document.getElementById('recordsEmptyState');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterMenu = document.getElementById('filterMenu');
+
+    let searchDebounceId = null;
+
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => {
+      const escapes = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      };
+      return escapes[character] || character;
+    });
+
+    const formatDate = (value) => {
+      if (!value) return 'Date unavailable';
+
+      const parsedDate = new Date(value);
+      if (Number.isNaN(parsedDate.getTime())) {
+        return 'Date unavailable';
+      }
+
+      return new Intl.DateTimeFormat('en-ZA', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).format(parsedDate);
+    };
+
+    const formatDateTimeValue = (value) => {
+      const parsedDate = new Date(value);
+      return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+    };
+
+    const buildEmployeeKey = (record) => {
+      const fallback = record.employee_name || 'unknown-employee';
+      return String(record.sa_id_number || fallback).trim().toLowerCase();
+    };
+
+    const groupTrainingRecords = (records) => {
+      const groupedRecords = new Map();
+
+      records.forEach((record) => {
+        const key = buildEmployeeKey(record);
+        const recordDate = record.created_at || record.completed_at || null;
+
+        if (!groupedRecords.has(key)) {
+          groupedRecords.set(key, {
+            employee_name: record.employee_name || 'Unnamed employee',
+            sa_id_number: record.sa_id_number || '',
+            farm_id: record.farm_id || '',
+            modules: [],
+            latestCompletedAt: recordDate,
+          });
+        }
+
+        const employee = groupedRecords.get(key);
+        employee.employee_name = employee.employee_name || record.employee_name || 'Unnamed employee';
+        employee.sa_id_number = employee.sa_id_number || record.sa_id_number || '';
+        employee.farm_id = employee.farm_id || record.farm_id || '';
+        employee.latestCompletedAt = formatDateTimeValue(recordDate) > formatDateTimeValue(employee.latestCompletedAt)
+          ? recordDate
+          : employee.latestCompletedAt;
+        employee.modules.push({
+          module_title: record.module_title || 'Untitled module',
+          supervisor_name: record.supervisor_name || '',
+          supervisor_email: record.supervisor_email || '',
+          training_type: record.training_type || 'Individual',
+          created_at: recordDate,
+        });
+      });
+
+      return Array.from(groupedRecords.values())
+        .map((employee) => ({
+          ...employee,
+          modules: employee.modules.sort((leftModule, rightModule) => {
+            return formatDateTimeValue(rightModule.created_at) - formatDateTimeValue(leftModule.created_at);
+          }),
+        }))
+        .sort((leftEmployee, rightEmployee) => {
+          const rightDate = formatDateTimeValue(rightEmployee.latestCompletedAt);
+          const leftDate = formatDateTimeValue(leftEmployee.latestCompletedAt);
+
+          if (rightDate !== leftDate) {
+            return rightDate - leftDate;
+          }
+
+          return leftEmployee.employee_name.localeCompare(rightEmployee.employee_name);
+        });
+    };
+
+    const getActiveSearchQuery = () => (searchInput?.value || '').trim().toLowerCase();
+
+    const matchesSearchQuery = (employee, query) => {
+      if (!query) return true;
+
+      const employeeName = (employee.employee_name || '').toLowerCase();
+      const idNumber = (employee.sa_id_number || '').toLowerCase();
+      const moduleMatch = employee.modules.some((module) => (module.module_title || '').toLowerCase().includes(query));
+
+      return employeeName.includes(query) || idNumber.includes(query) || moduleMatch;
+    };
+
+    const matchesTrainingTypeFilter = (employee, trainingTypeFilter) => {
+      if (trainingTypeFilter === 'all') return true;
+      return employee.modules.some((module) => (module.training_type || 'Individual') === trainingTypeFilter);
+    };
+
+    const sortEmployees = (employees, sortValue) => {
+      const clonedEmployees = [...employees];
+
+      if (sortValue === 'recent') {
+        return clonedEmployees.sort((leftEmployee, rightEmployee) => {
+          const rightDate = formatDateTimeValue(rightEmployee.latestCompletedAt);
+          const leftDate = formatDateTimeValue(leftEmployee.latestCompletedAt);
+
+          if (rightDate !== leftDate) {
+            return rightDate - leftDate;
+          }
+
+          return leftEmployee.employee_name.localeCompare(rightEmployee.employee_name);
+        });
+      }
+
+      if (sortValue === 'modules') {
+        return clonedEmployees.sort((leftEmployee, rightEmployee) => {
+          if (rightEmployee.modules.length !== leftEmployee.modules.length) {
+            return rightEmployee.modules.length - leftEmployee.modules.length;
+          }
+
+          const rightDate = formatDateTimeValue(rightEmployee.latestCompletedAt);
+          const leftDate = formatDateTimeValue(leftEmployee.latestCompletedAt);
+
+          if (rightDate !== leftDate) {
+            return rightDate - leftDate;
+          }
+
+          return leftEmployee.employee_name.localeCompare(rightEmployee.employee_name);
+        });
+      }
+
+      return clonedEmployees;
+    };
+
+    const applyFiltersAndRender = () => {
+      const query = getActiveSearchQuery();
+      const sortValue = sortSelect?.value || 'all';
+
+      const filteredEmployees = sortEmployees(
+        allEmployeesData.filter((employee) => {
+          return matchesSearchQuery(employee, query) && matchesTrainingTypeFilter(employee, activeTrainingTypeFilter);
+        }),
+        sortValue,
+      );
+
+      if (!filteredEmployees.length) {
+        setEmptyState('No matching employees found.', 'Try adjusting your search query or clear active filters.');
+        return;
+      }
+
+      renderEmployeeDirectory(filteredEmployees);
+    };
+
+    const setLoadingState = () => {
+      recordsLoadingState?.classList.remove('hidden');
+      recordsDirectory?.classList.add('hidden');
+      recordsEmptyState?.classList.add('hidden');
+    };
+
+    const setEmptyState = (message, subtext = '') => {
+      if (recordsLoadingState) recordsLoadingState.classList.add('hidden');
+      if (recordsDirectory) recordsDirectory.classList.add('hidden');
+      if (recordsEmptyState) {
+        recordsEmptyState.innerHTML = `
+          <p class="text-sm font-medium text-foreground">${escapeHtml(message)}</p>
+          ${subtext ? `<p class="mt-1 text-xs text-muted">${escapeHtml(subtext)}</p>` : ''}
+        `;
+        recordsEmptyState.classList.remove('hidden');
+      }
+    };
+
+    const renderEmployeeDirectory = (employees) => {
+      if (!recordsDirectory) return;
+
+      if (!employees.length) {
+        setEmptyState('No verified training records logged yet.', 'Once employees complete modules, they will appear here by name.');
+        return;
+      }
+
+      const cardsHtml = employees.map((employee, index) => {
+        const panelId = `employee-panel-${index}`;
+        const displayId = employee.sa_id_number ? escapeHtml(employee.sa_id_number) : 'No SA ID provided';
+        const moduleCount = employee.modules.length;
+        const moduleLabel = moduleCount === 1 ? 'Module Completed' : 'Modules Completed';
+
+        const modulesHtml = employee.modules.map((module) => {
+          const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Unassigned';
+          const supervisorEmail = module.supervisor_email ? escapeHtml(module.supervisor_email) : '';
+          const trainingType = module.training_type || 'Individual';
+
+          return `
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="px-4 py-4 align-top text-foreground sm:px-6">
+                <div class="font-medium">${escapeHtml(module.module_title)}</div>
+              </td>
+              <td class="px-4 py-4 align-top sm:px-6">
+                <span class="inline-flex items-center rounded-full ${trainingType === 'Group' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'} px-2.5 py-0.5 text-xs font-semibold">
+                  ${escapeHtml(trainingType)}
+                </span>
+              </td>
+              <td class="px-4 py-4 align-top text-foreground sm:px-6">
+                <div class="font-medium">${supervisorName}</div>
+                ${supervisorEmail ? `<div class="text-xs text-muted">${supervisorEmail}</div>` : ''}
+              </td>
+              <td class="px-4 py-4 align-top text-muted sm:px-6">
+                ${escapeHtml(formatDate(module.created_at))}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md">
+            <button
+              type="button"
+              class="employee-toggle flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
+              aria-expanded="false"
+              aria-controls="${panelId}"
+              data-panel-id="${panelId}"
+            >
+              <div class="flex min-w-0 items-center gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary font-semibold">
+                  ${escapeHtml(employee.employee_name.slice(0, 1) || 'E')}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="truncate text-lg font-semibold text-foreground">${escapeHtml(employee.employee_name)}</h3>
+                  <p class="truncate text-sm text-muted">${displayId}</p>
+                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-3">
+                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  ${moduleCount} ${moduleLabel}
+                </span>
+                <svg class="employee-chevron h-5 w-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </button>
+
+            <div id="${panelId}" class="employee-panel" style="max-height: 0px;">
+              <div class="border-t border-slate-200 bg-slate-50 px-5 py-5 sm:px-6">
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm">
+                      <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground">
+                        <tr>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Module Title</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Training Type</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Supervisor</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Completion Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${modulesHtml}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      recordsDirectory.innerHTML = cardsHtml;
+      recordsDirectory.classList.remove('hidden');
+      recordsEmptyState?.classList.add('hidden');
+      recordsLoadingState?.classList.add('hidden');
+      bindEmployeeAccordionEvents();
+    };
+
+    const bindEmployeeAccordionEvents = () => {
+      const toggleButtons = document.querySelectorAll('.employee-toggle');
+
+      toggleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const panelId = button.getAttribute('data-panel-id');
+          const panel = panelId ? document.getElementById(panelId) : null;
+          const chevron = button.querySelector('.employee-chevron');
+          if (!panel) return;
+
+          const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+          if (isExpanded) {
+            panel.style.maxHeight = `${panel.scrollHeight}px`;
+            panel.classList.add('is-open');
+            requestAnimationFrame(() => {
+              panel.style.maxHeight = '0px';
+              panel.classList.remove('is-open');
+            });
+          } else {
+            panel.classList.add('is-open');
+            panel.style.maxHeight = `${panel.scrollHeight}px`;
+            const handleTransitionEnd = (event) => {
+              if (event.propertyName === 'max-height' && button.getAttribute('aria-expanded') === 'true') {
+                panel.style.maxHeight = 'none';
+              }
+            };
+            panel.addEventListener('transitionend', handleTransitionEnd, { once: true });
+          }
+
+          button.setAttribute('aria-expanded', String(!isExpanded));
+          chevron?.classList.toggle('rotate-180', !isExpanded);
+        });
+      });
+    };
+
+    const syncExpandedPanelHeights = () => {
+      document.querySelectorAll('.employee-toggle[aria-expanded="true"]').forEach((button) => {
+        const panelId = button.getAttribute('data-panel-id');
+        const panel = panelId ? document.getElementById(panelId) : null;
+        if (panel) {
+          panel.style.maxHeight = 'none';
+        }
+      });
+    };
+
+    async function fetchAndRenderTrainingRecords() {
+      if (!recordsDirectory || !recordsLoadingState) return;
+
+      setLoadingState();
+
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session) {
+          setEmptyState('Please sign in to view training records.', 'Your employee directory is only available to authenticated users.');
+          return;
+        }
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('farm_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile || !profile.farm_id) {
+          setEmptyState('No associated farm profile found.', 'A linked farm profile is required before training records can be displayed.');
+          return;
+        }
+
+        const { data: records, error } = await window.dbClient
+          .from('training_records')
+          .select('employee_name, sa_id_number, farm_id, module_title, supervisor_name, supervisor_email, training_type, created_at, completed_at')
+          .eq('farm_id', profile.farm_id)
+          .order('completed_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!records || records.length === 0) {
+          setEmptyState('No verified training records logged yet.', 'Once employees complete modules, they will appear here by name.');
+          return;
+        }
+
+        allEmployeesData = groupTrainingRecords(records);
+        applyFiltersAndRender();
+
+      } catch (err) {
+        console.error('Error fetching training records:', err);
+        setEmptyState('Failed to load training records.', 'Please refresh the page and try again.');
+      }
+    }
+
+    const closeFilterMenu = () => {
+      filterMenu?.classList.add('hidden');
+      filterToggleBtn?.setAttribute('aria-expanded', 'false');
+    };
+
+    const toggleFilterMenu = () => {
+      if (!filterMenu || !filterToggleBtn) return;
+      const isHidden = filterMenu.classList.contains('hidden');
+      filterMenu.classList.toggle('hidden', !isHidden);
+      filterToggleBtn.setAttribute('aria-expanded', String(isHidden));
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAndRenderTrainingRecords();
+      searchInput?.addEventListener('input', () => {
+        window.clearTimeout(searchDebounceId);
+        searchDebounceId = window.setTimeout(() => {
+          applyFiltersAndRender();
+        }, 150);
+      });
+
+      sortSelect?.addEventListener('change', applyFiltersAndRender);
+
+      filterToggleBtn?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleFilterMenu();
+      });
+
+      filterMenu?.addEventListener('click', (event) => {
+        const option = event.target.closest('.filter-option');
+        if (!option) return;
+
+        activeTrainingTypeFilter = option.getAttribute('data-training-type') || 'all';
+        applyFiltersAndRender();
+        closeFilterMenu();
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!filterMenu || !filterToggleBtn) return;
+        if (filterMenu.contains(event.target) || filterToggleBtn.contains(event.target)) return;
+        closeFilterMenu();
+      });
+
+      window.addEventListener('resize', syncExpandedPanelHeights);
+    });
+  </script>
 </body>
 </html>
