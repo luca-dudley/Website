@@ -205,8 +205,8 @@
             Back to Training Library
           </a>
           <div class="text-right">
-            <p id="headerTitle" class="text-sm font-medium text-foreground">Agricultural Sprayer Calibration &amp; Safety</p>
-            <p id="headerMeta" class="text-xs text-muted">Agriculture Module • 5:50</p>
+            <p id="headerTitle" class="text-sm font-medium text-foreground">Loading Module...</p>
+            <p id="headerMeta" class="text-xs text-muted">Module • --:--</p>
           </div>
         </div>
       </header>
@@ -216,7 +216,6 @@
           <div class="w-full max-w-5xl mx-auto aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
             <iframe
               id="videoPlayer"
-              src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0"
               class="w-full h-full"
               frameborder="0"
               allow="autoplay; fullscreen; picture-in-picture"
@@ -228,13 +227,13 @@
             <section class="space-y-5 max-w-3xl mx-auto">
               <div class="rounded-xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center gap-3 mb-3">
-                  <span data-module-category class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Agriculture Module</span>
-                  <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: 5:50</span>
-                  <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: English, isiZulu</span>
+                  <span data-module-category class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Module</span>
+                  <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: --:--</span>
+                  <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: --</span>
                 </div>
-                <h1 id="moduleTitle" class="text-3xl font-serif text-foreground mb-3">Agricultural Sprayer Calibration &amp; Safety</h1>
+                <h1 id="moduleTitle" class="text-3xl font-serif text-foreground mb-3">Loading Module...</h1>
                 <p id="moduleDescription" class="text-sm text-muted leading-relaxed">
-                  Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.
+                  Loading module description...
                 </p>
               </div>
 
@@ -279,118 +278,54 @@
   </div>
 
   <script>
-    const moduleVideoPlayer = document.getElementById('videoPlayer');
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestedVideoId = urlParams.get('v') || '1179583326';
-    const requestedStartTime = Math.max(0, Number(urlParams.get('t') || 0));
-
-    moduleVideoPlayer.src = `https://player.vimeo.com/video/${encodeURIComponent(requestedVideoId)}?title=0&byline=0&portrait=0&badge=0&autoplay=1#t=${Math.floor(requestedStartTime)}s`;
-
-    const player = new Vimeo.Player(moduleVideoPlayer);
-
-    const saveVideoProgress = (watchedSeconds, totalSeconds) => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      let progressByVideo = {};
-
-      if (rawProgress) {
-        try {
-          progressByVideo = JSON.parse(rawProgress) || {};
-        } catch (error) {
-          progressByVideo = {};
-        }
-      }
-
-      progressByVideo[requestedVideoId] = {
-        watchedSeconds: Math.max(0, Math.floor(watchedSeconds)),
-        totalSeconds: Math.max(0, Math.floor(totalSeconds || 0)),
-        lastWatchedAt: Date.now()
-      };
-
-      localStorage.setItem('vaultVideoProgress', JSON.stringify(progressByVideo));
-    };
-
-    let lastSavedSecond = -1;
-    player.on('timeupdate', (event) => {
-      const currentSecond = Math.floor(event.seconds || 0);
-      if (currentSecond === lastSavedSecond) {
-        return;
-      }
-
-      lastSavedSecond = currentSecond;
-      saveVideoProgress(event.seconds || 0, event.duration || 0);
-    });
-
-    player.on('ended', (event) => {
-      const duration = event && event.duration ? event.duration : 0;
-      saveVideoProgress(duration, duration);
-    });
-
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const desktopSidebarToggle = document.getElementById('sidebarToggle');
-      if (sidebar && mainContent && desktopSidebarToggle && window.innerWidth >= 1024) {
-        sidebar.classList.add('collapsed');
-        mainContent.style.marginLeft = '5rem';
-        desktopSidebarToggle.textContent = '>>';
-        desktopSidebarToggle.setAttribute('aria-expanded', 'false');
-        desktopSidebarToggle.setAttribute('aria-label', 'Expand sidebar');
-      }
-    });
-  </script>
-  <script>
-    function openTallyCompliance() {
-      const farmId = window.userFarmId;
-      const moduleTitle = window.currentVideoTitle || document.getElementById('moduleTitle')?.innerText || '';
-
-      if (!farmId) {
-        console.warn('Unable to open compliance form without a farm_id.');
-        return;
-      }
-
-      const tallyUrl = `https://tally.so/r/D4DAAE?farm_id=${encodeURIComponent(farmId)}&module_title=${encodeURIComponent(moduleTitle)}`;
-      window.open(tallyUrl, '_blank', 'noopener,noreferrer,width=600,height=800');
-    }
-
-    // 2. The Dynamic Loader (Overwrites the HTML skeleton)
     document.addEventListener('DOMContentLoaded', async () => {
-      const videoId = new URLSearchParams(window.location.search).get('v');
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('v');
+      const startTime = Math.max(0, Number(urlParams.get('t') || 0));
 
       if (!videoId) {
         window.location.replace('vault.html');
         return;
       }
 
-      const waitForDbClient = async () => {
-        if (window.dbClient) return window.dbClient;
+      const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+      const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+      window.dbClient = dbClient;
 
-        return await new Promise((resolve) => {
-          const checkClient = () => {
-            if (window.dbClient) {
-              resolve(window.dbClient);
-            } else {
-              setTimeout(checkClient, 50);
-            }
-          };
-
-          checkClient();
-        });
-      };
-
-      const dbClient = await waitForDbClient();
-      const { data: video, error } = await dbClient
+      // Fetch video details from Supabase with fallback to prevent redirecting or defaulting to Chemical Spraying
+      let { data: video, error: videoError } = await dbClient
         .from('videos')
         .select('*')
-        .eq('id', videoId)
-        .single();
+        .eq('id', String(videoId))
+        .maybeSingle();
 
-      if (error || !video) {
-        window.location.replace('vault.html');
+      if (!video) {
+        // Fallback object using the requested video ID so the correct Vimeo video still plays
+        video = {
+          id: String(videoId),
+          title: `Training Module (${videoId})`,
+          category: 'Agriculture Module',
+          description: 'Standard operational safety module.',
+          total_seconds: 0
+        };
+      }
+
+      const { data: { session } } = await dbClient.auth.getSession();
+
+      if (!session?.user?.id) {
+        console.warn('No valid session found. Redirecting to login...');
+        window.location.replace('index.html');
         return;
       }
+
+      const { data: profile } = await dbClient
+        .from('profiles')
+        .select('farm_id')
+        .eq('id', session.user.id)
+        .single();
+
+      window.userFarmId = profile?.farm_id || null;
 
       const totalSeconds = Number(video.total_seconds || 0);
       const minutes = Math.floor(totalSeconds / 60);
@@ -401,29 +336,23 @@
 
       document.title = `${videoTitle} - The Vault`;
 
-      const videoPlayer = document.getElementById('videoPlayer');
-      if (videoPlayer) {
-        videoPlayer.src = `https://player.vimeo.com/video/${video.id}?title=0&byline=0&portrait=0&badge=0`;
-      }
-
       const headerTitle = document.getElementById('headerTitle');
       const headerMeta = document.getElementById('headerMeta');
+      const moduleTitle = document.getElementById('moduleTitle');
+      const moduleDescription = document.getElementById('moduleDescription');
+      const moduleDuration = document.getElementById('moduleDuration');
+      const moduleLanguage = document.getElementById('moduleLanguage');
+      const categoryBadge = document.querySelector('[data-module-category]');
+
       if (headerTitle) headerTitle.textContent = videoTitle;
       if (headerMeta) headerMeta.textContent = `${categoryLabel} • ${minutes}:${String(seconds).padStart(2, '0')}`;
-
-      const titleEl = document.getElementById('moduleTitle');
-      const descEl = document.getElementById('moduleDescription');
-      const durationEl = document.getElementById('moduleDuration');
-      const langEl = document.getElementById('moduleLanguage');
-
-      if (titleEl) titleEl.textContent = videoTitle;
-      window.currentVideoTitle = videoTitle;
-      if (descEl) descEl.textContent = video.description || '';
-      if (durationEl) durationEl.textContent = durationLabel;
-      if (langEl) langEl.textContent = video.language || '';
-
-      const categoryBadge = document.querySelector('[data-module-category]');
+      if (moduleTitle) moduleTitle.textContent = videoTitle;
+      if (moduleDescription) moduleDescription.textContent = video.description || '';
+      if (moduleDuration) moduleDuration.textContent = durationLabel;
+      if (moduleLanguage) moduleLanguage.textContent = video.language || '';
       if (categoryBadge) categoryBadge.textContent = categoryLabel;
+
+      window.currentVideoTitle = videoTitle;
 
       const objectivesList = document.getElementById('moduleObjectives');
       if (objectivesList) {
@@ -437,34 +366,137 @@
           objectivesList.appendChild(li);
         });
       }
+
+      const iframe = document.querySelector('#videoPlayer');
+      if (!iframe) {
+        throw new Error('Unable to find the Vimeo iframe.');
+      }
+
+      // 1. Set the Vimeo URL directly on the iframe element
+      iframe.src = `https://player.vimeo.com/video/${encodeURIComponent(videoId)}?title=0&byline=0&portrait=0&badge=0&autoplay=1#t=${Math.floor(startTime)}s`;
+
+      // 2. Initialize player after setting src
+      const player = new Vimeo.Player(iframe);
+      await player.ready();
+
+      const saveProgress = async (data) => {
+        const progressSeconds = Math.floor(Number(data?.seconds || 0));
+        const durationSeconds = Math.floor(Number(data?.duration || 0));
+        const percentage = durationSeconds > 0 ? Math.round((progressSeconds / durationSeconds) * 100) : 0;
+
+        console.log('Syncing Vimeo progress', {
+          videoId: String(videoId),
+          progressSeconds,
+          durationSeconds,
+          percentage,
+        });
+
+        const { error } = await dbClient.from('user_video_progress').upsert({
+          user_id: session.user.id,
+          video_id: String(videoId),
+          video_title: video.title,
+          progress_seconds: progressSeconds,
+          duration_seconds: durationSeconds,
+          percentage,
+          is_completed: percentage >= 90,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id, video_id' });
+
+        if (error) {
+          throw error;
+        }
+      };
+
+      const progressState = {
+        lastSyncAt: 0,
+        pendingTimer: null,
+        latestData: null,
+      };
+
+      const flushProgress = (data, force = false) => {
+        progressState.latestData = data;
+
+        if (force) {
+          if (progressState.pendingTimer) {
+            clearTimeout(progressState.pendingTimer);
+            progressState.pendingTimer = null;
+          }
+
+          progressState.lastSyncAt = Date.now();
+          saveProgress(data).catch((error) => {
+            console.error('Failed to sync Vimeo progress:', error);
+          });
+          return;
+        }
+
+        const elapsed = Date.now() - progressState.lastSyncAt;
+        if (elapsed >= 5000) {
+          progressState.lastSyncAt = Date.now();
+          saveProgress(data).catch((error) => {
+            console.error('Failed to sync Vimeo progress:', error);
+          });
+          return;
+        }
+
+        if (progressState.pendingTimer) return;
+
+        progressState.pendingTimer = setTimeout(() => {
+          progressState.pendingTimer = null;
+          progressState.lastSyncAt = Date.now();
+          saveProgress(progressState.latestData || data).catch((error) => {
+            console.error('Failed to sync Vimeo progress:', error);
+          });
+        }, 5000 - elapsed);
+      };
+
+      player.on('timeupdate', (data) => {
+        flushProgress(data, false);
+      });
+
+      player.on('pause', (data) => {
+        flushProgress(data, true);
+      });
+
+      player.on('ended', (data) => {
+        flushProgress({
+          seconds: data?.duration || 0,
+          duration: data?.duration || 0,
+        }, true);
+      });
+
+      window.openTallyCompliance = function openTallyCompliance() {
+        const farmId = window.userFarmId;
+        const moduleTitleValue = window.currentVideoTitle || '';
+
+        if (!farmId) {
+          console.warn('Unable to open compliance form without a farm_id.');
+          return;
+        }
+
+        const tallyUrl = `https://tally.so/r/D4DAAE?farm_id=${encodeURIComponent(farmId)}&module_title=${encodeURIComponent(moduleTitleValue)}`;
+        window.open(tallyUrl, '_blank', 'noopener,noreferrer,width=600,height=800');
+      };
+
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const desktopSidebarToggle = document.getElementById('sidebarToggle');
+      if (sidebar && mainContent && desktopSidebarToggle && window.innerWidth >= 1024) {
+        sidebar.classList.add('collapsed');
+        mainContent.style.marginLeft = '5rem';
+        desktopSidebarToggle.textContent = '>>';
+        desktopSidebarToggle.setAttribute('aria-expanded', 'false');
+        desktopSidebarToggle.setAttribute('aria-label', 'Expand sidebar');
+      }
+
+      if (startTime > 0) {
+        try {
+          await player.setCurrentTime(startTime);
+        } catch (error) {
+          console.warn('Unable to set the requested start time:', error);
+        }
+      }
     });
   </script>
   <script src="assets/java_files/main.js"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Supabase
-    const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
-    const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-    window.dbClient = dbClient;
-
-    // 2. Check memory for the login ticket
-    const { data: { session } } = await dbClient.auth.getSession();
-    
-    if (!session) {
-      console.warn("No valid session found. Redirecting to login...");
-      window.location.replace('index.html');
-    } else {
-      console.log("Access Granted. Session verified for user:", session.user.id);
-      const { data: profile } = await dbClient
-        .from('profiles')
-        .select('farm_id')
-        .eq('id', session.user.id)
-        .single();
-
-      window.userFarmId = profile?.farm_id || null;
-    }
-  });
-  </script>
 </body>
 </html>

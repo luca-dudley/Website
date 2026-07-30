@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -226,37 +227,37 @@
       <div class="p-8">
         
         <!-- Featured Training Banner -->
-        <div id="continue-watching-block">
+        <div id="continue-watching-block" class="hidden">
         <section class="mb-10">
           <div class="relative bg-gradient-to-r from-primary to-[#2a5285] rounded-2xl overflow-hidden shadow-lg border border-primary/20">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
             <div class="relative p-6 md:p-8">
               <div class="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
               <!-- Video Thumbnail -->
-              <a id="continueWatchingVisualLink" href="module.html?v=1179583326&t=120" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
-                <img id="bannerThumbnail" src="assets/thumbnails/Chemical_Spraying.svg" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
+              <a id="continueWatchingVisualLink" href="#" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
+                <img id="bannerThumbnail" src="" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
               </a>
               
               <!-- Content -->
               <div class="text-white flex flex-col w-full md:w-1/2">
                 <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
-                <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Chemical Spraying</h2>
+                <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Loading...</h2>
                 <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
                 <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span id="bannerTimeRemaining">3:50 remaining</span>
+                    <span id="bannerTimeRemaining">--:-- remaining</span>
                   </span>
                   <span class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
-                    <span id="continueWatchingModule">Agriculture</span>
+                    <span id="continueWatchingModule">Training</span>
                   </span>
                 </div>
-                <a id="bannerResumeBtn" href="module.html?v=1179583326&t=120" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
+                <a id="bannerResumeBtn" href="#" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
               </div>
               </div>
             </div>
@@ -297,6 +298,7 @@
     // 1. RUNTIME CONFIGURATION
     // This object will be dynamically populated from the database to ensure search filters and tracking loops function seamlessly.
     let videoLibrary = {}; 
+    let currentContinueWatchingProgress = null;
 
     // Helper: Formats total integer seconds into clean MM:SS layout
     function formatDuration(totalSeconds) {
@@ -304,6 +306,104 @@
       const mins = Math.floor(totalSeconds / 60);
       const secs = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
       return `${mins}:${secs}`;
+    }
+
+    function formatRemainingTime(totalSeconds, watchedSeconds) {
+      const remainingSeconds = Math.max(0, Number(totalSeconds || 0) - Number(watchedSeconds || 0));
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = Math.floor(remainingSeconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs} remaining`;
+    }
+
+    async function getCurrentSession() {
+      const { data: { session } } = await window.dbClient.auth.getSession();
+      return session || null;
+    }
+
+    async function fetchVideoLibraryMap() {
+      if (Object.keys(videoLibrary).length > 0) {
+        return videoLibrary;
+      }
+
+      const { data: databaseVideos, error } = await window.dbClient
+        .from('videos')
+        .select('id, title, description, category, language, thumbnail_url, total_seconds')
+        .order('title', { ascending: true });
+
+      if (error) throw error;
+
+      (databaseVideos || []).forEach((video) => {
+        videoLibrary[video.id] = {
+          title: video.title,
+          module: video.category || 'Agriculture',
+          description: video.description || '',
+          totalSeconds: video.total_seconds || 300,
+          thumbnail: video.thumbnail_url || 'assets/thumbnails/Chemical_Spraying.svg'
+        };
+      });
+
+      return videoLibrary;
+    }
+
+    async function fetchContinueWatchingProgress() {
+      const session = await getCurrentSession();
+      if (!session) return null;
+
+      const { data, error } = await window.dbClient
+        .from('user_video_progress')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_completed', false)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    }
+
+    async function renderContinueWatchingBanner() {
+      const bannerBlock = document.getElementById('continue-watching-block');
+      const bannerTitle = document.getElementById('bannerTitle');
+      const bannerDesc = document.getElementById('bannerDescription');
+      const bannerThumb = document.getElementById('bannerThumbnail');
+      const bannerBtn = document.getElementById('bannerResumeBtn');
+      const visualLink = document.getElementById('continueWatchingVisualLink');
+      const bannerTimeRemaining = document.getElementById('bannerTimeRemaining');
+      const bannerModule = document.getElementById('continueWatchingModule');
+
+      if (!bannerBlock || !bannerTitle || !bannerDesc || !bannerThumb || !bannerBtn || !visualLink || !bannerTimeRemaining || !bannerModule) {
+        return;
+      }
+
+      try {
+        await fetchVideoLibraryMap();
+        currentContinueWatchingProgress = await fetchContinueWatchingProgress();
+
+        if (!currentContinueWatchingProgress) {
+          bannerBlock.classList.add('hidden');
+          return;
+        }
+
+        const videoData = videoLibrary[currentContinueWatchingProgress.video_id] || {};
+        const progressSeconds = Number(currentContinueWatchingProgress.progress_seconds || 0);
+        const durationSeconds = Number(currentContinueWatchingProgress.duration_seconds || videoData.totalSeconds || 0);
+        const percentage = Math.min(100, Number(currentContinueWatchingProgress.percentage || 0));
+        const resumeUrl = `module.html?v=${encodeURIComponent(currentContinueWatchingProgress.video_id)}&t=${Math.floor(progressSeconds)}`;
+
+        bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
+        bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
+        bannerThumb.src = videoData.thumbnail || 'assets/thumbnails/Chemical_Spraying.svg';
+        bannerThumb.alt = `${bannerTitle.textContent} thumbnail`;
+        bannerBtn.href = resumeUrl;
+        visualLink.href = resumeUrl;
+        bannerTimeRemaining.textContent = formatRemainingTime(durationSeconds, progressSeconds);
+        bannerModule.textContent = `${Math.max(0, Math.round(percentage))}% complete`;
+        bannerBlock.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error rendering continue watching banner:', error);
+        bannerBlock.classList.add('hidden');
+      }
     }
 
     // 2. DYNAMIC SUPABASE FETCH & INJECTION ENGINE
@@ -374,7 +474,7 @@
         });
 
         // 3. EXECUTE METRIC ROUTINES (Only runs after cards are securely drawn into DOM)
-        updateFeaturedBanner();
+        renderContinueWatchingBanner();
         renderAllVideoProgress();
         setupSearchAndFilters(); // Attaches client-side search listener routines to newly rendered nodes
 
@@ -383,90 +483,80 @@
       }
     }
 
-    // 4. PROGRESS UTILITIES & RENDERING ENGINES
-    const updateFeaturedBanner = () => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      if (!rawProgress) return;
-
+   // 4. PROGRESS UTILITIES & SUPABASE RENDERING ENGINE
+    const renderAllVideoProgress = async () => {
       try {
-        const progress = JSON.parse(rawProgress);
-        let lastWatchedId = null;
-        let latestTime = 0;
+        const session = await getCurrentSession();
+        if (!session?.user?.id) return;
 
-        for (const [id, data] of Object.entries(progress)) {
-          if (data.lastWatchedAt > latestTime && data.watchedSeconds < data.totalSeconds) {
-            latestTime = data.lastWatchedAt;
-            lastWatchedId = id;
-          }
+        // Fetch user video progress from Supabase
+        const { data: progressList, error } = await window.dbClient
+          .from('user_video_progress')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        if (error) {
+          console.error("Error fetching progress from Supabase:", error);
+          return;
         }
 
-        if (lastWatchedId && videoLibrary[lastWatchedId]) {
-          const videoData = videoLibrary[lastWatchedId];
-          const savedData = progress[lastWatchedId];
+        // Build progress map by video_id
+        const progressMap = {};
+        (progressList || []).forEach(row => {
+          progressMap[String(row.video_id)] = row;
+        });
 
-          const bannerTitle = document.getElementById('bannerTitle');
-          const bannerDesc = document.getElementById('bannerDescription');
-          const bannerThumb = document.getElementById('bannerThumbnail');
-          const bannerBtn = document.getElementById('bannerResumeBtn');
-          const visualLink = document.getElementById('continueWatchingVisualLink');
+        // Loop over each video card in the DOM and apply real-time progress & status styles
+        Object.keys(videoLibrary).forEach(videoId => {
+          const progressFill = document.getElementById(`progress-${videoId}`);
+          const statusText = document.getElementById(`status-${videoId}`);
+          const cardLink = document.querySelector(`a[href*="v=${videoId}"]`);
+          const userProgress = progressMap[String(videoId)];
 
-          if (bannerTitle) bannerTitle.textContent = videoData.title;
-          if (bannerDesc) bannerDesc.textContent = videoData.description;
-          if (bannerThumb) bannerThumb.src = videoData.thumbnail;
-          
-          // Inject exact structural link parameters to avoid progress reset loops
-          const resumeUrl = `module.html?v=${lastWatchedId}&t=${savedData.watchedSeconds}`;
-          if (bannerBtn) bannerBtn.href = resumeUrl;
-          if (visualLink) visualLink.href = resumeUrl;
-
-          const timeRemainingEl = document.getElementById('bannerTimeRemaining');
-          if (timeRemainingEl) {
-            const secondsLeft = Math.max(0, videoData.totalSeconds - savedData.watchedSeconds);
-            const mins = Math.floor(secondsLeft / 60);
-            const secs = Math.floor(secondsLeft % 60).toString().padStart(2, '0');
-            timeRemainingEl.textContent = `${mins}:${secs} remaining`;
+          if (!userProgress) {
+            // Not Started
+            if (progressFill) progressFill.style.width = '0%';
+            if (statusText) {
+              statusText.textContent = 'Not Started';
+              statusText.className = 'inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800';
+            }
+            return;
           }
-        } else {
-          // If no active tracking history exists, clean layout clutter by hiding banner container elegantly
-          const bannerBlock = document.getElementById('continue-watching-block');
-          if (bannerBlock) bannerBlock.classList.add('hidden');
-        }
-      } catch (error) {
-        console.error("Error updating banner:", error);
+
+          if (userProgress.is_completed) {
+            // Completed: badge shows 'Completed', full bar width, link starts at beginning (t=0)
+            if (progressFill) {
+              progressFill.style.width = '100%';
+              progressFill.className = 'bg-green-500 h-1.5 rounded-full';
+            }
+            if (statusText) {
+              statusText.textContent = 'Completed';
+              statusText.className = 'inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700';
+            }
+            if (cardLink) {
+              cardLink.href = `module.html?v=${encodeURIComponent(videoId)}&t=0`;
+            }
+          } else if (userProgress.percentage > 0) {
+            // In Progress: badge shows % complete, bar width reflects exact percentage
+            const pct = Math.min(99, Math.max(1, Math.round(userProgress.percentage)));
+            const progressSecs = Math.floor(userProgress.progress_seconds || 0);
+
+            if (progressFill) {
+              progressFill.style.width = `${pct}%`;
+              progressFill.className = 'bg-primary h-1.5 rounded-full';
+            }
+            if (statusText) {
+              statusText.textContent = `${pct}% Complete`;
+              statusText.className = 'inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700';
+            }
+            if (cardLink) {
+              cardLink.href = `module.html?v=${encodeURIComponent(videoId)}&t=${progressSecs}`;
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Failed rendering video card progress:", err);
       }
-    };
-
-    const getSavedProgress = (videoId) => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      if (!rawProgress) return null;
-      try {
-        const progressByVideo = JSON.parse(rawProgress);
-        return progressByVideo && typeof progressByVideo === 'object' ? progressByVideo[videoId] || null : null;
-      } catch (error) {
-        return null;
-      }
-    };
-
-    const renderAllVideoProgress = () => {
-      Object.keys(videoLibrary).forEach(videoId => {
-        const progressFill = document.getElementById(`progress-${videoId}`);
-        const statusText = document.getElementById(`status-${videoId}`);
-
-        if (progressFill) {
-          const saved = getSavedProgress(videoId);
-          const watched = Math.max(0, Number(saved?.watchedSeconds || 0));
-          const total = Math.max(1, Number(saved?.totalSeconds || videoLibrary[videoId].totalSeconds));
-          const percent = Math.min(100, Math.round((watched / total) * 100));
-
-          progressFill.style.width = `${percent}%`;
-
-          if (statusText) {
-            if (percent >= 100) statusText.textContent = 'Completed';
-            else if (percent > 0) statusText.textContent = 'In Progress';
-            else statusText.textContent = 'Not Started';
-          }
-        }
-      });
     };
 
     // 5. CLIENT-SIDE LIVE DRILL DOWN / FILTERS
@@ -505,7 +595,8 @@
 
     // 6. INITIALIZATION HOOK
     // Tie the database loop into the existing security verification lifecycle cleanly
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
+      await renderContinueWatchingBanner();
       fetchAndRenderVault();
     });
   </script>
