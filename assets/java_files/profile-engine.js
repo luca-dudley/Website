@@ -315,6 +315,38 @@ function triggerPaystackUpgrade(planCode, targetTier) {
   }
 }
 
+// Handler for direct subscription cancellation
+async function handleSubscriptionCancellation() {
+  const confirmCancel = confirm("Are you sure you want to cancel your active subscription? Your organization will revert to the Basic tier at the end of the current billing cycle.");
+  if (!confirmCancel) return;
+
+  try {
+    if (!window.userFarmId) {
+      alert("Unable to resolve organization details. Please contact support.");
+      return;
+    }
+
+    // 1. Revert farm tier to 'basic' and mark status in Supabase
+    const { error } = await window.dbClient
+      .from('farms')
+      .update({
+        tier: 'basic',
+        subscription_status: 'cancelled',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', window.userFarmId);
+
+    if (error) throw error;
+
+    alert("Your subscription cancellation request has been logged. Your tier has been updated to Basic.");
+    window.location.reload();
+
+  } catch (err) {
+    console.error("Cancellation error:", err);
+    alert("There was an issue processing your cancellation. Please submit a quick billing request using the Manage Billing link.");
+  }
+}
+
 // Global delegated click listener
 if (!window._paystackDelegatedListenerAdded) {
   window._paystackDelegatedListenerAdded = true;
