@@ -11,6 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -247,22 +248,8 @@
                 </div>
               </details>
 
-              <!--
-              <details class="rounded-xl border border-slate-200 bg-white">
-                <summary class="cursor-pointer px-6 py-4 flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-foreground uppercase tracking-wider">Module Resources</h3>
-                  <span class="text-xs text-muted">Expand/Collapse</span>
-                </summary>
-                <div class="px-6 pb-5 text-sm text-muted space-y-2">
-                  <p>PPE checklist (PDF)</p>
-                  <p>Sprayer calibration worksheet</p>
-                  <p>Chemical spill quick response guide</p>
-                </div>
-              </details>
-              -->
-
               <div class="mt-8 pt-8 border-t border-slate-200">
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center max-w-2xl mx-auto">
+                <div id="compliance-card-container" class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center max-w-2xl mx-auto">
                   <h3 class="font-serif text-2xl text-foreground mb-2">Compliance Registration</h3>
                   <p class="text-slate-500 mb-6">Submit your completion data to sync with your organization's HR dashboard.</p>
                   <button onclick="openTallyCompliance()" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
@@ -498,5 +485,6 @@
     });
   </script>
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
 </body>
 </html>
