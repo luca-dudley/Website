@@ -322,14 +322,76 @@ async function loadUserProfile(userId) {
     console.log('[ProfileEngine] Resolved profile row:', profile);
     console.log('[ProfileEngine] Resolved company row:', companyObj);
 
+    // --- SUSPENSION & GRACE PERIOD BOUNCER ---
+    const subStatus = (companyObj?.subscription_status || 'active').toLowerCase();
+    const isAdmin = (profile.role || '').toLowerCase().includes('admin');
+
+    if (subStatus === 'suspended') {
+      document.body.innerHTML = `
+        <div class="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+          <div class="max-w-lg w-full bg-slate-800 border border-red-500/30 rounded-2xl p-8 text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-red-500/10 text-red-400 mx-auto flex items-center justify-center mb-5">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h2 class="text-2xl font-serif font-bold text-white mb-2">Organization Access Suspended</h2>
+            <p class="text-sm text-slate-400 mb-6">
+              Your organization's subscription payment could not be processed after the grace period. <strong>All training records and worker data remain safely saved.</strong>
+            </p>
+            ${isAdmin ? `
+              <button onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential', 'Essential Vault', 22000)" class="w-full bg-primary py-3 rounded-md font-medium text-white hover:bg-primary/90 transition-colors shadow-lg mb-3">
+                Reactivate & Update Card Details 💳
+              </button>
+            ` : `
+              <div class="p-3 bg-slate-700/50 rounded-lg text-xs text-slate-300 mb-4">
+                Please notify your primary administrator to reactivate your company portal.
+              </div>
+            `}
+            <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white underline">
+              Sign Out
+            </button>
+          </div>
+        </div>
+      `;
+      console.groupEnd();
+      return;
+    }
+
+    // Check if user is Primary Admin vs Manager
+    const userRole = (profile.role || '').toLowerCase();
+    const isPlanAdmin = userRole === 'master admin' || userRole === 'admin';
+
+    const managerNotice = document.getElementById('manager-plan-notice');
+    const billingActions = document.getElementById('admin-billing-actions');
+    const planButtons = document.querySelectorAll('.plan-upgrade-btn');
+
+    if (!isPlanAdmin) {
+      if (managerNotice) managerNotice.classList.remove('hidden');
+      if (billingActions) billingActions.classList.add('hidden');
+      planButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('opacity-40', 'cursor-not-allowed');
+        btn.setAttribute('title', 'Only Primary Administrators can change subscription plans.');
+      });
+    } else {
+      if (managerNotice) managerNotice.classList.add('hidden');
+      if (billingActions) billingActions.classList.remove('hidden');
+      planButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+      });
+    }
+
     // --- Resolve company id & tier ----------------------------------------
-    window.userCompanyId = profile.company_id || companyObj?.id || null;
+window.userCompanyId = profile.company_id || companyObj?.id || null;
     window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
     console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
 
     const currentPlanName = document.getElementById('current-plan-name');
     if (currentPlanName) currentPlanName.textContent = window.currentCompanyTier.toUpperCase();
     else console.warn('[ProfileEngine] #current-plan-name not found in DOM.');
+
+    // Update the button labels (Upgrade vs Downgrade vs Current Plan)
+    updatePlanActionButtons(window.currentCompanyTier);
 
     applyTierRestrictions();
 
@@ -425,53 +487,143 @@ function applyTierRestrictions() {
   }
 }
 
-// Paystack Subscription Checkout & Upgrade Trigger
-function triggerPaystackUpgrade(planCode, targetTier) {
-  console.log(`[Paystack Engine] Initiating upgrade to ${targetTier} with plan ${planCode}`);
+// DYNAMIC PLAN BUTTON LABELS & DISABLED STATES
+function updatePlanActionButtons(currentTier) {
+  const tierRanks = { basic: 1, essential: 2, enterprise: 3 };
+  const currentRank = tierRanks[currentTier] || 1;
+
+  const btnConfigs = [
+    { id: 'plan-btn-basic', tier: 'basic', rank: 1, name: 'Basic' },
+    { id: 'plan-btn-essential', tier: 'essential', rank: 2, name: 'Essential' },
+    { id: 'plan-btn-enterprise', tier: 'enterprise', rank: 3, name: 'Enterprise' }
+  ];
+
+  btnConfigs.forEach(cfg => {
+    const btn = document.getElementById(cfg.id);
+    if (!btn) return;
+
+    if (cfg.rank === currentRank) {
+      // Current active tier: Disable button so they cannot re-purchase
+      btn.disabled = true;
+      btn.textContent = 'Current Plan';
+      btn.className = 'plan-upgrade-btn mt-6 w-full py-2 px-3 border border-slate-300 bg-slate-100 text-slate-400 text-xs font-semibold rounded-md cursor-not-allowed';
+    } else if (cfg.rank < currentRank) {
+      // Lower tier: Downgrade button
+      btn.disabled = false;
+      btn.textContent = `Downgrade to ${cfg.name}`;
+      btn.className = 'plan-upgrade-btn mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors rounded-md';
+    } else {
+      // Higher tier: Upgrade button
+      btn.disabled = false;
+      btn.textContent = `Upgrade to ${cfg.name}`;
+      if (cfg.tier === 'essential') {
+        btn.className = 'plan-upgrade-btn mt-6 w-full py-2 px-3 bg-primary text-white text-xs font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm';
+      } else {
+        btn.className = 'plan-upgrade-btn mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors rounded-md';
+      }
+    }
+  });
+}
+
+// 1. STATE FOR IN-VAULT UPGRADE SELECTION
+let pendingVaultUpgrade = {
+  planCode: 'PLN_glbt6ice9adjj45',
+  targetTier: 'essential',
+  tierDisplayName: 'Essential Vault',
+  amountInCents: 22000
+};
+
+function triggerPaystackUpgrade(planCode, targetTier, tierDisplayName, amountInCents) {
+  pendingVaultUpgrade = { planCode, targetTier, tierDisplayName, amountInCents };
+
+  const tierRanks = { basic: 1, essential: 2, enterprise: 3 };
+  const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+  const isDowngrade = (tierRanks[targetTier] || 1) < (tierRanks[currentTier] || 1);
+
+  // Set description helper text based on target tier
+  let desc = '1 Admin Seat • Full Video Vault';
+  if (targetTier === 'essential') desc = '4 Total Seats • Training Records Dashboard';
+  if (targetTier === 'enterprise') desc = '8 Manager Seats • Priority Support • ClickUp Sync';
+
+  const modalTitle = document.getElementById('vault-upgrade-modal-title');
+  const nameEl = document.getElementById('vault-upgrade-tier-name');
+  const priceEl = document.getElementById('vault-upgrade-tier-price');
+  const descEl = document.getElementById('vault-upgrade-tier-desc');
+  const modal = document.getElementById('vaultUpgradeReviewModal');
+
+  if (modalTitle) modalTitle.textContent = isDowngrade ? 'Confirm Plan Downgrade' : 'Confirm Plan Upgrade';
+  if (nameEl) nameEl.textContent = tierDisplayName;
+  if (priceEl) priceEl.textContent = `R${amountInCents / 100} /mo`;
+  if (descEl) descEl.textContent = desc;
+
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeVaultUpgradeReviewModal() {
+  const modal = document.getElementById('vaultUpgradeReviewModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function executeVaultPaystackUpgrade() {
+  closeVaultUpgradeReviewModal();
 
   const userEmail = document.getElementById('sidebar-user-email')?.textContent || '';
+  const fName = document.getElementById('profile-fname')?.value || '';
+  const lName = document.getElementById('profile-lname')?.value || '';
+  const companyName = document.getElementById('profile-company')?.value || '';
 
   if (!window.PaystackPop) {
-    alert('Paystack SDK failed to load. Please check your internet connection.');
+    alert('Paystack SDK is loading or blocked. Please refresh your browser.');
+    return;
+  }
+
+  if (!window.userCompanyId) {
+    alert('Unable to identify your organization account. Please contact support.');
     return;
   }
 
   try {
-    const handler = PaystackPop.setup({
+    const popup = new PaystackPop();
+    popup.newTransaction({
       key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
       email: userEmail,
-      plan: planCode,
+      amount: pendingVaultUpgrade.amountInCents,
+      plan: pendingVaultUpgrade.planCode,
       currency: 'ZAR',
-      callback: function(response) {
-        console.log('Paystack transaction successful. Reference:', response.reference);
-
-        if (window.userCompanyId) {
-          window.dbClient
-            .from('companies')
-            .update({
-              tier: targetTier,
-              subscription_status: 'active',
-              paystack_subscription_code: response.subscription_code || response.reference
-            })
-            .eq('id', window.userCompanyId)
-            .then(({ error }) => {
-              if (!error) {
-                alert(`Success! Your organization has been upgraded to ${targetTier.toUpperCase()}.`);
-                window.location.reload();
-              } else {
-                console.error('Failed to update company tier:', error);
-              }
-            });
-        }
+      metadata: {
+        custom_fields: [
+          { display_name: "Customer Name", variable_name: "customer_name", value: `${fName} ${lName}`.trim() },
+          { display_name: "Company Name", variable_name: "company_name", value: companyName },
+          { display_name: "Target Tier", variable_name: "target_tier", value: pendingVaultUpgrade.targetTier }
+        ]
       },
-      onClose: function() {
-        console.log('Paystack checkout popup closed.');
+      onSuccess: (transaction) => {
+        console.log('[Paystack Engine] Payment success. Reference:', transaction.reference);
+
+        // Instant Supabase Company Activation
+        window.dbClient
+          .from('companies')
+          .update({
+            tier: pendingVaultUpgrade.targetTier,
+            subscription_status: 'active',
+            paystack_subscription_code: transaction.subscription_code || transaction.reference
+          })
+          .eq('id', window.userCompanyId)
+          .then(({ error }) => {
+            if (!error) {
+              alert(`Success! Your organization has been upgraded to ${pendingVaultUpgrade.targetTier.toUpperCase()}.`);
+              window.location.reload();
+            } else {
+              console.error('Failed updating tier in Supabase:', error);
+            }
+          });
+      },
+      onCancel: () => {
+        console.log('[Paystack Engine] Checkout modal closed by user.');
       }
     });
-
-    handler.openIframe();
   } catch (err) {
-    console.error('[Paystack Engine] Setup error:', err);
+    console.error('[Paystack Engine] Launch error:', err);
   }
 }
 
@@ -505,21 +657,6 @@ async function handleSubscriptionCancellation() {
     console.error("Cancellation error:", err);
     alert("There was an issue processing your cancellation. Please submit a quick billing request using the Manage Billing link.");
   }
-}
-
-// Global delegated click listener
-if (!window._paystackDelegatedListenerAdded) {
-  window._paystackDelegatedListenerAdded = true;
-  document.addEventListener('click', function (evt) {
-    const btn = evt.target.closest && evt.target.closest('[data-plan-code]');
-    if (!btn) return;
-    evt.preventDefault();
-    const plan = btn.getAttribute('data-plan-code');
-    const targetTier = btn.getAttribute('data-plan-tier') || 'essential';
-    if (plan) {
-      triggerPaystackUpgrade(plan, targetTier);
-    }
-  });
 }
 
 // FETCH ACTIVE TEAM MEMBERS UNDER COMPANY WITH TIER LOCKS

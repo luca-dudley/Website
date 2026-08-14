@@ -291,7 +291,7 @@
                   </ul>
                 </div>
                 <button type="button" 
-                        onclick="payWithPaystack('PLN_q37eti0fct6aazv', 18000, 'The Vault - Basic')" 
+                        onclick="openCheckoutModal('PLN_q37eti0fct6aazv', 18000, 'Basic Vault', 'R180 /mo', '1 Admin Seat • Full Streaming Library • Multi-Language')" 
                         class="w-full text-center bg-gray-100 text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-200 transition-colors">
                   Select Basic
                 </button>
@@ -338,7 +338,7 @@
                   </ul>
                 </div>
                 <button type="button" 
-                        onclick="payWithPaystack('PLN_glbt6ice9adjj45', 22000, 'The Vault - Essential')" 
+                        onclick="openCheckoutModal('PLN_glbt6ice9adjj45', 22000, 'Essential Vault', 'R220 /mo', '4 Seats • Records Dashboard • Worker Compliance Tracking')" 
                         class="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-primary/90 transition-colors text-center">
                   Select Essential
                 </button>
@@ -375,7 +375,7 @@
                   </ul>
                 </div>
                 <button type="button" 
-                        onclick="payWithPaystack('PLN_xx7w3l93tke10kh', 22000, 'The Vault - Enterprise')" 
+                        onclick="openCheckoutModal('PLN_xx7w3l93tke10kh', 45000, 'Enterprise Solution', 'R450 /mo', '8 Seats • Priority Support • ClickUp HR Live Sync')" 
                         class="w-full text-center bg-gray-100 text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-200 transition-colors">
                   Select Enterprise
                 </button>
@@ -598,6 +598,82 @@
     </div>
   </div>
 
+  <!-- SECURE ORDER REVIEW & CHECKOUT MODAL -->
+  <div id="checkoutModal" onclick="closeCheckoutModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+    <div onclick="event.stopPropagation()" class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-foreground">Secure Subscription Checkout</h3>
+            <p class="text-xs text-muted">Review plan details and proceed to payment.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCheckoutModal()" class="p-1 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Plan Summary Card -->
+      <div class="p-6">
+        <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 mb-5 flex items-center justify-between">
+          <div>
+            <span id="checkout-plan-tag" class="inline-block text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mb-1">Selected Plan</span>
+            <h4 id="checkout-plan-name" class="font-semibold text-foreground text-base">Essential Vault</h4>
+            <p id="checkout-plan-desc" class="text-xs text-muted mt-0.5">4 Seats • Records Dashboard • Compliance Sign-offs</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-muted block">Billed Monthly</span>
+            <span id="checkout-plan-price" class="text-xl font-bold text-primary">R220</span>
+          </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <form id="checkout-form" onsubmit="handleProceedToPaystack(event)" class="space-y-3.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Full Name</label>
+              <input type="text" id="checkout-name" required placeholder="Luca Dudley" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Company / Organization</label>
+              <input type="text" id="checkout-company" required placeholder="Simple Solutions" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Billing Work Email</label>
+            <input type="email" id="checkout-email" required placeholder="you@company.com" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+          </div>
+
+          <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Proceed to Secure Payment
+          </button>
+        </form>
+
+        <!-- Trust & Security Assurance Footnote -->
+        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-400">
+          <div class="flex items-center gap-2 text-xs">
+            <svg class="w-4 h-4 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
+            <span class="text-slate-500 font-medium">256-Bit SSL • PCI-DSS Level 1</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+            <span>Powered by</span>
+            <span class="text-slate-700 font-bold tracking-tight">paystack</span>
+            <span class="text-slate-300">|</span>
+            <span>Visa • Mastercard • EFT</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- VAULT DEMO MODAL -->
   <div id="vaultDemoModal" onclick="closeVaultDemoModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
     <div onclick="event.stopPropagation()" class="relative w-full max-w-4xl mx-4 bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10">
@@ -665,27 +741,71 @@
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
-    function payWithPaystack(planCode, amountInCents, tierName) {
-      const userEmail = prompt(`Enter your email address to subscribe to ${tierName}:`);
+    // Global variable tracking active checkout selection
+    let activeCheckoutPlan = {
+      planCode: 'PLN_glbt6ice9adjj45',
+      amountInCents: 22000,
+      tierName: 'Essential Vault',
+      priceDisplay: 'R220 /mo',
+      desc: '4 Seats • Records Dashboard • Compliance Sign-offs'
+    };
+
+    function openCheckoutModal(planCode, amountInCents, tierName, priceDisplay, desc) {
+      activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
       
+      document.getElementById('checkout-plan-name').textContent = tierName;
+      document.getElementById('checkout-plan-price').textContent = priceDisplay;
+      document.getElementById('checkout-plan-desc').textContent = desc;
+
+      const modal = document.getElementById('checkoutModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById('checkoutModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function handleProceedToPaystack(e) {
+      e.preventDefault();
+      
+      const userEmail = document.getElementById('checkout-email').value.trim();
+      const userName = document.getElementById('checkout-name').value.trim();
+      const userCompany = document.getElementById('checkout-company').value.trim();
+
       if (!userEmail || !userEmail.includes('@')) {
-        if (userEmail !== null) alert("Please provide a valid email address.");
+        alert('Please enter a valid billing email.');
         return;
       }
 
+      // Close the review modal
+      closeCheckoutModal();
+
+      // Launch Paystack's official secure card drawer
       const popup = new PaystackPop();
       popup.newTransaction({
         key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
         email: userEmail,
-        amount: amountInCents,
-        plan: planCode,
+        amount: activeCheckoutPlan.amountInCents,
+        plan: activeCheckoutPlan.planCode,
         currency: 'ZAR',
+        metadata: {
+          custom_fields: [
+            { display_name: "Customer Name", variable_name: "customer_name", value: userName },
+            { display_name: "Company Name", variable_name: "company_name", value: userCompany },
+            { display_name: "Tier Selected", variable_name: "tier_selected", value: activeCheckoutPlan.tierName }
+          ]
+        },
         onSuccess: (transaction) => {
           alert(`Payment successful! Reference: ${transaction.reference}`);
           window.location.href = 'vault.html?subscribed=true&ref=' + transaction.reference;
         },
         onCancel: () => {
-          console.log('Customer closed payment window.');
+          console.log('Customer dismissed payment window.');
         }
       });
     }

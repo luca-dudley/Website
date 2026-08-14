@@ -125,6 +125,12 @@
             <p class="text-sm text-muted mt-1">Manage your organization's subscription tier and feature access.</p>
           </div>
 
+          <!-- Non-Admin Notice (Hidden by default, shown to managers) -->
+          <div id="manager-plan-notice" class="hidden mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span>Plan upgrades and subscription billing are managed exclusively by your organization's Primary Admin.</span>
+          </div>
+
           <!-- Active Tier Summary Card -->
           <div class="mb-8 p-5 border border-slate-200 rounded-xl bg-slate-50 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -135,9 +141,9 @@
               </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3 sm:gap-4 shrink-0">
+            <div id="admin-billing-actions" class="flex flex-wrap items-center gap-3 sm:gap-4 shrink-0">
               <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Billing" target="_blank" rel="noopener noreferrer" class="text-xs text-muted hover:text-primary underline whitespace-nowrap">
-                Manage Billing
+                Update Card / Billing
               </a>
               <button onclick="handleSubscriptionCancellation()" class="text-xs font-medium text-red-600 hover:text-red-800 border border-red-200 bg-white hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors shadow-sm whitespace-nowrap">
                 Cancel Subscription
@@ -161,7 +167,7 @@
                   <li class="flex items-center gap-1.5 text-slate-400"><span class="text-red-400">✕</span> No Tally Registrations</li>
                 </ul>
               </div>
-              <button data-plan-code="PLN_q37eti0fct6aazv" data-plan-tier="basic" onclick="triggerPaystackUpgrade('PLN_q37eti0fct6aazv', 'basic')" class="mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 rounded-md hover:bg-slate-50 transition-colors">
+              <button id="plan-btn-basic" data-plan-code="PLN_q37eti0fct6aazv" data-plan-tier="basic" onclick="triggerPaystackUpgrade('PLN_q37eti0fct6aazv', 'basic', 'Basic Vault', 18000)" class="plan-upgrade-btn mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 rounded-md hover:bg-slate-50 transition-colors">
                 Select Basic
               </button>
             </div>
@@ -177,11 +183,11 @@
                 <ul class="text-xs text-slate-600 space-y-2 mt-4">
                   <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Full Video Vault</li>
                   <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Training Records Dashboard</li>
-                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Worker Tally Registrations</li>
-                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Group Sign-off Enabled</li>
+                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Worker Compliance Tracking</li>
+                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> 4 Total Team Seats</li>
                 </ul>
               </div>
-              <button data-plan-code="PLN_glbt6ice9adjj45" data-plan-tier="essential" onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential')" class="mt-6 w-full py-2 px-3 bg-primary text-white text-xs font-medium rounded-md hover:bg-primary/90 transition-colors">
+              <button id="plan-btn-essential" data-plan-code="PLN_glbt6ice9adjj45" data-plan-tier="essential" onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential', 'Essential Vault', 22000)" class="plan-upgrade-btn mt-6 w-full py-2 px-3 bg-primary text-white text-xs font-medium rounded-md hover:bg-primary/90 transition-colors">
                 Upgrade to Essential
               </button>
             </div>
@@ -193,12 +199,12 @@
                 <p class="text-2xl font-bold text-foreground mt-2">R450 <span class="text-xs font-normal text-slate-500">/mo</span></p>
                 <ul class="text-xs text-slate-600 space-y-2 mt-4">
                   <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Everything in Essential</li>
+                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> 8 Manager Seats</li>
                   <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> ClickUp HR Live Sync</li>
                   <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Automated Email Reports</li>
-                  <li class="flex items-center gap-1.5"><span class="text-green-500">✓</span> Custom Subdomain</li>
                 </ul>
               </div>
-              <button data-plan-code="PLN_glbt6ice9adjj45" data-plan-tier="enterprise" onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'enterprise')" class="mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 rounded-md hover:bg-slate-50 transition-colors">
+              <button id="plan-btn-enterprise" data-plan-code="PLN_xx7w3l93tke10kh" data-plan-tier="enterprise" onclick="triggerPaystackUpgrade('PLN_xx7w3l93tke10kh', 'enterprise', 'Enterprise Solution', 45000)" class="plan-upgrade-btn mt-6 w-full py-2 px-3 border border-slate-300 text-xs font-medium text-slate-700 rounded-md hover:bg-slate-50 transition-colors">
                 Upgrade to Enterprise
               </button>
             </div>
@@ -264,6 +270,58 @@
             <p class="text-xs text-muted italic">Loading team members...</p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IN-VAULT SECURE UPGRADE REVIEW MODAL -->
+<div id="vaultUpgradeReviewModal" onclick="event.stopPropagation(); closeVaultUpgradeReviewModal();" class="fixed inset-0 z-[70] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div onclick="event.stopPropagation()" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+          <h4 id="vault-upgrade-modal-title" class="font-serif text-base font-bold text-foreground">Confirm Plan Change</h4>
+          <p class="text-[11px] text-muted">Review details before launching payment</p>
+        </div>
+      </div>
+      <button type="button" onclick="event.stopPropagation(); closeVaultUpgradeReviewModal();" class="p-1 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 mb-4 flex items-center justify-between">
+        <div>
+          <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mb-1">Target Tier</span>
+          <h5 id="vault-upgrade-tier-name" class="font-semibold text-foreground text-sm">Essential Vault</h5>
+          <p id="vault-upgrade-tier-desc" class="text-xs text-muted mt-0.5">4 Total Seats • Training Records</p>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-muted uppercase block">Price</span>
+          <span id="vault-upgrade-tier-price" class="text-lg font-bold text-primary">R220 /mo</span>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-600 mb-4">
+        Plan changes apply immediately to your organization. Your next billing cycle and team seat count will update automatically.
+      </p>
+
+      <button type="button" id="confirm-vault-upgrade-btn" onclick="executeVaultPaystackUpgrade()" class="w-full bg-primary text-white py-2.5 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        Proceed to Secure Card Payment
+      </button>
+
+      <!-- Trust Footer -->
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-slate-400 text-[11px]">
+        <span class="text-green-600 font-medium">🔒 256-Bit Encrypted</span>
+        <span>Secured by <strong>Paystack</strong></span>
       </div>
     </div>
   </div>
