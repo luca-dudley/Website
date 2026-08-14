@@ -432,6 +432,18 @@ window.userCompanyId = profile.company_id || companyObj?.id || null;
       document.querySelectorAll('[data-dynamic-profile-img]').forEach(img => img.classList.add('hidden'));
     }
 
+    // Sync Modern Top Bar Data
+    const topName = document.getElementById('topbar-user-name');
+    const topRole = document.getElementById('topbar-user-role');
+    const topCompany = document.getElementById('topbar-company-name');
+    const topTier = document.getElementById('topbar-tier-tag');
+
+    if (topName) topName.textContent = `${fName} ${lName}`.trim() || 'User';
+    if (topRole) topRole.textContent = profile.role || (isPlanAdmin ? 'Primary Admin' : 'Manager');
+    if (topCompany) topCompany.textContent = companyObj?.name || 'Simple Solutions';
+    if (topTier) topTier.textContent = window.currentCompanyTier.toUpperCase();
+
+    // Legacy fallback selector (if present)
     const headerClientName = document.querySelector('header.hidden.lg\\:block .text-right p span:first-child');
     if (headerClientName && (fName || lName)) {
       headerClientName.parentElement.innerHTML = `<span>${fName}</span> <span>${lName}</span>`;
@@ -847,6 +859,26 @@ function resetInviteForm() {
   document.getElementById('invite-result-container').classList.add('hidden');
   document.getElementById('invite-form-container').classList.remove('hidden');
 }
+
+// TOPBAR NOTIFICATION TOGGLE HANDLERS
+function toggleNotificationDropdown(event) {
+  event.stopPropagation();
+  const dropdown = document.getElementById('notification-dropdown');
+  if (dropdown) dropdown.classList.toggle('hidden');
+}
+
+function markAllNotificationsRead() {
+  const dot = document.getElementById('bell-unread-dot');
+  if (dot) dot.classList.add('hidden');
+}
+
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('notification-dropdown');
+  const bellBtn = document.getElementById('notification-bell-btn');
+  if (dropdown && !dropdown.classList.contains('hidden') && !bellBtn?.contains(e.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
 
 // 5. HYBRID BOUNCER INTEGRATION LIFECYCLE
 document.addEventListener('DOMContentLoaded', async () => {
