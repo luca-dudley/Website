@@ -86,17 +86,29 @@ async function linkGoogleAccount() {
   if (btn.disabled) return;
   const textSpan = document.getElementById('google-link-text');
   const originalText = textSpan.innerText;
-  textSpan.innerText = 'Connecting...';
+  textSpan.innerText = 'Connecting to Google...';
   try {
-    const { error } = await window.dbClient.auth.linkIdentity({
+    const { data, error } = await window.dbClient.auth.linkIdentity({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/vault.html' }
+      options: { 
+        redirectTo: window.location.origin + '/vault.html'
+      }
     });
     if (error) throw error;
+    if (data?.url) {
+      window.location.href = data.url; // Navigate to Google OAuth screen
+    }
   } catch (error) {
-    console.error("Link error:", error);
-    textSpan.innerText = 'Error - Try Again';
-    setTimeout(() => { textSpan.innerText = originalText; }, 3000);
+    console.error("Google Link error:", error);
+    // If the account is already linked
+    if (error.message && error.message.toLowerCase().includes('already')) {
+      textSpan.innerText = 'Google Already Linked';
+      btn.disabled = true;
+      btn.classList.add('opacity-70', 'cursor-not-allowed');
+    } else {
+      textSpan.innerText = 'Error - Try Again';
+      setTimeout(() => { textSpan.innerText = originalText; }, 3000);
+    }
   }
 }
 
@@ -202,6 +214,44 @@ async function loadUserProfile(userId) {
       return;
     }
     console.log('[ProfileEngine] Auth user resolved:', user.id, user.email);
+
+    // Auto-link pending invite from Google OAuth
+    const pendingCompanyId = localStorage.getItem('pending_invite_company_id');
+    const pendingTier = localStorage.getItem('pending_invite_tier') || 'essential';
+
+    if (pendingCompanyId) {
+      localStorage.removeItem('pending_invite_company_id');
+      localStorage.removeItem('pending_invite_tier');
+
+      const userMeta = user.user_metadata || {};
+      const fullName = userMeta.full_name || userMeta.name || '';
+      const nameParts = fullName.split(' ');
+      const firstName = userMeta.first_name || nameParts[0] || '';
+      const lastName = userMeta.last_name || nameParts.slice(1).join(' ') || '';
+      const avatarUrl = userMeta.avatar_url || userMeta.picture || null;
+
+      await window.dbClient.from('profiles').upsert([{
+        id: user.id,
+        company_id: pendingCompanyId,
+        first_name: firstName,
+        last_name: lastName,
+        role: 'Manager',
+        tier: pendingTier,
+        avatar_url: avatarUrl
+      }], { onConflict: 'id' });
+    }
+
+    // Check if Google Identity is already attached
+    const hasGoogle = user.identities?.some(id => id.provider === 'google') || user.app_metadata?.provider === 'google';
+    const googleBtn = document.getElementById('google-link-btn');
+    const googleText = document.getElementById('google-link-text');
+    if (hasGoogle && googleBtn && googleText) {
+      googleBtn.disabled = true;
+      googleBtn.classList.replace('hover:bg-slate-50', 'bg-slate-50');
+      googleBtn.classList.add('cursor-not-allowed', 'opacity-70');
+      googleText.innerText = 'Google Connected';
+      googleText.classList.add('text-green-700', 'font-bold');
+    }
 
     // Email fields - independent of the queries below, fill them immediately.
     const sidebarEmail = document.getElementById('sidebar-user-email');
@@ -614,10 +664,27 @@ async function handleGenerateManagerInvite() {
   document.getElementById('generated-invite-url').value = inviteUrl;
   
   const emailSubject = encodeURIComponent("Join our organization's Vault portal");
-  const emailBody = encodeURIComponent(`Hi,\n\nPlease set up your manager account for our training portal by clicking the link below:\n\n${inviteUrl}`);
+  const emailBody = encodeURIComponent(
+`Hi,
+
+You have been invited to join your team in the Simple Solutions Vault — our centralized training & operational compliance portal.
+
+Please click the link below to activate your Manager account and access your team modules:
+${inviteUrl}
+
+Best regards,
+Simple Solutions Team`
+  );
   document.getElementById('share-gmail-btn').href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${emailSubject}&body=${emailBody}`;
   
-  const waText = encodeURIComponent(`Hi, please set up your manager account for our training portal using this link: ${inviteUrl}`);
+  const waText = encodeURIComponent(
+`*Simple Solutions Vault | Team Invitation*
+
+Hi! You have been invited to join your team in the Simple Solutions Vault.
+
+Set up your Manager Account and gain access using the secure link below:
+🔗 ${inviteUrl}`
+  );
   document.getElementById('share-whatsapp-btn').href = `https://api.whatsapp.com/send?text=${waText}`;
 
   document.getElementById('invite-form-container').classList.add('hidden');
