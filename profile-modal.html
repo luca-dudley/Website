@@ -22,6 +22,10 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             Plans
           </button>
+          <button onclick="switchProfileTab('team')" id="tab-btn-team" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-100 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Team Seats
+          </button>
         </nav>
       </div>
       <div class="p-6 border-t border-slate-200">
@@ -198,7 +202,66 @@
                 Upgrade to Enterprise
               </button>
             </div>
+          </div>
+        </div>
 
+        <!-- Team Seats Tab -->
+        <div id="tab-team" class="profile-tab-content hidden">
+          <div class="mb-6 border-b border-slate-200 pb-4 pr-8 flex items-center justify-between">
+            <div>
+              <h2 class="font-serif text-3xl font-semibold text-foreground">Team Management</h2>
+              <p class="text-sm text-muted mt-1">Invite sub-managers to access your organization's Vault training dashboard.</p>
+            </div>
+            <!-- Dynamic Seat Counter Badge -->
+            <div class="text-right shrink-0">
+              <span class="text-xs font-semibold uppercase text-slate-400">Seats Used</span>
+              <p id="occupied-seats-badge" class="text-lg font-bold text-primary">0 Seats</p>
+            </div>
+          </div>
+
+          <!-- Manager Invite Section -->
+          <div class="mb-8 p-6 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
+            <h3 class="text-sm font-semibold text-foreground mb-1">Invite a New Manager</h3>
+            <p class="text-xs text-muted mb-4">Managers can log worker completions, view training records, and stream content.</p>
+            
+            <!-- Default Form View -->
+            <div id="invite-form-container" class="flex flex-col sm:flex-row gap-3">
+              <input type="email" id="invite-manager-email" placeholder="manager@yourcompany.com" class="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm outline-none focus:border-primary">
+              <button onclick="handleGenerateManagerInvite()" class="px-5 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap">
+                Generate Invite Link
+              </button>
+            </div>
+
+            <!-- Generated Link Card View (Initially Hidden) -->
+            <div id="invite-result-container" class="hidden mt-3 p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Registration Link Ready</p>
+              <div class="flex items-center gap-2 mb-3">
+                <input type="text" id="generated-invite-url" readonly class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-md text-xs font-mono text-slate-700 outline-none">
+                <button id="copy-invite-btn" onclick="copyInviteLink()" class="px-4 py-2 bg-primary text-white text-xs font-medium rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap">
+                  Copy
+                </button>
+              </div>
+
+              <!-- Quick Share Options -->
+              <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
+                <span class="text-xs text-muted">Share via:</span>
+                <a id="share-gmail-btn" href="#" target="_blank" class="text-xs font-medium text-slate-600 hover:text-red-600 flex items-center gap-1">
+                  ✉️ Gmail
+                </a>
+                <a id="share-whatsapp-btn" href="#" target="_blank" class="text-xs font-medium text-slate-600 hover:text-green-600 flex items-center gap-1">
+                  💬 WhatsApp
+                </a>
+                <button onclick="resetInviteForm()" class="text-xs text-muted hover:text-slate-800 ml-auto underline">
+                  + Invite Another
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Team Roster List -->
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Active Company Seats</h3>
+          <div id="team-members-list" class="space-y-2">
+            <p class="text-xs text-muted italic">Loading team members...</p>
           </div>
         </div>
       </div>

@@ -308,11 +308,11 @@
 
       const { data: profile } = await dbClient
         .from('profiles')
-        .select('farm_id')
+        .select('company_id')
         .eq('id', session.user.id)
         .single();
 
-      window.userFarmId = profile?.farm_id || null;
+      window.userCompanyId = profile?.company_id || null;
 
       const totalSeconds = Number(video.total_seconds || 0);
       const minutes = Math.floor(totalSeconds / 60);
@@ -452,15 +452,15 @@
       });
 
       window.openTallyCompliance = function openTallyCompliance() {
-        const farmId = window.userFarmId;
+        const companyId = window.userCompanyId;
         const moduleTitleValue = window.currentVideoTitle || '';
 
-        if (!farmId) {
-          console.warn('Unable to open compliance form without a farm_id.');
+        if (!companyId) {
+          console.warn('Unable to open compliance form without a company_id.');
           return;
         }
 
-        const tallyUrl = `https://tally.so/r/D4DAAE?farm_id=${encodeURIComponent(farmId)}&module_title=${encodeURIComponent(moduleTitleValue)}`;
+        const tallyUrl = `https://tally.so/r/D4DAAE?company_id=${encodeURIComponent(companyId)}&module_title=${encodeURIComponent(moduleTitleValue)}`;
         window.open(tallyUrl, '_blank', 'noopener,noreferrer,width=600,height=800');
       };
 

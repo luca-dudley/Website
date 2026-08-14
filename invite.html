@@ -1,52 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Simple Solutions | Invite</title>
-	<link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
-	<script src="https://cdn.tailwindcss.com"></script>
-	<script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<script>
-		tailwind.config = {
-			theme: {
-				extend: {
-					fontFamily: {
-						sans: ['Inter', 'system-ui', 'sans-serif'],
-						serif: ['Playfair Display', 'Georgia', 'serif'],
-					},
-					colors: {
-						primary: '#1e3a5f',
-						foreground: '#1a1a2e',
-					}
-				}
-			}
-		}
-	</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Vault - Manager Onboarding</title>
+  <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            foreground: '#0f172a',
+            muted: '#64748b'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-slate-50 font-sans text-foreground antialiased">
-	<main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-		<div class="w-full max-w-2xl text-center">
-			<div class="mb-10 flex flex-col items-center gap-2">
-				<img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-16 w-auto object-contain" loading="eager">
-				<p class="font-serif text-2xl font-semibold tracking-tight text-foreground">Simple Solutions</p>
-			</div>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
+    <div class="text-center mb-6">
+      <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions Logo" class="h-16 mx-auto mb-3 object-contain">
+      <h2 class="text-2xl font-serif font-bold text-foreground">Join Your Team's Vault</h2>
+      <p class="text-xs text-muted mt-1">Set up your manager account to access training modules.</p>
+    </div>
 
-			<h1 class="font-serif text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">You've been invited!</h1>
+    <!-- Feedback Container (No native browser alerts) -->
+    <div id="status-message" class="hidden mb-4 p-3 rounded-md text-xs font-medium"></div>
 
-			<p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
-				Your Admin has granted you access to The Safety Vault training library. Click below to create your staff account.
-			</p>
+    <form id="invite-form" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">First Name</label>
+        <input id="fname-input" type="text" required placeholder="e.g. Axl" class="w-full bg-slate-50 border border-slate-300 rounded-md p-3 text-slate-800 outline-none focus:border-primary text-sm transition-colors">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Last Name</label>
+        <input id="lname-input" type="text" required placeholder="e.g. Bargon" class="w-full bg-slate-50 border border-slate-300 rounded-md p-3 text-slate-800 outline-none focus:border-primary text-sm transition-colors">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Email</label>
+        <input id="email-input" type="email" required placeholder="name@company.com" class="w-full bg-slate-50 border border-slate-300 rounded-md p-3 text-slate-800 outline-none focus:border-primary text-sm transition-colors">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Create Password</label>
+        <input id="password-input" type="password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-md p-3 text-slate-800 outline-none focus:border-primary text-sm transition-colors">
+      </div>
 
-			<div class="mt-10">
-				<button data-ms-modal="signup" data-ms-plan:add="pln_vault-access-staff-seat-3o2r0d4p" class="bg-blue-900 hover:bg-slate-900 text-white font-sans py-3 px-6 rounded-md transition-colors">
-					Create My Account
-				</button>
-			</div>
-		</div>
-	</main>
+      <button type="submit" id="submit-btn" class="w-full bg-primary py-3 rounded-md font-medium text-white hover:bg-primary/90 transition-colors shadow-md mt-2 text-sm">
+        Complete Account Setup
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+    const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    function showStatus(msg, isError = false) {
+      const el = document.getElementById('status-message');
+      el.textContent = msg;
+      el.className = `mb-4 p-3 rounded-md text-xs font-medium ${isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`;
+      el.classList.remove('hidden');
+    }
+
+document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const companyId = urlParams.get('company');
+      const prefilledEmail = urlParams.get('email');
+
+      if (prefilledEmail) document.getElementById('email-input').value = prefilledEmail;
+
+      document.getElementById('invite-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fname = document.getElementById('fname-input').value;
+        const lname = document.getElementById('lname-input').value;
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (!companyId) {
+          showStatus("Invalid onboarding link. Missing company reference.", true);
+          return;
+        }
+
+        submitBtn.innerText = "Registering Account...";
+        submitBtn.disabled = true;
+
+        // 1. Query the company's actual tier first to inherit it
+        const { data: companyData } = await dbClient
+          .from('companies')
+          .select('tier')
+          .eq('id', companyId)
+          .maybeSingle();
+
+        const companyTier = (companyData?.tier || 'basic').toLowerCase();
+
+        // Check capacity before creating account
+        const { count: currentMembers } = await dbClient
+          .from('profiles')
+          .select('id', { count: 'exact' })
+          .eq('company_id', companyId);
+
+        let seatLimit = 1;
+        if (companyTier === 'essential') seatLimit = 4;
+        if (companyTier === 'enterprise') seatLimit = 8;
+
+        if (currentMembers >= seatLimit) {
+          showStatus(`Registration closed: This organization has reached its seat limit (${seatLimit}/${seatLimit}). Contact your administrator.`, true);
+          submitBtn.innerText = "Complete Account Setup";
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // 2. Create Auth Account
+        const { data: authData, error: authError } = await dbClient.auth.signUp({
+          email,
+          password,
+          options: { data: { first_name: fname, last_name: lname } }
+        });
+
+        if (authError) {
+          showStatus("Registration Error: " + authError.message, true);
+          submitBtn.innerText = "Complete Account Setup";
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // 3. Insert Profile linked to Company ID inheriting the company's exact tier
+        const { error: profileError } = await dbClient
+          .from('profiles')
+          .upsert([{
+            id: authData.user.id,
+            company_id: companyId,
+            first_name: fname,
+            last_name: lname,
+            role: 'Manager',
+            tier: companyTier
+          }], { onConflict: 'id' });
+
+        if (profileError) {
+          showStatus("Error linking profile: " + profileError.message, true);
+          submitBtn.innerText = "Complete Account Setup";
+          submitBtn.disabled = false;
+        } else {
+          showStatus("Account created successfully! Redirecting to Vault...");
+          setTimeout(() => { window.location.href = 'vault.html'; }, 1500);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

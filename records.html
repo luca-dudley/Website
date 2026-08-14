@@ -410,7 +410,7 @@
           groupedRecords.set(key, {
             employee_name: record.employee_name || 'Unnamed employee',
             sa_id_number: record.sa_id_number || '',
-            farm_id: record.farm_id || '',
+            company_id: record.company_id || '',
             modules: [],
             latestCompletedAt: recordDate,
           });
@@ -419,7 +419,7 @@
         const employee = groupedRecords.get(key);
         employee.employee_name = employee.employee_name || record.employee_name || 'Unnamed employee';
         employee.sa_id_number = employee.sa_id_number || record.sa_id_number || '';
-        employee.farm_id = employee.farm_id || record.farm_id || '';
+        employee.company_id = employee.company_id || record.company_id || '';
         employee.latestCompletedAt = formatDateTimeValue(recordDate) > formatDateTimeValue(employee.latestCompletedAt)
           ? recordDate
           : employee.latestCompletedAt;
@@ -701,19 +701,19 @@
 
         const { data: profile } = await window.dbClient
           .from('profiles')
-          .select('farm_id')
+          .select('company_id')
           .eq('id', session.user.id)
           .single();
 
-        if (!profile || !profile.farm_id) {
-          setEmptyState('No associated farm profile found.', 'A linked farm profile is required before training records can be displayed.');
+        if (!profile || !profile.company_id) {
+          setEmptyState('No associated company profile found.', 'A linked company profile is required before training records can be displayed.');
           return;
         }
 
         const { data: records, error } = await window.dbClient
           .from('training_records')
-          .select('employee_name, sa_id_number, farm_id, module_title, supervisor_name, supervisor_email, training_type, created_at, completed_at')
-          .eq('farm_id', profile.farm_id)
+          .select('employee_name, sa_id_number, company_id, module_title, supervisor_name, supervisor_email, training_type, created_at, completed_at')
+          .eq('company_id', profile.company_id)
           .order('completed_at', { ascending: false });
 
         if (error) throw error;

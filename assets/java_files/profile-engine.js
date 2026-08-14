@@ -7,21 +7,31 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 if (!window.dbClient) {
   window.dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 }
-window.userFarmId = null;
-window.currentFarmTier = 'basic';
+window.userCompanyId = null;
+window.currentCompanyTier = 'basic';
 
 // 2. DOM MULTI-PAGE INJECTION ENGINE
 async function injectProfileModalContainer() {
-  if (document.getElementById('profileModal')) return; // Already loaded on this page
-  
+  if (document.getElementById('profileModal')) {
+    console.log('[ProfileEngine] #profileModal already present, skipping injection.');
+    return true;
+  }
+
   try {
     const response = await fetch('profile-modal.html');
-    if (!response.ok) throw new Error('Network file retrieval drop.');
+    if (!response.ok) throw new Error(`Fetch failed with status ${response.status} (${response.statusText}) for profile-modal.html`);
     const htmlText = await response.text();
     document.body.insertAdjacentHTML('beforeend', htmlText);
-    console.log("Centralized Profile Modal successfully mounted to Viewport.");
+
+    // Verify the injection actually landed before anything downstream trusts it.
+    if (!document.getElementById('profileModal')) {
+      throw new Error('profile-modal.html was fetched successfully but #profileModal was not found in the DOM after injection - check the file markup for a stray wrapper or missing id.');
+    }
+    console.log('[ProfileEngine] Profile modal mounted successfully.');
+    return true;
   } catch (err) {
-    console.error("Critical Injection Loop Interruption:", err.message);
+    console.error('[ProfileEngine] CRITICAL: Modal injection failed -', err.message);
+    return false;
   }
 }
 
@@ -45,14 +55,24 @@ function switchProfileTab(tabName) {
     tab.classList.add('hidden');
     tab.classList.remove('block');
   });
-  ['profile', 'security', 'plans'].forEach(name => {
+  ['profile', 'security', 'plans', 'team'].forEach(name => {
     const btn = document.getElementById(`tab-btn-${name}`);
     if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-100 transition-colors";
   });
-  document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-  document.getElementById(`tab-${tabName}`).classList.add('block');
+  
+  const targetTab = document.getElementById(`tab-${tabName}`);
+  if (targetTab) {
+    targetTab.classList.remove('hidden');
+    targetTab.classList.add('block');
+  }
+
   const activeBtn = document.getElementById(`tab-btn-${tabName}`);
   if (activeBtn) activeBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 transition-colors";
+
+  // Trigger team roster fetch when switching to team tab
+  if (tabName === 'team') {
+    fetchCompanyTeamMembers();
+  }
 }
 
 // 4. BACKEND SUPABASE OPERATION LOGICS
@@ -63,7 +83,7 @@ async function handleSignOut() {
 
 async function linkGoogleAccount() {
   const btn = document.getElementById('google-link-btn');
-  if (btn.disabled) return; 
+  if (btn.disabled) return;
   const textSpan = document.getElementById('google-link-text');
   const originalText = textSpan.innerText;
   textSpan.innerText = 'Connecting...';
@@ -136,16 +156,27 @@ async function saveUserProfile() {
     const { data: { user } } = await window.dbClient.auth.getUser();
     const fName = document.getElementById('profile-fname').value;
     const lName = document.getElementById('profile-lname').value;
-    const role = document.getElementById('profile-title').value;
-    const company = document.getElementById('profile-company').value;
-    await window.dbClient.from('profiles').update({ first_name: fName, last_name: lName, role: role }).eq('id', user.id);
-    if (window.userFarmId) {
-      await window.dbClient.from('farms').update({ name: company }).eq('id', window.userFarmId);
+    const jobTitle = document.getElementById('profile-title').value;
+    const companyName = document.getElementById('profile-company').value;
+
+    // 1. Update Profile (saving job title to role or job_title column)
+    await window.dbClient.from('profiles').update({
+      first_name: fName,
+      last_name: lName,
+      role: jobTitle
+    }).eq('id', user.id);
+
+    // 2. Update Company Name
+    if (window.userCompanyId) {
+      await window.dbClient.from('companies').update({ name: companyName }).eq('id', window.userCompanyId);
     }
-    const initials = (fName.charAt(0) + lName.charAt(0)).toUpperCase() || 'U';
+
+    const initials = ((fName.charAt(0) || '') + (lName.charAt(0) || '')).toUpperCase() || 'U';
     document.querySelectorAll('[data-dynamic-initials]').forEach(el => el.textContent = initials);
+
     const headerClientName = document.querySelector('header.hidden.lg\\:block .text-right p span:first-child');
     if (headerClientName) headerClientName.parentElement.innerHTML = `<span>${fName}</span> <span>${lName}</span>`;
+
     saveBtn.innerText = 'Saved!';
     setTimeout(() => { saveBtn.innerText = originalText; }, 2000);
   } catch (error) {
@@ -155,77 +186,156 @@ async function saveUserProfile() {
   }
 }
 
+// 4b. PROFILE LOADER
+// Split into: (a) resolve the auth user & email fields, (b) resolve profile+company
+// data with a fallback path, (c) populate the DOM. Steps (b) and (c) are decoupled
+// on purpose - a company/tier resolution failure should never blank out fields that
+// only depend on the profiles row itself.
 async function loadUserProfile(userId) {
+  console.groupCollapsed('[ProfileEngine] loadUserProfile');
   try {
-    const { data: { user } } = await window.dbClient.auth.getUser();
-    if (!user) return;
-    const hasGoogle = user.identities?.some(id => id.provider === 'google');
-    const googleBtn = document.getElementById('google-link-btn');
-    const googleText = document.getElementById('google-link-text');
-    if (hasGoogle && googleBtn) {
-      googleBtn.disabled = true;
-      googleBtn.classList.replace('hover:bg-slate-50', 'bg-slate-50');
-      googleBtn.classList.add('cursor-not-allowed', 'opacity-70');
-      googleText.innerText = 'Google Connected';
-      googleText.classList.add('text-green-700', 'font-bold');
+    const { data: { user }, error: userError } = await window.dbClient.auth.getUser();
+    if (userError) throw userError;
+    if (!user) {
+      console.warn('[ProfileEngine] No authenticated user found - aborting.');
+      console.groupEnd();
+      return;
     }
-    document.getElementById('sidebar-user-email').textContent = user.email;
-    document.getElementById('profile-email-input').value = user.email;
-    const { data: profile, error } = await window.dbClient
+    console.log('[ProfileEngine] Auth user resolved:', user.id, user.email);
+
+    // Email fields - independent of the queries below, fill them immediately.
+    const sidebarEmail = document.getElementById('sidebar-user-email');
+    const emailInput = document.getElementById('profile-email-input');
+    if (sidebarEmail) sidebarEmail.textContent = user.email;
+    else console.warn('[ProfileEngine] #sidebar-user-email not found in DOM.');
+    if (emailInput) emailInput.value = user.email;
+    else console.warn('[ProfileEngine] #profile-email-input not found in DOM.');
+
+    // --- Resolve profile + company ---------------------------------------
+    // companies:company_id(*) gives PostgREST an explicit FK hint instead of
+    // making it guess the relationship from companies(*) alone. After a table
+    // rename this is the single most common source of a hard query failure -
+    // either the schema cache hasn't been reloaded, or the relationship is now
+    // ambiguous. If it still fails (e.g. an RLS policy on profiles/companies
+    // still references the old farm_id/farms names), we fall back to two plain
+    // queries so the UI degrades gracefully instead of going fully blank.
+    let profile = null;
+    let companyObj = null;
+
+    const { data: joinedProfile, error: joinedError } = await window.dbClient
       .from('profiles')
-      .select('*, farms(id, name, tier, subscription_status)')
+      .select('*, companies:company_id(*)')
       .eq('id', user.id)
-      .single();
-    if (error) throw error;
-    const farm = profile?.farms || null;
-    window.userFarmId = profile?.farm_id || farm?.id || null;
-    window.currentFarmTier = farm?.tier || 'basic';
-    const currentPlanName = document.getElementById('current-plan-name');
-    if (currentPlanName) {
-      currentPlanName.textContent = window.currentFarmTier.toUpperCase();
+      .maybeSingle();
+
+    if (joinedError) {
+      console.error('[ProfileEngine] Joined profile+company query failed:', joinedError.message, joinedError);
+      console.warn('[ProfileEngine] Falling back to a two-step fetch (profile, then company by id).');
+
+      const { data: plainProfile, error: plainError } = await window.dbClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (plainError) {
+        console.error('[ProfileEngine] Fallback profile fetch also failed:', plainError.message, plainError);
+        throw plainError;
+      }
+      profile = plainProfile;
+
+      if (profile?.company_id) {
+        const { data: companyRow, error: companyError } = await window.dbClient
+          .from('companies')
+          .select('*')
+          .eq('id', profile.company_id)
+          .maybeSingle();
+        if (companyError) {
+          console.error('[ProfileEngine] Fallback company fetch also failed:', companyError.message, companyError);
+        } else {
+          companyObj = companyRow;
+        }
+      }
+    } else {
+      profile = joinedProfile;
+      companyObj = Array.isArray(profile?.companies) ? profile.companies[0] : profile?.companies;
     }
-    console.log(`[Tier Engine] Logged in as: ${profile?.first_name || 'User'} | Farm Tier: ${window.currentFarmTier}`);
+
+    if (!profile) {
+      console.error('[ProfileEngine] No profile row resolved for user', user.id, '- check that profiles.id matches this auth.users.id.');
+      window.currentCompanyTier = 'basic';
+      applyTierRestrictions();
+      console.groupEnd();
+      return;
+    }
+
+    console.log('[ProfileEngine] Resolved profile row:', profile);
+    console.log('[ProfileEngine] Resolved company row:', companyObj);
+
+    // --- Resolve company id & tier ----------------------------------------
+    window.userCompanyId = profile.company_id || companyObj?.id || null;
+    window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
+    console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
+
+    const currentPlanName = document.getElementById('current-plan-name');
+    if (currentPlanName) currentPlanName.textContent = window.currentCompanyTier.toUpperCase();
+    else console.warn('[ProfileEngine] #current-plan-name not found in DOM.');
+
     applyTierRestrictions();
 
-    if (profile) {
-      document.getElementById('profile-fname').value = profile.first_name || '';
-      document.getElementById('profile-lname').value = profile.last_name || '';
-      document.getElementById('profile-title').value = profile.role || '';
-      if (profile.avatar_url) {
-        document.querySelectorAll('[data-dynamic-profile-img]').forEach(img => {
-          img.src = profile.avatar_url;
-          img.classList.remove('hidden');
-        });
-        document.querySelectorAll('[data-dynamic-initials]').forEach(span => span.classList.add('hidden'));
-      } else {
-        const initial1 = profile.first_name ? profile.first_name.charAt(0).toUpperCase() : '';
-        const initial2 = profile.last_name ? profile.last_name.charAt(0).toUpperCase() : '';
-        const initials = (initial1 + initial2) || 'U';
-        document.querySelectorAll('[data-dynamic-initials]').forEach(el => {
-          el.textContent = initials;
-          el.classList.remove('hidden');
-        });
-        document.querySelectorAll('[data-dynamic-profile-img]').forEach(img => img.classList.add('hidden'));
-      }
-      if (profile.farms) {
-        document.getElementById('profile-company').value = profile.farms.name || '';
-        const headerClientName = document.querySelector('header.hidden.lg\\:block .text-right p span:first-child');
-        if (headerClientName) headerClientName.parentElement.innerHTML = `<span>${profile.first_name}</span> <span>${profile.last_name}</span>`;
-      }
+    // --- Populate input fields ---------------------------------------------
+    // Runs regardless of whether the company embed succeeded above, so a broken
+    // company relationship can no longer blank out name/title too.
+    const fnameEl = document.getElementById('profile-fname');
+    const lnameEl = document.getElementById('profile-lname');
+    const titleEl = document.getElementById('profile-title');
+    const companyEl = document.getElementById('profile-company');
+
+    if (!fnameEl || !lnameEl || !titleEl || !companyEl) {
+      console.error('[ProfileEngine] One or more profile input elements are missing from the DOM - injection likely failed or ran after this point.', {
+        fnameEl: !!fnameEl, lnameEl: !!lnameEl, titleEl: !!titleEl, companyEl: !!companyEl
+      });
     }
+
+    if (fnameEl) fnameEl.value = profile.first_name || '';
+    if (lnameEl) lnameEl.value = profile.last_name || '';
+    if (titleEl) titleEl.value = profile.role || '';
+    if (companyEl) companyEl.value = companyObj?.name || '';
+
+    const fName = profile.first_name || '';
+    const lName = profile.last_name || '';
+    const initials = ((fName.charAt(0) || '') + (lName.charAt(0) || '')).toUpperCase() || 'U';
+
+    if (profile.avatar_url) {
+      document.querySelectorAll('[data-dynamic-profile-img]').forEach(img => {
+        img.src = profile.avatar_url;
+        img.classList.remove('hidden');
+      });
+      document.querySelectorAll('[data-dynamic-initials]').forEach(span => span.classList.add('hidden'));
+    } else {
+      document.querySelectorAll('[data-dynamic-initials]').forEach(el => {
+        el.textContent = initials;
+        el.classList.remove('hidden');
+      });
+      document.querySelectorAll('[data-dynamic-profile-img]').forEach(img => img.classList.add('hidden'));
+    }
+
+    const headerClientName = document.querySelector('header.hidden.lg\\:block .text-right p span:first-child');
+    if (headerClientName && (fName || lName)) {
+      headerClientName.parentElement.innerHTML = `<span>${fName}</span> <span>${lName}</span>`;
+    }
+
+    console.log('[ProfileEngine] Profile UI population complete.');
   } catch (error) {
-    console.error('Error loading profile:', error);
-    window.currentFarmTier = 'basic';
-    const currentPlanName = document.getElementById('current-plan-name');
-    if (currentPlanName) {
-      currentPlanName.textContent = window.currentFarmTier.toUpperCase();
-    }
+    console.error('[ProfileEngine] Unrecoverable error in loadUserProfile:', error);
+    window.currentCompanyTier = 'basic';
     applyTierRestrictions();
   }
+  console.groupEnd();
 }
 
 function applyTierRestrictions() {
-  const tier = window.currentFarmTier || 'basic';
+  const tier = window.currentCompanyTier || 'basic';
 
   // 1. Sidebar Protection for Training Records
   const recordsNavBtn = document.querySelector('a[href="records.html"]');
@@ -246,9 +356,9 @@ function applyTierRestrictions() {
     return;
   }
 
-// 3. Direct ID Target for Module Compliance Card
+  // 3. Direct ID Target for Module Compliance Card
   const complianceContainer = document.getElementById('compliance-card-container');
-  
+
   if (complianceContainer && tier === 'basic') {
     complianceContainer.innerHTML = `
       <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 mb-3">
@@ -268,7 +378,7 @@ function applyTierRestrictions() {
 // Paystack Subscription Checkout & Upgrade Trigger
 function triggerPaystackUpgrade(planCode, targetTier) {
   console.log(`[Paystack Engine] Initiating upgrade to ${targetTier} with plan ${planCode}`);
-  
+
   const userEmail = document.getElementById('sidebar-user-email')?.textContent || '';
 
   if (!window.PaystackPop) {
@@ -285,21 +395,21 @@ function triggerPaystackUpgrade(planCode, targetTier) {
       callback: function(response) {
         console.log('Paystack transaction successful. Reference:', response.reference);
 
-        if (window.userFarmId) {
+        if (window.userCompanyId) {
           window.dbClient
-            .from('farms')
+            .from('companies')
             .update({
               tier: targetTier,
               subscription_status: 'active',
               paystack_subscription_code: response.subscription_code || response.reference
             })
-            .eq('id', window.userFarmId)
+            .eq('id', window.userCompanyId)
             .then(({ error }) => {
               if (!error) {
                 alert(`Success! Your organization has been upgraded to ${targetTier.toUpperCase()}.`);
                 window.location.reload();
               } else {
-                console.error('Failed to update farm tier:', error);
+                console.error('Failed to update company tier:', error);
               }
             });
         }
@@ -321,20 +431,20 @@ async function handleSubscriptionCancellation() {
   if (!confirmCancel) return;
 
   try {
-    if (!window.userFarmId) {
+    if (!window.userCompanyId) {
       alert("Unable to resolve organization details. Please contact support.");
       return;
     }
 
-    // 1. Revert farm tier to 'basic' and mark status in Supabase
+    // 1. Revert company tier to 'basic' and mark status in Supabase
     const { error } = await window.dbClient
-      .from('farms')
+      .from('companies')
       .update({
         tier: 'basic',
         subscription_status: 'cancelled',
         updated_at: new Date().toISOString()
       })
-      .eq('id', window.userFarmId);
+      .eq('id', window.userCompanyId);
 
     if (error) throw error;
 
@@ -362,17 +472,192 @@ if (!window._paystackDelegatedListenerAdded) {
   });
 }
 
+// FETCH ACTIVE TEAM MEMBERS UNDER COMPANY WITH TIER LOCKS
+async function fetchCompanyTeamMembers() {
+  const container = document.getElementById('team-members-list');
+  const seatsBadge = document.getElementById('occupied-seats-badge');
+  const inviteContainer = document.getElementById('invite-form-container');
+  if (!container || !window.userCompanyId) return;
+
+  const tier = (window.currentCompanyTier || 'basic').toLowerCase();
+
+  // 1. Paywall Lock for Basic Tier
+  if (tier === 'basic') {
+    if (seatsBadge) seatsBadge.textContent = '1 / 1 Seat';
+    if (inviteContainer) {
+      inviteContainer.innerHTML = `
+        <div class="w-full text-center py-4 bg-slate-50 border border-amber-200 rounded-lg p-4">
+          <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 mb-2">
+            Essential Feature
+          </span>
+          <h4 class="font-semibold text-slate-800 text-sm mb-1">Manager Seats Locked</h4>
+          <p class="text-xs text-slate-500 mb-3 max-w-sm mx-auto">
+            Sub-manager accounts and multi-user delegation are available on the Essential (4 seats) and Enterprise tiers.
+          </p>
+          <button onclick="switchProfileTab('plans')" class="bg-primary text-white text-xs font-medium py-2 px-4 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
+            Upgrade to Unlock Seats &rarr;
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  try {
+    // 2. Query all profiles under company
+    const { data: team, error } = await window.dbClient
+      .from('profiles')
+      .select('id, first_name, last_name, role')
+      .eq('company_id', window.userCompanyId);
+
+    if (error) throw error;
+
+    const { data: company } = await window.dbClient
+      .from('companies')
+      .select('tier, seat_limit, max_supervisors')
+      .eq('id', window.userCompanyId)
+      .maybeSingle();
+
+    const currentCount = team?.length || 0;
+    
+    // Seat Capacity Definition
+    let maxSeats = 1;
+    if (tier === 'essential') maxSeats = 4;
+    if (tier === 'enterprise') maxSeats = company?.seat_limit || 8;
+
+    if (seatsBadge) {
+      seatsBadge.textContent = `${currentCount} / ${maxSeats} Seats`;
+    }
+
+    // 3. Seat Cap Enforcement for Essential / Enterprise
+    if (tier !== 'basic' && inviteContainer && currentCount >= maxSeats) {
+      inviteContainer.innerHTML = `
+        <div class="w-full text-center py-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <h4 class="font-semibold text-slate-800 text-sm mb-1">Seat Limit Reached (${currentCount}/${maxSeats})</h4>
+          <p class="text-xs text-slate-500 mb-3">
+            Your organization has filled all active team seats. Upgrade your subscription or contact support to add more manager seats.
+          </p>
+          <button onclick="switchProfileTab('plans')" class="border border-slate-300 text-slate-700 bg-white text-xs font-medium py-2 px-4 rounded-md hover:bg-slate-50 transition-colors shadow-sm">
+            View Upgrade Plans
+          </button>
+        </div>
+      `;
+    }
+
+    if (!team || team.length === 0) {
+      container.innerHTML = '<p class="text-xs text-muted">No registered team members found.</p>';
+      return;
+    }
+
+    // 4. Render Roster Cards
+    container.innerHTML = team.map(member => {
+      const isPrimaryAdmin = member.role === 'Master Admin' || member.role === 'admin' || member.role === 'Primary Admin';
+      const fullName = `${member.first_name || 'User'} ${member.last_name || ''}`.trim();
+      
+      return `
+        <div class="flex items-center justify-between p-3.5 border border-slate-200 bg-white rounded-lg text-sm shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full ${isPrimaryAdmin ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} flex items-center justify-center font-bold text-xs uppercase">
+              ${(member.first_name?.charAt(0) || '') + (member.last_name?.charAt(0) || '') || 'U'}
+            </div>
+            <div>
+              <p class="font-semibold text-foreground leading-snug">${fullName}</p>
+              <p class="text-xs text-muted">${member.role || 'Manager'}</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center rounded-full ${isPrimaryAdmin ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-blue-50 text-blue-700 border border-blue-200'} px-2.5 py-0.5 text-xs font-semibold">
+            ${isPrimaryAdmin ? 'Primary Admin' : 'Manager'}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('[ProfileEngine] Failed fetching team members:', err);
+    container.innerHTML = '<p class="text-xs text-red-500">Failed to load team list.</p>';
+  }
+}
+
+// GENERATE INVITATION LINK WITH STRICT CAP VALIDATION
+async function handleGenerateManagerInvite() {
+  const emailInput = document.getElementById('invite-manager-email');
+  const email = emailInput?.value?.trim();
+
+  if (!email || !email.includes('@')) {
+    alert("Please enter a valid email address for the manager.");
+    return;
+  }
+
+  if (!window.userCompanyId) {
+    alert("Unable to resolve company details. Please contact support.");
+    return;
+  }
+
+  const { count, error } = await window.dbClient
+    .from('profiles')
+    .select('id', { count: 'exact' })
+    .eq('company_id', window.userCompanyId);
+
+  const tier = (window.currentCompanyTier || 'basic').toLowerCase();
+  let maxSeats = 1;
+  if (tier === 'essential') maxSeats = 4;
+  if (tier === 'enterprise') maxSeats = 8;
+
+  if (tier === 'basic') {
+    alert("The Basic tier only allows 1 admin seat. Upgrade to Essential to invite up to 3 sub-managers.");
+    return;
+  } else if (count >= maxSeats) {
+    alert(`You have reached the maximum limit of ${maxSeats} seats on the ${tier.toUpperCase()} plan.`);
+    return;
+  }
+
+  const inviteUrl = `${window.location.origin}/invite.html?company=${encodeURIComponent(window.userCompanyId)}&email=${encodeURIComponent(email)}`;
+  document.getElementById('generated-invite-url').value = inviteUrl;
+  
+  const emailSubject = encodeURIComponent("Join our organization's Vault portal");
+  const emailBody = encodeURIComponent(`Hi,\n\nPlease set up your manager account for our training portal by clicking the link below:\n\n${inviteUrl}`);
+  document.getElementById('share-gmail-btn').href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${emailSubject}&body=${emailBody}`;
+  
+  const waText = encodeURIComponent(`Hi, please set up your manager account for our training portal using this link: ${inviteUrl}`);
+  document.getElementById('share-whatsapp-btn').href = `https://api.whatsapp.com/send?text=${waText}`;
+
+  document.getElementById('invite-form-container').classList.add('hidden');
+  document.getElementById('invite-result-container').classList.remove('hidden');
+}
+
+function copyInviteLink() {
+  const input = document.getElementById('generated-invite-url');
+  const copyBtn = document.getElementById('copy-invite-btn');
+  input.select();
+  navigator.clipboard.writeText(input.value);
+  
+  copyBtn.innerText = "Copied!";
+  copyBtn.classList.replace('bg-primary', 'bg-green-600');
+  setTimeout(() => {
+    copyBtn.innerText = "Copy";
+    copyBtn.classList.replace('bg-green-600', 'bg-primary');
+  }, 2000);
+}
+
+function resetInviteForm() {
+  document.getElementById('invite-manager-email').value = '';
+  document.getElementById('invite-result-container').classList.add('hidden');
+  document.getElementById('invite-form-container').classList.remove('hidden');
+}
+
 // 5. HYBRID BOUNCER INTEGRATION LIFECYCLE
 document.addEventListener('DOMContentLoaded', async () => {
-  await injectProfileModalContainer(); // Mount HTML architecture to frame
+  const injected = await injectProfileModalContainer(); // Wait for HTML to land in DOM first!
+  if (!injected) {
+    console.error('[ProfileEngine] Continuing without the profile modal - profile fields and tier badge will be unavailable until injection is fixed.');
+  }
   try {
     const { data: { session }, error } = await window.dbClient.auth.getSession();
     if (error) throw error;
     if (!session) {
-      window.location.replace('index.html'); 
+      window.location.replace('index.html');
       return;
     }
-    loadUserProfile(session.user.id);
+    await loadUserProfile(session.user.id);
     window.dbClient.auth.onAuthStateChange((event, currentSession) => {
       if (event === 'SIGNED_OUT' || !currentSession) {
         window.location.replace('index.html');
@@ -381,6 +666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   } catch (err) {
+    console.error('[ProfileEngine] Session bootstrap failed:', err);
     window.location.replace('index.html');
   }
 });
