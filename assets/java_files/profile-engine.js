@@ -215,6 +215,8 @@ async function loadUserProfile(userId) {
     }
     console.log('[ProfileEngine] Auth user resolved:', user.id, user.email);
 
+    checkNotificationReadStatus(user.id);
+
     // Auto-link pending invite from Google OAuth
     const pendingCompanyId = localStorage.getItem('pending_invite_company_id');
     const pendingTier = localStorage.getItem('pending_invite_tier') || 'essential';
@@ -860,7 +862,7 @@ function resetInviteForm() {
   document.getElementById('invite-form-container').classList.remove('hidden');
 }
 
-// TOPBAR NOTIFICATION TOGGLE HANDLERS
+// TOPBAR NOTIFICATION TOGGLE & PERSISTENCE
 function toggleNotificationDropdown(event) {
   event.stopPropagation();
   const dropdown = document.getElementById('notification-dropdown');
@@ -870,8 +872,25 @@ function toggleNotificationDropdown(event) {
 function markAllNotificationsRead() {
   const dot = document.getElementById('bell-unread-dot');
   if (dot) dot.classList.add('hidden');
+
+  // Persist read state in browser storage
+  const userId = window.currentUserId || 'guest';
+  localStorage.setItem(`vault_notifications_read_${userId}`, 'true');
 }
 
+function checkNotificationReadStatus(userId) {
+  window.currentUserId = userId;
+  const isRead = localStorage.getItem(`vault_notifications_read_${userId}`) === 'true';
+  const dot = document.getElementById('bell-unread-dot');
+  
+  if (isRead && dot) {
+    dot.classList.add('hidden');
+  } else if (!isRead && dot) {
+    dot.classList.remove('hidden');
+  }
+}
+
+// Global click listener to close dropdown on outside clicks
 document.addEventListener('click', (e) => {
   const dropdown = document.getElementById('notification-dropdown');
   const bellBtn = document.getElementById('notification-bell-btn');
