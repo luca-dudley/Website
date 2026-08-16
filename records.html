@@ -11,6 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://js.paystack.co/v2/inline.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -170,7 +171,6 @@
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
         <nav class="space-y-1.5">
-          <!-- Video Library -->
           <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -187,7 +187,6 @@
             <span class="sidebar-text truncate">Training Records</span>
           </a>
 
-          <!-- Help & Support -->
           <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -209,13 +208,13 @@
     </div>
   </aside>
 
-  <!-- 3. MAIN CONTENT WRAPPER -->
+  <!-- 3. MAIN CONTENT CONTAINER -->
   <main id="mainContent" class="ml-64 p-8">
     <div class="max-w-5xl mx-auto p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
           <h2 class="text-2xl font-serif text-foreground mb-2">Employee Directory</h2>
-          <p class="text-muted text-sm">Find all recorded employees down below with the record of the modules they have completed.</p>
+          <p class="text-muted text-sm">Find all recorded employees down below with verified completion logs and downloadable certificates.</p>
         </div>
 
         <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-full shadow-sm">
@@ -269,13 +268,6 @@
         <p class="text-sm font-medium text-foreground">No verified training records logged yet.</p>
         <p class="mt-1 text-xs text-muted">Once employees complete modules, they will appear here by name.</p>
       </div>
-
-      <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
-        <p class="text-xs text-muted">Need a physical copy for a site inspection?</p>
-        <a href="request.html" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-          Request PDF Certificate &rarr;
-        </a>
-      </div>
     </div>
 
     <!-- Footer -->
@@ -300,7 +292,6 @@
             <a href="vault.html" class="transition-colors hover:text-white">The Vault</a>
             <a href="support.html" class="transition-colors hover:text-white">Support</a>
             <a href="records.html" class="transition-colors hover:text-white">Training Records</a>
-            <a href="request.html" class="transition-colors hover:text-white">Request Certificate</a>
           </nav>
         </div>
 
@@ -483,26 +474,44 @@
         const moduleLabel = moduleCount === 1 ? 'Module Completed' : 'Modules Completed';
 
         const modulesHtml = employee.modules.map((module) => {
-          const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Unassigned';
+          const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Authorized Safety Officer';
           const supervisorEmail = module.supervisor_email ? escapeHtml(module.supervisor_email) : '';
           const trainingType = module.training_type || 'Individual';
+          const dateFormatted = formatDate(module.created_at);
+
+          // Escaped attributes for the generator function
+          const empSafe = escapeHtml(employee.employee_name).replace(/'/g, "\\'");
+          const idSafe = escapeHtml(employee.sa_id_number || 'N/A').replace(/'/g, "\\'");
+          const modSafe = escapeHtml(module.module_title).replace(/'/g, "\\'");
+          const supSafe = supervisorName.replace(/'/g, "\\'");
 
           return `
-            <tr class="border-b border-slate-100 last:border-0">
-              <td class="px-4 py-4 align-top text-foreground sm:px-6">
-                <div class="font-medium">${escapeHtml(module.module_title)}</div>
+            <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
+              <td class="px-4 py-4 align-middle text-foreground sm:px-6">
+                <div class="font-semibold text-slate-800">${escapeHtml(module.module_title)}</div>
               </td>
-              <td class="px-4 py-4 align-top sm:px-6">
+              <td class="px-4 py-4 align-middle sm:px-6">
                 <span class="inline-flex items-center rounded-full ${trainingType === 'Group' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'} px-2.5 py-0.5 text-xs font-semibold">
                   ${escapeHtml(trainingType)}
                 </span>
               </td>
-              <td class="px-4 py-4 align-top text-foreground sm:px-6">
-                <div class="font-medium">${supervisorName}</div>
-                ${supervisorEmail ? `<div class="text-xs text-muted">${supervisorEmail}</div>` : ''}
+              <td class="px-4 py-4 align-middle text-foreground sm:px-6">
+                <div class="font-medium text-slate-700">${supervisorName}</div>
+                ${supervisorEmail ? `<div class="text-[11px] text-muted">${supervisorEmail}</div>` : ''}
               </td>
-              <td class="px-4 py-4 align-top text-muted sm:px-6">
-                ${escapeHtml(formatDate(module.created_at))}
+              <td class="px-4 py-4 align-middle text-slate-500 sm:px-6 text-xs">
+                ${escapeHtml(dateFormatted)}
+              </td>
+              <td class="px-4 py-4 align-middle text-right sm:px-6">
+                <button 
+                  onclick="generateCertificatePDF('${empSafe}', '${idSafe}', '${modSafe}', '${dateFormatted}', '${supSafe}')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
+                  title="Generate Official PDF Certificate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <span>PDF</span>
+                </button>
               </td>
             </tr>
           `;
@@ -547,6 +556,7 @@
                           <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Training Type</th>
                           <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Supervisor</th>
                           <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Completion Date</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6 text-right">Certificate</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -665,6 +675,223 @@
       filterMenu.classList.toggle('hidden', !isHidden);
       filterToggleBtn.setAttribute('aria-expanded', String(isHidden));
     };
+
+    // =========================================================================
+    // HIGH-RESOLUTION CLIENT-SIDE PDF RECORD GENERATOR (IMPROVED HEADER LOCKUP)
+    // =========================================================================
+    function generateCertificatePDF(employeeName, saIdNumber, moduleTitle, completionDate, supervisorName) {
+      const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+      const companyId = window.userCompanyId || 'default';
+      const currentMonthKey = `cert_quota_${companyId}_${new Date().getFullYear()}_${new Date().getMonth() + 1}`;
+
+      // 1. Basic Tier: Hard Lock
+      if (currentTier === 'basic') {
+        openProfileModal();
+        switchProfileTab('plans');
+        alert('PDF Record Generation is available on Essential (5/mo) and Enterprise (Unlimited). Please upgrade your plan.');
+        return;
+      }
+
+      // 2. Essential Tier: 5 Downloads per Month Cap
+      if (currentTier === 'essential') {
+        let usedCount = parseInt(localStorage.getItem(currentMonthKey) || '0', 10);
+        const monthlyLimit = 5;
+
+        if (usedCount >= monthlyLimit) {
+          openProfileModal();
+          switchProfileTab('plans');
+          alert(`You have reached your monthly limit of ${monthlyLimit} certificate downloads on the Essential plan. Upgrade to Enterprise for unlimited instant certificate generation.`);
+          return;
+        }
+
+        // Increment usage count on Essential
+        localStorage.setItem(currentMonthKey, (usedCount + 1).toString());
+      }
+
+      // 3. Enterprise: Unlimited (Proceeds directly through without restrictions)
+
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF Generation library is loading. Please try again in a moment.');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      // Landscape A4: 297mm width x 210mm height
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = 297;
+      const pageHeight = 210;
+
+      // Soft Clean Background
+      doc.setFillColor(253, 254, 255);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+      // Primary Outer Navy Border
+      doc.setDrawColor(30, 58, 95); // #1e3a5f
+      doc.setLineWidth(3);
+      doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+      // Inner Accent Gold/Slate Border
+      doc.setDrawColor(203, 213, 225); // Slate 300
+      doc.setLineWidth(0.75);
+      doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+
+      // Corner Accents (Geometric Corners)
+      const cSize = 10;
+      doc.setFillColor(30, 58, 95);
+      doc.rect(8, 8, cSize, cSize, 'F');
+      doc.rect(pageWidth - 8 - cSize, 8, cSize, cSize, 'F');
+      doc.rect(8, pageHeight - 8 - cSize, cSize, cSize, 'F');
+      doc.rect(pageWidth - 8 - cSize, pageHeight - 8 - cSize, cSize, cSize, 'F');
+
+      // -----------------------------------------------------
+      // 1. PROMINENT LOGO & HEADER LOCKUP (CALCULATED TRUE CENTER)
+      // -----------------------------------------------------
+      const logoImgElement = document.querySelector('img[src*="Simple_Logo-removebg-preview"]') || document.querySelector('img[src*="Simple_Logo"]');
+      
+      const logoSize = 22;        // Clean size without container box
+      const gap = 8;              // Gap between logo and text
+      const textBlockWidth = 110; // Width allocated to 'SIMPLE SOLUTIONS'
+      
+      // Calculate start coordinate so (Logo + Gap + Text) is mathematically centered
+      const totalHeaderWidth = (logoImgElement ? logoSize + gap : 0) + textBlockWidth;
+      const startX = (pageWidth - totalHeaderWidth) / 2;
+      const headerY = 19;
+
+      if (logoImgElement) {
+        doc.addImage(logoImgElement, 'PNG', startX, headerY, logoSize, logoSize);
+      }
+
+      // Text block precisely aligned and vertically centered with the logo
+      const textX = logoImgElement ? startX + logoSize + gap : pageWidth / 2;
+      const textAlignment = logoImgElement ? 'left' : 'center';
+
+      doc.setFont('times', 'bold');
+      doc.setFontSize(26);
+      doc.setTextColor(30, 58, 95);
+      doc.text('SIMPLE SOLUTIONS', textX, headerY + 11, { align: textAlignment });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('INTERNAL OPERATIONAL TRAINING RECORD', textX, headerY + 18, { align: textAlignment });
+
+      // Geometric Divider Line
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(30, 48, pageWidth - 30, 48);
+
+      // -----------------------------------------------------
+      // 2. RECIPIENT & MODULE CONTENT
+      // -----------------------------------------------------
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text('This operational record logs that', pageWidth / 2, 66, { align: 'center' });
+
+      // Recipient Employee Name
+      doc.setFont('times', 'bold');
+      doc.setFontSize(28);
+      doc.setTextColor(15, 23, 42);
+      doc.text((employeeName || 'VERIFIED OPERATOR').toUpperCase(), pageWidth / 2, 80, { align: 'center' });
+
+      // Identification Line
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      const idText = (saIdNumber && saIdNumber !== 'N/A' && saIdNumber !== 'No SA ID provided') 
+        ? `National ID / Reg: ${saIdNumber}` 
+        : `Company Employee`;
+      doc.text(idText, pageWidth / 2, 88, { align: 'center' });
+
+      // Body Statement
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text('has reviewed the internal safety protocols and guidelines for:', pageWidth / 2, 103, { align: 'center' });
+
+      // Training Module Title Block
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(19);
+      doc.setTextColor(30, 58, 95);
+      doc.text(moduleTitle.toUpperCase(), pageWidth / 2, 117, { align: 'center' });
+
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(9.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Logged via The Vault digital training framework.', pageWidth / 2, 126, { align: 'center' });
+
+      // -----------------------------------------------------
+      // 3. SIGN-OFF & VERIFICATION SEAL
+      // -----------------------------------------------------
+      const sigY = 160;
+
+      // Left Column: Issue Date
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.5);
+      doc.line(40, sigY, 100, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(completionDate || 'Recorded Date', 70, sigY - 3, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('DATE LOGGED', 70, sigY + 6, { align: 'center' });
+
+      // Center Compliance Stamp Seal
+      doc.setFillColor(30, 58, 95);
+      doc.circle(pageWidth / 2, sigY - 2, 12, 'F');
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.75);
+      doc.circle(pageWidth / 2, sigY - 2, 10.5, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(255, 255, 255);
+      doc.text('LOGGED', pageWidth / 2, sigY - 4, { align: 'center' });
+      doc.setFontSize(5.5);
+      doc.text('RECORD', pageWidth / 2, sigY + 0.5, { align: 'center' });
+
+      // Right Column: Supervisor
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.5);
+      doc.line(pageWidth - 100, sigY, pageWidth - 40, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(supervisorName || 'Authorized Officer', pageWidth - 70, sigY - 3, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('SUPERVISING OFFICER', pageWidth - 70, sigY + 6, { align: 'center' });
+
+      // -----------------------------------------------------
+      // 4. LEGAL DISCLAIMER & FOOTER
+      // -----------------------------------------------------
+      const docHash = `REC-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      
+      const disclaimerLine1 = "DISCLAIMER: This document serves solely as an internal operational log confirming the review of supplementary safety materials.";
+      const disclaimerLine2 = "It is not a legally accredited, statutory, or sanctioned certificate of competence under any national safety framework.";
+      const refLine = `Internal Record Ref: ${docHash} • Simple Solutions`;
+      
+      doc.text(disclaimerLine1, pageWidth / 2, 184, { align: 'center' });
+      doc.text(disclaimerLine2, pageWidth / 2, 187, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.text(refLine, pageWidth / 2, 192, { align: 'center' });
+
+      // Trigger Instant Download
+      const safeName = `Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`;
+      doc.save(safeName);
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       fetchAndRenderTrainingRecords();
