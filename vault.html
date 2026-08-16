@@ -251,8 +251,11 @@
               <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
             </div>
             <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
-              <option value="all">All Topics</option>
-              <option value="agriculture">Agriculture</option>
+              <option value="all">All Sub-Categories</option>
+              <option value="General Safety">General Safety</option>
+              <option value="Machinery & Workshop">Machinery & Workshop</option>
+              <option value="Macadamia Processing">Macadamia Processing</option>
+              <option value="Pumping & Irrigation">Pumping & Irrigation</option>
             </select>
             <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
               <option value="all">All Languages</option>
@@ -358,7 +361,7 @@
           module: video.category || 'Agriculture',
           description: video.description || '',
           totalSeconds: video.total_seconds || 300,
-          thumbnail: video.thumbnail_url || 'assets/thumbnails/Chemical_Spraying.svg'
+          thumbnail: video.thumbnail_url || 'assets/thumbnails/Simple/Chemical_Spraying.svg'
         };
       });
 
@@ -413,7 +416,7 @@
 
         bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
         bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
-        bannerThumb.src = videoData.thumbnail || 'assets/thumbnails/Chemical_Spraying.svg';
+        bannerThumb.src = videoData.thumbnail || 'assets/thumbnails/Simple/Chemical_Spraying.svg';
         bannerThumb.alt = `${bannerTitle.textContent} thumbnail`;
         bannerBtn.href = resumeUrl;
         visualLink.href = resumeUrl;
@@ -426,43 +429,102 @@
       }
     }
 
-    // 2. DYNAMIC SUPABASE FETCH & INJECTION ENGINE
+    // 2. DYNAMIC SUPABASE FETCH & INJECTION ENGINE (WITH TENANT ISOLATION)
     async function fetchAndRenderVault() {
       try {
         const gridTarget = document.getElementById('videoCardsGrid');
         if (!gridTarget) return;
 
-        const { data: databaseVideos, error } = await window.dbClient
+        // 1. Get logged-in user session and their company_id
+        const session = await getCurrentSession();
+        let userCompanyId = null;
+
+        if (session?.user?.id) {
+          const { data: profile } = await window.dbClient
+            .from('profiles')
+            .select('company_id')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          userCompanyId = profile?.company_id || null;
+        }
+
+        // 2. Query Videos:
+        // - If user belongs to Elliott Farm (or any custom company): fetch their branded videos (company_id = userCompanyId)
+        // - For all other users / unlinked / generic accounts: ONLY fetch generic videos (company_id IS NULL)
+        let query = window.dbClient
           .from('videos')
-          .select('id, title, description, category, language, thumbnail_url, total_seconds')
+          .select('id, title, description, category, sub_tag, language, thumbnail_url, total_seconds, company_id')
           .order('title', { ascending: true });
 
+        if (userCompanyId) {
+          // Check if this company actually has custom branded videos
+          const { data: customVideos } = await window.dbClient
+            .from('videos')
+            .select('id')
+            .eq('company_id', userCompanyId)
+            .limit(1);
+
+          if (customVideos && customVideos.length > 0) {
+            // Company has custom branded videos: Show ONLY their custom library
+            query = query.eq('company_id', userCompanyId);
+          } else {
+            // Regular company without custom branding: Show default catalog
+            query = query.is('company_id', null);
+          }
+        } else {
+          // Default public catalog
+          query = query.is('company_id', null);
+        }
+
+        const { data: databaseVideos, error } = await query;
         if (error) throw error;
 
         gridTarget.innerHTML = '';
 
         if (!databaseVideos || databaseVideos.length === 0) {
-          gridTarget.innerHTML = `<p class="text-sm text-muted col-span-full text-center py-8">No active safety modules found in the database.</p>`;
+          gridTarget.innerHTML = `<p class="text-sm text-muted col-span-full text-center py-8">No active safety modules found for your organization.</p>`;
           return;
         }
 
         databaseVideos.forEach(video => {
+          const fallbackThumb = 'assets/thumbnails/Simple/General_Farm_Employees.svg';
+          const validThumbnail = (video.thumbnail_url && video.thumbnail_url.trim() !== '') 
+            ? video.thumbnail_url 
+            : fallbackThumb;
+
+          const subTag = video.sub_tag || 'General Safety';
+
           videoLibrary[video.id] = {
             title: video.title,
             module: video.category || 'Agriculture',
+            subCategory: subTag,
             description: video.description || '',
             totalSeconds: video.total_seconds || 300,
-            thumbnail: video.thumbnail_url || 'assets/thumbnails/Chemical_Spraying.svg'
+            thumbnail: validThumbnail
           };
+
+          // Color badge based on sub-category
+          let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
+          if (subTag === 'Macadamia Processing') {
+            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/60';
+          } else if (subTag === 'Machinery & Workshop') {
+            badgeClass = 'bg-blue-50 text-blue-700 border-blue-200/60';
+          } else if (subTag === 'Pumping & Irrigation') {
+            badgeClass = 'bg-cyan-50 text-cyan-700 border-cyan-200/60';
+          }
 
           const cardHTML = `
             <a href="module.html?v=${video.id}" 
                class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" 
                data-title="${video.title.toLowerCase()}" 
                data-category="${(video.category || 'agriculture').toLowerCase()}" 
+               data-subcategory="${subTag.toLowerCase().trim()}" 
                data-language="${(video.language || 'zu').toLowerCase()}">
               <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="${video.thumbnail_url || 'assets/thumbnails/Chemical_Spraying.svg'}" alt="${video.title} thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
+                <img src="${validThumbnail}" 
+                     onerror="this.onerror=null; this.src='${fallbackThumb}';" 
+                     alt="${video.title} thumbnail" 
+                     class="absolute inset-0 w-full h-full object-contain p-1">
                 <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
                   ${formatDuration(video.total_seconds)}
                 </div>
@@ -475,7 +537,11 @@
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">${video.title}</h3>
-                  <p class="text-xs text-muted mb-3">${video.category || 'Agriculture'}</p>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xs text-muted">${video.category || 'Agriculture'}</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="px-2 py-0.5 rounded-md ${badgeClass} text-[10px] font-semibold tracking-wide border">${subTag}</span>
+                  </div>
                 </div>
                 <div class="flex items-center justify-between mt-2">
                   <span id="status-${video.id}" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
@@ -573,21 +639,21 @@
       const languageFilter = document.getElementById('languageFilter');
 
       function filterHandler() {
-        const query = searchInput.value.toLowerCase().trim();
-        const category = categoryFilter.value.toLowerCase();
-        const language = languageFilter.value.toLowerCase();
+        const query = (searchInput?.value || '').toLowerCase().trim();
+        const selectedSub = (categoryFilter?.value || 'all').toLowerCase().trim();
+        const selectedLang = (languageFilter?.value || 'all').toLowerCase().trim();
         const cards = document.querySelectorAll('.video-card');
 
         cards.forEach(card => {
-          const title = card.getAttribute('data-title') || '';
-          const cat = card.getAttribute('data-category') || '';
-          const lang = card.getAttribute('data-language') || '';
+          const title = (card.getAttribute('data-title') || '').toLowerCase();
+          const subCat = (card.getAttribute('data-subcategory') || '').toLowerCase();
+          const lang = (card.getAttribute('data-language') || '').toLowerCase();
 
-          const matchSearch = title.includes(query);
-          const matchCat = (category === 'all' || cat === category);
-          const matchLang = (language === 'all' || lang === language);
+          const matchSearch = !query || title.includes(query);
+          const matchSub = (selectedSub === 'all') || (subCat === selectedSub);
+          const matchLang = (selectedLang === 'all') || (lang === selectedLang);
 
-          if (matchSearch && matchCat && matchLang) {
+          if (matchSearch && matchSub && matchLang) {
             card.classList.remove('hidden');
           } else {
             card.classList.add('hidden');
