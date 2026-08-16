@@ -197,73 +197,119 @@
     </div>
   </aside>
 
-  <!-- 3. MAIN CONTENT CONTAINER (Fully wraps all cards and banners) -->
-  <main id="mainContent" class="ml-64 p-8">
-        
-    <!-- Featured Training Banner -->
-    <div id="continue-watching-block" class="hidden">
-      <section class="mb-10">
-        <div class="relative bg-gradient-to-r from-primary to-[#2a5285] rounded-2xl overflow-hidden shadow-lg border border-primary/20">
-          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
-          <div class="relative p-6 md:p-8">
-            <div class="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
-              <!-- Video Thumbnail -->
-              <a id="continueWatchingVisualLink" href="#" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
-                <img id="bannerThumbnail" src="" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
-              </a>
-              
-              <!-- Content -->
-              <div class="text-white flex flex-col w-full md:w-1/2">
-                <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
-                <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Loading...</h2>
-                <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
-                <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span id="bannerTimeRemaining">--:-- remaining</span>
-                  </span>
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                    </svg>
-                    <span id="continueWatchingModule">Training</span>
-                  </span>
+  <!-- 3. MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+    <div>
+      <!-- Featured Training Banner -->
+      <div id="continue-watching-block" class="hidden">
+        <section class="mb-10">
+          <div class="relative bg-gradient-to-r from-primary to-[#2a5285] rounded-2xl overflow-hidden shadow-lg border border-primary/20">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
+            <div class="relative p-6 md:p-8">
+              <div class="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
+                <!-- Video Thumbnail -->
+                <a id="continueWatchingVisualLink" href="#" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
+                  <img id="bannerThumbnail" src="" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
+                </a>
+                
+                <!-- Content -->
+                <div class="text-white flex flex-col w-full md:w-1/2">
+                  <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
+                  <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Loading...</h2>
+                  <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
+                  <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
+                    <span class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <span id="bannerTimeRemaining">--:-- remaining</span>
+                    </span>
+                    <span class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                      </svg>
+                      <span id="continueWatchingModule">Training</span>
+                    </span>
+                  </div>
+                  <a id="bannerResumeBtn" href="#" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
                 </div>
-                <a id="bannerResumeBtn" href="#" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
               </div>
             </div>
           </div>
+        </section>
+      </div>
+      
+      <!-- Video Library Section -->
+      <section>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
+          <h2 class="text-2xl font-serif text-slate-800 font-medium">Training Library</h2>
+          <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+            <div class="relative w-full sm:w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </div>
+              <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
+            </div>
+            <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+              <option value="all">All Topics</option>
+              <option value="agriculture">Agriculture</option>
+            </select>
+            <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+              <option value="all">All Languages</option>
+              <option value="zu">English &amp; Zulu</option>
+            </select>
+          </div>
         </div>
+
+        <!-- Video Cards Grid -->
+        <div id="videoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
       </section>
     </div>
-    
-    <!-- Video Library Section -->
-    <section>
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
-        <h2 class="text-2xl font-serif text-slate-800 font-medium">Training Library</h2>
-        <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-          <div class="relative w-full sm:w-64">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+
+    <!-- ANCHORED ROUNDED FOOTER -->
+    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+      <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+        <!-- Brand Summary -->
+        <div class="max-w-sm space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+              <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
             </div>
-            <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
+            <div>
+              <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+              <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+            </div>
           </div>
-          <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
-            <option value="all">All Topics</option>
-            <option value="agriculture">Agriculture</option>
-          </select>
-          <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
-            <option value="all">All Languages</option>
-            <option value="zu">English &amp; Zulu</option>
-          </select>
+          <p class="text-xs leading-relaxed text-slate-300">
+            Streamlining operational architectures for modern business safety and workplace compliance.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+          <nav class="grid gap-2 text-xs text-slate-300">
+            <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+            <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+            <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+          </nav>
+        </div>
+
+        <!-- Subscription Management -->
+        <div class="max-w-xs sm:max-w-sm space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
+          <p class="text-xs leading-relaxed text-slate-300">
+            To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
+          </p>
         </div>
       </div>
 
-      <!-- Video Cards Grid -->
-      <div id="videoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-    </section>
+      <!-- Legal Sub-bar -->
+      <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+        <p>© 2026 Simple Solutions. All rights reserved.</p>
+        <p class="text-slate-400">Internal Operational Compliance Portal</p>
+      </div>
+    </footer>
 
   </main>
 
