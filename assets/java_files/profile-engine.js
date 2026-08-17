@@ -324,28 +324,28 @@ async function loadUserProfile(userId) {
     console.log('[ProfileEngine] Resolved profile row:', profile);
     console.log('[ProfileEngine] Resolved company row:', companyObj);
 
-    // --- SUSPENSION & GRACE PERIOD BOUNCER ---
+    // --- SUSPENSION & GRACE PERIOD BOUNCER --- //
     const subStatus = (companyObj?.subscription_status || 'active').toLowerCase();
     const isAdmin = (profile.role || '').toLowerCase().includes('admin');
 
-    if (subStatus === 'suspended') {
+    if (subStatus === 'suspended' || subStatus === 'cancelled' || subStatus === 'deactivated') {
       document.body.innerHTML = `
         <div class="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
-          <div class="max-w-lg w-full bg-slate-800 border border-red-500/30 rounded-2xl p-8 text-center shadow-2xl">
-            <div class="w-16 h-16 rounded-full bg-red-500/10 text-red-400 mx-auto flex items-center justify-center mb-5">
+          <div class="max-w-lg w-full bg-slate-800 border border-slate-700/60 rounded-2xl p-8 text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center mb-5">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
-            <h2 class="text-2xl font-serif font-bold text-white mb-2">Organization Access Suspended</h2>
+            <h2 class="text-2xl font-serif font-bold text-white mb-2">Organization Workspace Deactivated</h2>
             <p class="text-sm text-slate-400 mb-6">
-              Your organization's subscription payment could not be processed after the grace period. <strong>All training records and worker data remain safely saved.</strong>
+              Your organization's active subscription was cancelled. <strong>All training records, employee completions, and worker logs remain safely archived in our database.</strong>
             </p>
             ${isAdmin ? `
               <button onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential', 'Essential Vault', 22000)" class="w-full bg-primary py-3 rounded-md font-medium text-white hover:bg-primary/90 transition-colors shadow-lg mb-3">
-                Reactivate & Update Card Details 💳
+                Reactivate Workspace (Choose Plan) 💳
               </button>
             ` : `
               <div class="p-3 bg-slate-700/50 rounded-lg text-xs text-slate-300 mb-4">
-                Please notify your primary administrator to reactivate your company portal.
+                Please notify your primary administrator to reactivate your organization's portal.
               </div>
             `}
             <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white underline">
@@ -643,9 +643,15 @@ function executeVaultPaystackUpgrade() {
   }
 }
 
-// Handler for direct subscription cancellation
+// Handler for direct subscription cancellation (Soft Delete & Workspace Deactivation)
 async function handleSubscriptionCancellation() {
-  const confirmCancel = confirm("Are you sure you want to cancel your active subscription? Your organization will revert to the Basic tier at the end of the current billing cycle.");
+  const confirmCancel = confirm(
+    "Are you sure you want to deactivate your organization's Vault account?\n\n" +
+    "• Access to training modules and compliance tools will be suspended.\n" +
+    "• All historical employee training records and certificates will remain safely archived.\n" +
+    "• Your organization can be reactivated at any time by updating billing details."
+  );
+  
   if (!confirmCancel) return;
 
   try {
@@ -654,24 +660,26 @@ async function handleSubscriptionCancellation() {
       return;
     }
 
-    // 1. Revert company tier to 'basic' and mark status in Supabase
+    // 1. Soft-deactivate company in Supabase (Keep data intact, flag as suspended)
     const { error } = await window.dbClient
       .from('companies')
       .update({
-        tier: 'basic',
-        subscription_status: 'cancelled',
+        subscription_status: 'suspended',
+        cancelled_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', window.userCompanyId);
 
     if (error) throw error;
 
-    alert("Your subscription cancellation request has been logged. Your tier has been updated to Basic.");
+    alert("Your organization's account has been deactivated. Historical records remain archived.");
+    
+    // 2. Reload to trigger the Account Suspended & Reactivation screen
     window.location.reload();
 
   } catch (err) {
     console.error("Cancellation error:", err);
-    alert("There was an issue processing your cancellation. Please submit a quick billing request using the Manage Billing link.");
+    alert("There was an issue deactivating your subscription. Please contact support.");
   }
 }
 
