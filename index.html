@@ -215,7 +215,7 @@
             </div>
           </div>
 
-          <!-- Systems Block -->
+          <!-- Systems Block (Consulting) -->
           <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm flex flex-col justify-between">
             <div>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 mb-4">Custom Consulting</span>
@@ -230,11 +230,10 @@
               </ul>
             </div>
             <div class="flex flex-col gap-2">
-              <button type="button" onclick="openWorkflowDemoModal()" class="w-full inline-flex items-center justify-center gap-2 border border-gray-200 bg-white text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-50 transition-colors">
-                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                Watch ClickUp System Demo
-              </button>
-              <a href="systems.html" class="text-xs text-center text-muted hover:text-primary underline py-1">View Workflow Systems &rarr;</a>
+              <a href="systems.html" class="w-full inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm">
+                Explore Workflow Systems &rarr;
+              </a>
+              <a href="https://calendly.com/simple-lucadudley/30min" target="_blank" rel="noopener noreferrer" class="text-xs text-center text-muted hover:text-primary underline py-1">Book a 30-Min Scoping Call &rarr;</a>
             </div>
           </div>
         </div>
@@ -688,19 +687,6 @@
     </div>
   </div>
 
-  <!-- WORKFLOW DEMO MODAL -->
-  <div id="workflowDemoModal" onclick="closeWorkflowDemoModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
-    <div onclick="event.stopPropagation()" class="relative w-full max-w-4xl mx-4 bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10">
-      <button onclick="closeWorkflowDemoModal()" class="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
-      <div class="aspect-video w-full">
-        <!-- Replace src with your ClickUp demo video URL -->
-        <iframe src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-      </div>
-    </div>
-  </div>
-
   <script>
     function openLoginModal() {
       const modal = document.getElementById('loginModal');
@@ -723,20 +709,6 @@
 
     function closeVaultDemoModal() {
       const modal = document.getElementById('vaultDemoModal');
-      if (!modal) return;
-      modal.classList.add('opacity-0');
-      setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    function openWorkflowDemoModal() {
-      const modal = document.getElementById('workflowDemoModal');
-      if (!modal) return;
-      modal.classList.remove('hidden');
-      setTimeout(() => modal.classList.remove('opacity-0'), 10);
-    }
-
-    function closeWorkflowDemoModal() {
-      const modal = document.getElementById('workflowDemoModal');
       if (!modal) return;
       modal.classList.add('opacity-0');
       setTimeout(() => modal.classList.add('hidden'), 300);

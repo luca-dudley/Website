@@ -260,59 +260,114 @@
       </div>
     </section>
 
-    <!-- WORKFLOW SHOWCASE / CASE STUDIES -->
+    <!-- WORKFLOW SHOWCASE / CAPABILITIES GALLERY -->
     <section id="showcase" class="bg-white py-20 sm:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center mb-16">
           <p class="text-sm font-medium uppercase tracking-widest text-muted">System Architecture in Action</p>
           <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Recent Workflow Builds
+            Workflow Build Template Gallery
           </h2>
         </div>
 
-        <div class="grid gap-12 lg:grid-cols-2 max-w-5xl mx-auto">
+        <div class="grid gap-8 lg:grid-cols-3 max-w-7xl mx-auto">
           
-          <!-- Example 1: Operational Tracking Pipeline -->
-          <div class="group rounded-2xl border border-gray-200 bg-gray-50/50 p-6 transition-all duration-300 hover:shadow-lg">
-            <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-200 bg-slate-900 mb-6">
-              <img src="assets/verve_dashboard_preview.jpg" alt="Operational Pipeline Dashboard" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-              <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="inline-flex items-center gap-2 bg-white/90 text-foreground px-4 py-2 rounded-full text-xs font-semibold shadow-md">
-                  <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  Click to View Walkthrough
-                </span>
+          <!-- Card 1: Product Management & Operations Suite -->
+          <div class="group cursor-pointer rounded-2xl border border-gray-200 bg-gray-50/50 p-6 transition-all duration-300 hover:shadow-lg hover:border-primary/30 flex flex-col justify-between" onclick="openGalleryModal('pm-suite-gallery')">
+            <div>
+              <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-200 bg-slate-900 mb-6">
+                <img src="assets/workflow_pics/product_management/Screenshot 2026-08-17 180048.png" alt="Product Roadmap Status" class="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span class="inline-flex items-center gap-2 bg-white/95 text-foreground px-4 py-2 rounded-full text-xs font-semibold shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                    View Roadmap &amp; Sprints
+                  </span>
+                </div>
               </div>
+              <h3 class="font-serif text-xl font-semibold text-foreground mb-2">Product &amp; Operations Management</h3>
+              <p class="text-sm text-muted mb-4">Complete operational workspace featuring high-level roadmap tracking, Kanban sprint boards, and interactive Gantt scheduling.</p>
             </div>
-            <h3 class="font-serif text-xl font-semibold text-foreground mb-2">Multi-Region Factory Pipeline</h3>
-            <p class="text-sm text-muted mb-4">Centralized ClickUp workspace architecture connecting regional factory outputs into unified executive dashboards.</p>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="bg-primary/10 text-primary font-medium px-2.5 py-1 rounded">ClickUp Dashboards</span>
-              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Automated Form Sync</span>
+            <div class="flex flex-wrap gap-2 text-xs pt-2 border-t border-gray-200/60">
+              <span class="bg-primary/10 text-primary font-medium px-2.5 py-1 rounded">Roadmap Status</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Kanban Sprints</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Gantt Timelines</span>
             </div>
           </div>
 
-          <!-- Example 2: Visitor & Logistics Management -->
-          <div class="group rounded-2xl border border-gray-200 bg-gray-50/50 p-6 transition-all duration-300 hover:shadow-lg">
-            <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-200 bg-slate-900 mb-6">
-              <img src="assets/coastal_mac_preview.jpg" alt="Visitor Tracking System" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-              <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="inline-flex items-center gap-2 bg-white/90 text-foreground px-4 py-2 rounded-full text-xs font-semibold shadow-md">
-                  <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  Click to View Walkthrough
-                </span>
+          <!-- Card 2: Procurement & Contract Pipeline -->
+          <div class="group cursor-pointer rounded-2xl border border-gray-200 bg-gray-50/50 p-6 transition-all duration-300 hover:shadow-lg hover:border-primary/30 flex flex-col justify-between" onclick="openGalleryModal('procurement-gallery')">
+            <div>
+              <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-200 bg-slate-900 mb-6">
+                <img src="assets/workflow_pics/procurement/contracts_table.png" alt="Procurement & Contract Pipeline" class="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span class="inline-flex items-center gap-2 bg-white/95 text-foreground px-4 py-2 rounded-full text-xs font-semibold shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                    View Procurement Hub
+                  </span>
+                </div>
               </div>
+              <h3 class="font-serif text-xl font-semibold text-foreground mb-2">Procurement &amp; Contract Management</h3>
+              <p class="text-sm text-muted mb-4">Centralized supplier procurement hub tracking contract values, auto-renewal deadlines, intake queues, and RFx supplier requests.</p>
             </div>
-            <h3 class="font-serif text-xl font-semibold text-foreground mb-2">Site Visitor &amp; Logistics Portal</h3>
-            <p class="text-sm text-muted mb-4">Digital check-in workflows and automated task generation for visitor tracking and site compliance.</p>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="bg-primary/10 text-primary font-medium px-2.5 py-1 rounded">Automated Webhooks</span>
-              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Digital Audit Log</span>
+            <div class="flex flex-wrap gap-2 text-xs pt-2 border-t border-gray-200/60">
+              <span class="bg-primary/10 text-primary font-medium px-2.5 py-1 rounded">Contract Values</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Auto-Renewals</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Supplier RFx Form</span>
             </div>
           </div>
 
+          <!-- Card 1: Construction & Heavy Project Management -->
+          <div class="group cursor-pointer rounded-2xl border border-gray-200 bg-gray-50/50 p-6 transition-all duration-300 hover:shadow-lg hover:border-primary/30 flex flex-col justify-between" onclick="openGalleryModal('construction-gallery')">
+            <div>
+              <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-200 bg-slate-900 mb-6">
+                <img src="assets/workflow_pics/construction/construction_dashboard.png" alt="Construction Management Dashboard" class="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span class="inline-flex items-center gap-2 bg-white/95 text-foreground px-4 py-2 rounded-full text-xs font-semibold shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                    View Project Hub
+                  </span>
+                </div>
+              </div>
+              <h3 class="font-serif text-xl font-semibold text-foreground mb-2">Construction &amp; Site Project Operations</h3>
+              <p class="text-sm text-muted mb-4">Complete field infrastructure management with live executive KPI dashboards, milestone dependencies, sub-contractor allocations, and site Gantt schedules.</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs pt-2 border-t border-gray-200/60">
+              <span class="bg-primary/10 text-primary font-medium px-2.5 py-1 rounded">Executive Dashboard</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Gantt Timelines</span>
+              <span class="bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded">Sub-Contractor Tracking</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
+
+    <!-- FULLSCREEN GALLERY MODAL -->
+    <div id="galleryModal" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-sm flex flex-col justify-center items-center p-4 sm:p-8 transition-opacity duration-300 opacity-0">
+      
+      <!-- Close Button -->
+      <button type="button" onclick="closeGalleryModal()" class="absolute top-6 right-6 z-50 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <!-- Main Image Container -->
+      <div class="relative w-full max-w-6xl max-h-[80vh] flex items-center justify-center">
+        <img id="galleryMainImage" src="" alt="Gallery Preview" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/10 transition-opacity duration-150">
+        
+        <!-- Navigation Arrows -->
+        <button type="button" onclick="navigateGallery(-1)" class="absolute left-0 md:-left-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-primary text-white rounded-full transition-colors backdrop-blur">
+           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button type="button" onclick="navigateGallery(1)" class="absolute right-0 md:-right-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-primary text-white rounded-full transition-colors backdrop-blur">
+           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <!-- Caption & Counter -->
+      <div class="mt-6 text-center">
+        <h4 id="galleryCaption" class="text-white text-lg font-semibold tracking-wide mb-1"></h4>
+        <p id="galleryCounter" class="text-slate-400 text-sm font-medium"></p>
+      </div>
+    </div>
 
     <!-- REVIEWS SECTION -->
     <section id="client-reviews" class="bg-dark-bg pb-20 pt-16">
@@ -475,7 +530,145 @@
         </div>
       </div>
     </footer>
-
   </main>
+
+  <!-- GALLERY JAVASCRIPT LOGIC -->
+  <script>
+    const galleries = {
+      'pm-suite-gallery': [
+        { 
+          src: 'assets/workflow_pics/product_management/Screenshot 2026-08-17 180048.png', 
+          caption: 'Executive Roadmap Status Board' 
+        },
+        { 
+          src: 'assets/workflow_pics/product_management/Screenshot 2026-08-17 180412.png', 
+          caption: 'Kanban Team Sprint Board with Priority Tags' 
+        },
+        { 
+          src: 'assets/workflow_pics/product_management/Screenshot 2026-08-17 180252.png', 
+          caption: 'Interactive Multi-Quarter Gantt Timeline' 
+        },
+        { 
+          src: 'assets/workflow_pics/product_management/Screenshot 2026-08-17 180354.png', 
+          caption: 'Custom External Work Order & Issue Intake Form' 
+        },
+        { 
+          src: 'assets/workflow_pics/product_management/Screenshot 2026-08-17 180322.png', 
+          caption: 'Categorized Backlog List View with MoSCoW & Due Dates' 
+        }
+      ],
+'procurement-gallery': [
+        { 
+          src: 'assets/workflow_pics/procurement/contracts_table.png', 
+          caption: 'Master Contract Negotiations & Auto-Renewal Pipeline' 
+        },
+        { 
+          src: 'assets/workflow_pics/procurement/intake_kanban.png', 
+          caption: 'Procurement Intake Kanban Board (Review to Execution)' 
+        },
+        { 
+          src: 'assets/workflow_pics/procurement/intake_list.png', 
+          caption: 'Purchase Request List Grouped by Approval Stage' 
+        },
+        { 
+          src: 'assets/workflow_pics/procurement/vendor_rfx_form.png', 
+          caption: 'Automated External RFx Vendor Proposal Form' 
+        },
+        { 
+          src: 'assets/workflow_pics/procurement/department_grid.png', 
+          caption: 'Department Allocation & Budget Priority Grid' 
+        }
+      ],
+'construction-gallery': [
+        { 
+          src: 'assets/workflow_pics/construction/construction_dashboard.png', 
+          caption: 'Executive Operations Dashboard with Real-Time Task & Priority Metrics' 
+        },
+        { 
+          src: 'assets/workflow_pics/construction/construction_gantt.png', 
+          caption: 'Multi-Phase Gantt Scheduling with Dependency Logic & Milestones' 
+        },
+        { 
+          src: 'assets/workflow_pics/construction/priority_tracking_list.png', 
+          caption: 'Live Priority Tracking & Progress Completion Roster' 
+        },
+        { 
+          src: 'assets/workflow_pics/construction/phase_breakdown_list.png', 
+          caption: 'Granular Project Phase & Stage Breakdown with Status Indicators' 
+        },
+        { 
+          src: 'assets/workflow_pics/construction/project_overview.png', 
+          caption: 'Project Scope Summary & Standard Operating Instructions' 
+        }
+      ],
+    };
+
+    let currentGallery = [];
+    let currentIndex = 0;
+
+    function openGalleryModal(galleryKey) {
+      currentGallery = galleries[galleryKey];
+      if (!currentGallery || currentGallery.length === 0) return;
+      
+      currentIndex = 0;
+      updateGalleryView();
+      
+      const modal = document.getElementById('galleryModal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+      }, 10);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeGalleryModal() {
+      const modal = document.getElementById('galleryModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+      document.body.style.overflow = '';
+    }
+
+    function navigateGallery(direction) {
+      if (!currentGallery.length) return;
+      currentIndex += direction;
+      if (currentIndex < 0) currentIndex = currentGallery.length - 1;
+      if (currentIndex >= currentGallery.length) currentIndex = 0;
+      updateGalleryView();
+    }
+
+    function updateGalleryView() {
+      const imgElement = document.getElementById('galleryMainImage');
+      const captionElement = document.getElementById('galleryCaption');
+      const counterElement = document.getElementById('galleryCounter');
+      
+      const item = currentGallery[currentIndex];
+      imgElement.style.opacity = '0.3';
+      
+      setTimeout(() => {
+        imgElement.src = item.src;
+        captionElement.textContent = item.caption;
+        counterElement.textContent = `Image ${currentIndex + 1} of ${currentGallery.length}`;
+        imgElement.style.opacity = '1';
+      }, 120);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('galleryModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        if (e.key === 'Escape') closeGalleryModal();
+        if (e.key === 'ArrowRight') navigateGallery(1);
+        if (e.key === 'ArrowLeft') navigateGallery(-1);
+      }
+    });
+    
+    document.getElementById('galleryModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'galleryModal') {
+        closeGalleryModal();
+      }
+    });
+  </script>
 </body>
 </html>
