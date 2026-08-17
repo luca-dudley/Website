@@ -683,7 +683,7 @@ async function handleSubscriptionCancellation() {
   }
 }
 
-// FETCH ACTIVE TEAM MEMBERS UNDER COMPANY WITH TIER LOCKS
+// FETCH ACTIVE TEAM MEMBERS UNDER COMPANY WITH TIER LOCKS & REMOVAL CONTROLS
 async function fetchCompanyTeamMembers() {
   const container = document.getElementById('team-members-list');
   const seatsBadge = document.getElementById('occupied-seats-badge');
@@ -714,6 +714,8 @@ async function fetchCompanyTeamMembers() {
   }
 
   try {
+    const { data: { user } } = await window.dbClient.auth.getUser();
+    
     // 2. Query all profiles under company
     const { data: team, error } = await window.dbClient
       .from('profiles')
@@ -745,13 +747,24 @@ async function fetchCompanyTeamMembers() {
         <div class="w-full text-center py-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
           <h4 class="font-semibold text-slate-800 text-sm mb-1">Seat Limit Reached (${currentCount}/${maxSeats})</h4>
           <p class="text-xs text-slate-500 mb-3">
-            Your organization has filled all active team seats. Upgrade your subscription or contact support to add more manager seats.
+            Your organization has filled all active team seats. Upgrade your subscription or remove an inactive manager to reopen a seat.
           </p>
           <button onclick="switchProfileTab('plans')" class="border border-slate-300 text-slate-700 bg-white text-xs font-medium py-2 px-4 rounded-md hover:bg-slate-50 transition-colors shadow-sm">
             View Upgrade Plans
           </button>
         </div>
       `;
+    } else if (tier !== 'basic' && inviteContainer && currentCount < maxSeats) {
+      // Re-enable default invite form if a seat was recently freed
+      const inviteEmailInput = document.getElementById('invite-manager-email');
+      if (!inviteEmailInput) {
+        inviteContainer.innerHTML = `
+          <input type="email" id="invite-manager-email" placeholder="manager@yourcompany.com" class="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm outline-none focus:border-primary">
+          <button onclick="handleGenerateManagerInvite()" class="px-5 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap">
+            Generate Invite Link
+          </button>
+        `;
+      }
     }
 
     if (!team || team.length === 0) {
@@ -759,25 +772,42 @@ async function fetchCompanyTeamMembers() {
       return;
     }
 
-    // 4. Render Roster Cards
+    // Resolve current user's role to determine if delete button should be displayed
+    const currentUserProfile = team.find(m => m.id === user?.id);
+    const isCurrentAdmin = (currentUserProfile?.role || '').toLowerCase().includes('admin');
+
+    // 4. Render Roster Cards with Revoke Access Trigger
     container.innerHTML = team.map(member => {
       const isPrimaryAdmin = member.role === 'Master Admin' || member.role === 'admin' || member.role === 'Primary Admin';
+      const isSelf = member.id === user?.id;
       const fullName = `${member.first_name || 'User'} ${member.last_name || ''}`.trim();
+      const escapedName = fullName.replace(/'/g, "\\'");
       
       return `
-        <div class="flex items-center justify-between p-3.5 border border-slate-200 bg-white rounded-lg text-sm shadow-sm">
+        <div class="flex items-center justify-between p-3.5 border border-slate-200 bg-white rounded-lg text-sm shadow-sm transition-all hover:border-slate-300">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full ${isPrimaryAdmin ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} flex items-center justify-center font-bold text-xs uppercase">
               ${(member.first_name?.charAt(0) || '') + (member.last_name?.charAt(0) || '') || 'U'}
             </div>
             <div>
-              <p class="font-semibold text-foreground leading-snug">${fullName}</p>
+              <p class="font-semibold text-foreground leading-snug">${fullName} ${isSelf ? '<span class="text-xs text-slate-400 font-normal">(You)</span>' : ''}</p>
               <p class="text-xs text-muted">${member.role || 'Manager'}</p>
             </div>
           </div>
-          <span class="inline-flex items-center rounded-full ${isPrimaryAdmin ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-blue-50 text-blue-700 border border-blue-200'} px-2.5 py-0.5 text-xs font-semibold">
-            ${isPrimaryAdmin ? 'Primary Admin' : 'Manager'}
-          </span>
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center rounded-full ${isPrimaryAdmin ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-blue-50 text-blue-700 border border-blue-200'} px-2.5 py-0.5 text-xs font-semibold">
+              ${isPrimaryAdmin ? 'Primary Admin' : 'Manager'}
+            </span>
+            ${(isCurrentAdmin && !isSelf && !isPrimaryAdmin) ? `
+              <button 
+                type="button" 
+                onclick="handleRemoveTeamMember('${member.id}', '${escapedName}')" 
+                class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                title="Revoke Manager Access">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            ` : ''}
+          </div>
         </div>
       `;
     }).join('');
@@ -785,6 +815,59 @@ async function fetchCompanyTeamMembers() {
   } catch (err) {
     console.error('[ProfileEngine] Failed fetching team members:', err);
     container.innerHTML = '<p class="text-xs text-red-500">Failed to load team list.</p>';
+  }
+}
+
+/// REMOVE / DEACTIVATE SUB-MANAGER PROFILE & REOPEN SEAT
+async function handleRemoveTeamMember(targetUserId, targetUserName) {
+  const confirmed = confirm(
+    `Are you sure you want to remove ${targetUserName} from your organization's workspace?\n\n` +
+    `Their login access will be revoked immediately and one team seat will reopen.`
+  );
+  if (!confirmed) return;
+
+  try {
+    if (!window.userCompanyId) {
+      alert("Unable to identify active company ID. Please refresh.");
+      return;
+    }
+
+    // Delegated to a SECURITY DEFINER RPC (see remove_team_member_migration.sql).
+    // A plain client-side .update() on profiles will always return 0 rows here:
+    // the profiles UPDATE policy only allows a row to be updated by its owner
+    // (id = auth.uid()), and there's no safe way to widen that to "any admin,
+    // any row in their company" from the client side - a policy written that
+    // way has to subquery profiles to check the caller's own role, which
+    // re-triggers RLS on profiles and causes infinite recursion (42P17).
+    // The RPC runs server-side, authenticates + authorizes the caller itself,
+    // and performs the disassociation in one atomic step.
+    const { data, error } = await window.dbClient.rpc('remove_team_member', {
+      p_target_user_id: targetUserId
+    });
+
+    if (error) {
+      console.error('[ProfileEngine] Supabase error during removal:', error);
+      throw error;
+    }
+
+    if (!data || data.success !== true) {
+      console.warn('[ProfileEngine] remove_team_member did not report success:', data);
+      alert("Removal did not complete. Please refresh and try again.");
+      return;
+    }
+
+    console.log('[ProfileEngine] Successfully disassociated user profile:', data);
+    alert(`${targetUserName} has been removed. One seat has been reopened.`);
+
+    // Refresh the roster and seat badge count immediately
+    await fetchCompanyTeamMembers();
+
+  } catch (err) {
+    console.error('[ProfileEngine] Error removing manager:', err);
+    // Errors raised inside the RPC (insufficient privileges, cross-company
+    // target, self-removal, etc.) surface here in err.message and are
+    // already written to be admin-readable - show them directly.
+    alert(`Failed to remove team member: ${err.message || 'Unknown error'}`);
   }
 }
 
