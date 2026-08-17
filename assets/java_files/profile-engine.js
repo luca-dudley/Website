@@ -499,6 +499,8 @@ function applyTierRestrictions() {
       </button>
     `;
   }
+
+  if (typeof updatePdfQuotaUI === 'function') updatePdfQuotaUI();
 }
 
 // DYNAMIC PLAN BUTTON LABELS & DISABLED STATES

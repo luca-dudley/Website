@@ -211,15 +211,22 @@
   <!-- 3. MAIN CONTENT CONTAINER -->
   <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
     <div class="max-w-5xl mx-auto p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h2 class="text-2xl font-serif text-foreground mb-2">Employee Directory</h2>
+          <h2 class="text-2xl font-serif text-foreground mb-1">Employee Directory</h2>
           <p class="text-muted text-sm">Find all recorded employees down below with verified completion logs and downloadable certificates.</p>
         </div>
 
-        <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-full shadow-sm">
-          <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span class="text-xs font-medium text-green-700">Actively syncing to Organization HR</span>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
+          <!-- Dynamic Tier PDF Quota & Countdown Pill -->
+          <div id="pdf-quota-pill" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all">
+            <!-- Injected via updatePdfQuotaUI() -->
+          </div>
+
+          <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-xl shadow-sm">
+            <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span class="text-xs font-medium text-green-700">Live HR Sync</span>
+          </div>
         </div>
       </div>
 
@@ -686,12 +693,79 @@
     };
 
     // =========================================================================
+    // DYNAMIC PDF QUOTA & RESET COUNTDOWN ENGINE
+    // =========================================================================
+    function getDaysUntilNextMonth() {
+      const now = new Date();
+      // First day of next calendar month at 00:00:00
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const diffMs = nextMonth - now;
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      
+      const nextMonthName = nextMonth.toLocaleString('en-US', { month: 'short' });
+      return { days: diffDays, resetLabel: `1 ${nextMonthName}` };
+    }
+
+    function updatePdfQuotaUI() {
+      const pill = document.getElementById('pdf-quota-pill');
+      if (!pill) return;
+
+      const tier = (window.currentCompanyTier || 'basic').toLowerCase();
+      const companyId = window.userCompanyId || 'default';
+      const now = new Date();
+      const currentMonthKey = `cert_quota_${companyId}_${now.getFullYear()}_${now.getMonth() + 1}`;
+      const { days, resetLabel } = getDaysUntilNextMonth();
+
+      pill.className = 'hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all';
+      pill.classList.remove('hidden');
+      pill.classList.add('flex');
+
+      if (tier === 'enterprise') {
+        pill.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+        pill.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <span><strong>Unlimited</strong> PDF Certificates</span>
+        `;
+      } else if (tier === 'essential') {
+        const usedCount = parseInt(localStorage.getItem(currentMonthKey) || '0', 10);
+        const monthlyLimit = 5;
+        const remaining = Math.max(0, monthlyLimit - usedCount);
+
+        if (remaining > 0) {
+          pill.classList.add('bg-slate-50', 'border-slate-200', 'text-slate-700');
+          pill.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+            <span>PDF Limit: <strong>${remaining} of ${monthlyLimit} left</strong></span>
+            <span class="text-slate-300">|</span>
+            <span class="text-[11px] text-muted">Resets in ${days}d (${resetLabel})</span>
+          `;
+        } else {
+          // Monthly Cap Hit
+          pill.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+          pill.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span><strong>0 of ${monthlyLimit} left</strong> (Capped)</span>
+            <span class="text-red-200">|</span>
+            <span class="text-[11px]">Resets ${resetLabel}</span>
+            <button onclick="openProfileModal(); switchProfileTab('plans');" class="ml-1 text-[11px] font-bold text-red-900 underline hover:text-red-700">
+              Upgrade
+            </button>
+          `;
+        }
+      } else {
+        pill.classList.add('bg-slate-100', 'border-slate-300', 'text-slate-600');
+        pill.innerHTML = `<span>PDF Downloads Locked</span>`;
+      }
+    }
+
+    // =========================================================================
     // HIGH-RESOLUTION CLIENT-SIDE PDF RECORD GENERATOR (IMPROVED HEADER LOCKUP)
     // =========================================================================
     function generateCertificatePDF(employeeName, saIdNumber, moduleTitle, completionDate, supervisorName) {
       const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
       const companyId = window.userCompanyId || 'default';
       const currentMonthKey = `cert_quota_${companyId}_${new Date().getFullYear()}_${new Date().getMonth() + 1}`;
+      const { days, resetLabel } = getDaysUntilNextMonth();
 
       // 1. Basic Tier: Hard Lock
       if (currentTier === 'basic') {
@@ -709,14 +783,14 @@
         if (usedCount >= monthlyLimit) {
           openProfileModal();
           switchProfileTab('plans');
-          alert(`You have reached your monthly limit of ${monthlyLimit} certificate downloads on the Essential plan. Upgrade to Enterprise for unlimited instant certificate generation.`);
+          alert(`You have reached your monthly limit of ${monthlyLimit} certificate downloads on the Essential plan (resets in ${days} days on ${resetLabel}). Upgrade to Enterprise for unlimited certificate generation.`);
           return;
         }
 
         // Increment usage count on Essential
         localStorage.setItem(currentMonthKey, (usedCount + 1).toString());
+        updatePdfQuotaUI(); // Live UI update on download
       }
-
       // 3. Enterprise: Unlimited (Proceeds directly through without restrictions)
 
       if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -904,6 +978,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       fetchAndRenderTrainingRecords();
+      setTimeout(updatePdfQuotaUI, 500); // Initial check once profile-engine resolves tier
       searchInput?.addEventListener('input', () => {
         window.clearTimeout(searchDebounceId);
         searchDebounceId = window.setTimeout(() => {
