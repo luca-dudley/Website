@@ -235,7 +235,7 @@
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input id="searchInput" type="text" placeholder="Search employee or SA ID..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:ring-primary focus:border-primary outline-none transition-colors">
+          <input id="searchInput" type="text" placeholder="Search employee name or number..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:ring-primary focus:border-primary outline-none transition-colors">
         </div>
         <div class="flex gap-2 w-full sm:w-auto">
           <select id="sortSelect" class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
@@ -358,7 +358,7 @@
 
     const buildEmployeeKey = (record) => {
       const fallback = record.employee_name || 'unknown-employee';
-      return String(record.sa_id_number || fallback).trim().toLowerCase();
+      return String(record.employee_number || fallback).trim().toLowerCase();
     };
 
     const groupTrainingRecords = (records) => {
@@ -370,7 +370,7 @@
         if (!groupedRecords.has(key)) {
           groupedRecords.set(key, {
             employee_name: record.employee_name || 'Unnamed employee',
-            sa_id_number: record.sa_id_number || '',
+            employee_number: record.employee_number || '',
             company_id: record.company_id || '',
             modules: [],
             latestCompletedAt: recordDate,
@@ -379,16 +379,19 @@
 
         const employee = groupedRecords.get(key);
         employee.employee_name = employee.employee_name || record.employee_name || 'Unnamed employee';
-        employee.sa_id_number = employee.sa_id_number || record.sa_id_number || '';
+        employee.employee_number = employee.employee_number || record.employee_number || '';
         employee.company_id = employee.company_id || record.company_id || '';
         employee.latestCompletedAt = formatDateTimeValue(recordDate) > formatDateTimeValue(employee.latestCompletedAt)
           ? recordDate
           : employee.latestCompletedAt;
         employee.modules.push({
+          id: record.id,
           module_title: record.module_title || 'Untitled module',
           supervisor_name: record.supervisor_name || '',
-          supervisor_email: record.supervisor_email || '',
+          supervisor_signature_data: record.supervisor_signature_data || null,
+          employee_signature_data: record.employee_signature_data || null,
           training_type: record.training_type || 'Individual',
+          batch_session_id: record.batch_session_id || null,
           created_at: recordDate,
         });
       });
@@ -411,9 +414,9 @@
     const matchesSearchQuery = (employee, query) => {
       if (!query) return true;
       const employeeName = (employee.employee_name || '').toLowerCase();
-      const idNumber = (employee.sa_id_number || '').toLowerCase();
+      const empNumber = (employee.employee_number || '').toLowerCase();
       const moduleMatch = employee.modules.some((module) => (module.module_title || '').toLowerCase().includes(query));
-      return employeeName.includes(query) || idNumber.includes(query) || moduleMatch;
+      return employeeName.includes(query) || empNumber.includes(query) || moduleMatch;
     };
 
     const matchesTrainingTypeFilter = (employee, trainingTypeFilter) => {
@@ -485,21 +488,21 @@
 
       const cardsHtml = employees.map((employee, index) => {
         const panelId = `employee-panel-${index}`;
-        const displayId = employee.sa_id_number ? escapeHtml(employee.sa_id_number) : 'No SA ID provided';
+        const displayId = employee.employee_number ? `Emp No: ${escapeHtml(employee.employee_number)}` : 'Employee';
         const moduleCount = employee.modules.length;
         const moduleLabel = moduleCount === 1 ? 'Module Completed' : 'Modules Completed';
 
         const modulesHtml = employee.modules.map((module) => {
           const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Authorized Safety Officer';
-          const supervisorEmail = module.supervisor_email ? escapeHtml(module.supervisor_email) : '';
+
           const trainingType = module.training_type || 'Individual';
           const dateFormatted = formatDate(module.created_at);
 
-          // Escaped attributes for the generator function
           const empSafe = escapeHtml(employee.employee_name).replace(/'/g, "\\'");
-          const idSafe = escapeHtml(employee.sa_id_number || 'N/A').replace(/'/g, "\\'");
+          const idSafe = escapeHtml(employee.employee_number || '').replace(/'/g, "\\'");
           const modSafe = escapeHtml(module.module_title).replace(/'/g, "\\'");
           const supSafe = supervisorName.replace(/'/g, "\\'");
+          const batchIdSafe = escapeHtml(module.batch_session_id || '').replace(/'/g, "\\'");
 
           return `
             <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
@@ -513,21 +516,33 @@
               </td>
               <td class="px-4 py-4 align-middle text-foreground sm:px-6">
                 <div class="font-medium text-slate-700">${supervisorName}</div>
-                ${supervisorEmail ? `<div class="text-[11px] text-muted">${supervisorEmail}</div>` : ''}
               </td>
               <td class="px-4 py-4 align-middle text-slate-500 sm:px-6 text-xs">
                 ${escapeHtml(dateFormatted)}
               </td>
               <td class="px-4 py-4 align-middle text-right sm:px-6">
-                <button 
-                  onclick="generateCertificatePDF('${empSafe}', '${idSafe}', '${modSafe}', '${dateFormatted}', '${supSafe}')"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
-                  title="Generate Official PDF Certificate">
-                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                  <span>PDF</span>
-                </button>
+                <div class="flex items-center justify-end gap-2">
+                  <!-- Individual Cert Button -->
+                  <button 
+                    onclick="generateIndividualCertificatePDF('${empSafe}', '${idSafe}', '${modSafe}', '${dateFormatted}', '${supSafe}')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
+                    title="Download Individual Worker Certificate">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Cert</span>
+                  </button>
+
+                  <!-- 2-Page Group Register Button (Only for Group trainings) -->
+                  ${trainingType === 'Group' && batchIdSafe ? `
+                    <button 
+                      onclick="generateGroupLogSheetPDF('${batchIdSafe}', '${modSafe}', '${supSafe}', '${dateFormatted}')"
+                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 text-amber-800 text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                      title="Download 2-Page Group Attendance Register">
+                      <span>📋 Register</span>
+                    </button>
+                  ` : ''}
+                </div>
               </td>
             </tr>
           `;
@@ -659,9 +674,17 @@
           return;
         }
 
+        const { data: companyInfo } = await window.dbClient
+          .from('companies')
+          .select('name, vat_number, phone, postal_address, contact_email')
+          .eq('id', profile.company_id)
+          .maybeSingle();
+
+        window.currentCompanyInfo = companyInfo || {};
+
         const { data: records, error } = await window.dbClient
           .from('training_records')
-          .select('employee_name, sa_id_number, company_id, module_title, supervisor_name, supervisor_email, training_type, created_at, completed_at')
+          .select('id, employee_name, employee_number, company_id, module_title, supervisor_name, supervisor_signature_data, employee_signature_data, training_type, created_at, completed_at, batch_session_id')
           .eq('company_id', profile.company_id)
           .order('completed_at', { ascending: false });
 
@@ -759,15 +782,46 @@
     }
 
     // =========================================================================
-    // HIGH-RESOLUTION CLIENT-SIDE PDF RECORD GENERATOR (IMPROVED HEADER LOCKUP)
+    // FRESH COMPANY METADATA FETCHER (PREVENTS STALE STAMP DATA)
     // =========================================================================
-    function generateCertificatePDF(employeeName, saIdNumber, moduleTitle, completionDate, supervisorName) {
+    async function getFreshCompanyInfo() {
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session?.user?.id) return window.currentCompanyInfo || {};
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.company_id) {
+          const { data: companyData } = await window.dbClient
+            .from('companies')
+            .select('name, vat_number, phone, postal_address, contact_email')
+            .eq('id', profile.company_id)
+            .maybeSingle();
+
+          if (companyData) {
+            window.currentCompanyInfo = companyData;
+            return companyData;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed fetching fresh company info:', err);
+      }
+      return window.currentCompanyInfo || {};
+    }
+
+    // =========================================================================
+    // REWORKED INDIVIDUAL CERTIFICATE (WITH LIVE DYNAMIC STAMP)
+    // =========================================================================
+    async function generateIndividualCertificatePDF(employeeName, employeeNumber, moduleTitle, completionDate, supervisorName) {
       const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
       const companyId = window.userCompanyId || 'default';
       const currentMonthKey = `cert_quota_${companyId}_${new Date().getFullYear()}_${new Date().getMonth() + 1}`;
       const { days, resetLabel } = getDaysUntilNextMonth();
 
-      // 1. Basic Tier: Hard Lock
       if (currentTier === 'basic') {
         openProfileModal();
         switchProfileTab('plans');
@@ -775,7 +829,6 @@
         return;
       }
 
-      // 2. Essential Tier: 5 Downloads per Month Cap
       if (currentTier === 'essential') {
         let usedCount = parseInt(localStorage.getItem(currentMonthKey) || '0', 10);
         const monthlyLimit = 5;
@@ -787,43 +840,39 @@
           return;
         }
 
-        // Increment usage count on Essential
         localStorage.setItem(currentMonthKey, (usedCount + 1).toString());
-        updatePdfQuotaUI(); // Live UI update on download
+        updatePdfQuotaUI();
       }
-      // 3. Enterprise: Unlimited (Proceeds directly through without restrictions)
 
       if (!window.jspdf || !window.jspdf.jsPDF) {
-        alert('PDF Generation library is loading. Please try again in a moment.');
+        alert('PDF Generation library is loading. Please try again.');
         return;
       }
 
-      const { jsPDF } = window.jspdf;
-      // Landscape A4: 297mm width x 210mm height
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
+      // Fetch live company stamp details directly from Supabase
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
 
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pageWidth = 297;
       const pageHeight = 210;
 
-      // Soft Clean Background
+      // 1. Soft Clean Background
       doc.setFillColor(253, 254, 255);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-      // Primary Outer Navy Border
-      doc.setDrawColor(30, 58, 95); // #1e3a5f
+      // 2. Primary Outer Navy Border
+      doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(3);
       doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
 
-      // Inner Accent Gold/Slate Border
-      doc.setDrawColor(203, 213, 225); // Slate 300
+      // Inner Accent Slate Border
+      doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.75);
       doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
 
-      // Corner Accents (Geometric Corners)
+      // Corner Accents (Geometric Solid Squares)
       const cSize = 10;
       doc.setFillColor(30, 58, 95);
       doc.rect(8, 8, cSize, cSize, 'F');
@@ -831,149 +880,437 @@
       doc.rect(8, pageHeight - 8 - cSize, cSize, cSize, 'F');
       doc.rect(pageWidth - 8 - cSize, pageHeight - 8 - cSize, cSize, cSize, 'F');
 
-      // -----------------------------------------------------
-      // 1. PROMINENT LOGO & HEADER LOCKUP (CALCULATED TRUE CENTER)
-      // -----------------------------------------------------
-      const logoImgElement = document.querySelector('img[src*="Simple_Logo-removebg-preview"]') || document.querySelector('img[src*="Simple_Logo"]');
-      
-      const logoSize = 22;        // Clean size without container box
-      const gap = 8;              // Gap between logo and text
-      const textBlockWidth = 110; // Width allocated to 'SIMPLE SOLUTIONS'
-      
-      // Calculate start coordinate so (Logo + Gap + Text) is mathematically centered
-      const totalHeaderWidth = (logoImgElement ? logoSize + gap : 0) + textBlockWidth;
-      const startX = (pageWidth - totalHeaderWidth) / 2;
-      const headerY = 19;
-
-      if (logoImgElement) {
-        doc.addImage(logoImgElement, 'PNG', startX, headerY, logoSize, logoSize);
-      }
-
-      // Text block precisely aligned and vertically centered with the logo
-      const textX = logoImgElement ? startX + logoSize + gap : pageWidth / 2;
-      const textAlignment = logoImgElement ? 'left' : 'center';
-
+      // 3. Prominent Company Header
       doc.setFont('times', 'bold');
       doc.setFontSize(26);
       doc.setTextColor(30, 58, 95);
-      doc.text('SIMPLE SOLUTIONS', textX, headerY + 11, { align: textAlignment });
+      doc.text(companyName.toUpperCase(), pageWidth / 2, 28, { align: 'center' });
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
-      doc.text('INTERNAL OPERATIONAL TRAINING RECORD', textX, headerY + 18, { align: textAlignment });
+      doc.text('INTERNAL OPERATIONAL TRAINING RECORD', pageWidth / 2, 36, { align: 'center' });
 
       // Geometric Divider Line
       doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(0.8);
-      doc.line(30, 48, pageWidth - 30, 48);
+      doc.line(30, 44, pageWidth - 30, 44);
 
-      // -----------------------------------------------------
-      // 2. RECIPIENT & MODULE CONTENT
-      // -----------------------------------------------------
+      // 4. Recipient Details & Statement
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
       doc.setTextColor(71, 85, 105);
-      doc.text('This operational record logs that', pageWidth / 2, 66, { align: 'center' });
+      doc.text('This operational record logs that', pageWidth / 2, 60, { align: 'center' });
 
-      // Recipient Employee Name
+      // Employee Full Name
       doc.setFont('times', 'bold');
       doc.setFontSize(28);
       doc.setTextColor(15, 23, 42);
-      doc.text((employeeName || 'VERIFIED OPERATOR').toUpperCase(), pageWidth / 2, 80, { align: 'center' });
+      doc.text((employeeName || 'VERIFIED OPERATOR').toUpperCase(), pageWidth / 2, 74, { align: 'center' });
 
-      // Identification Line
+      // Employee / Clock Code
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(100, 116, 139);
-      const idText = (saIdNumber && saIdNumber !== 'N/A' && saIdNumber !== 'No SA ID provided') 
-        ? `National ID / Reg: ${saIdNumber}` 
-        : `Company Employee`;
-      doc.text(idText, pageWidth / 2, 88, { align: 'center' });
+      const idText = (employeeNumber && employeeNumber.trim() !== '' && employeeNumber !== 'N/A') 
+        ? `Employee / Clock No: ${employeeNumber.trim().toUpperCase()}` 
+        : `Verified Company Employee`;
+      doc.text(idText, pageWidth / 2, 82, { align: 'center' });
 
-      // Body Statement
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11.5);
+      doc.setFontSize(11);
       doc.setTextColor(71, 85, 105);
-      doc.text('has reviewed the internal safety protocols and guidelines for:', pageWidth / 2, 103, { align: 'center' });
+      doc.text('has reviewed the internal safety protocols and guidelines for:', pageWidth / 2, 97, { align: 'center' });
 
-      // Training Module Title Block
+      // Module Title
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(19);
       doc.setTextColor(30, 58, 95);
-      doc.text(moduleTitle.toUpperCase(), pageWidth / 2, 117, { align: 'center' });
+      doc.text(moduleTitle.toUpperCase(), pageWidth / 2, 111, { align: 'center' });
 
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(9.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Logged via The Vault digital training framework.', pageWidth / 2, 126, { align: 'center' });
+      // 5. Bottom Verification & Rectangular Stamp Row
+      const sigY = 158;
 
-      // -----------------------------------------------------
-      // 3. SIGN-OFF & VERIFICATION SEAL
-      // -----------------------------------------------------
-      const sigY = 160;
-
-      // Left Column: Issue Date
+      // Left: Date Logged
       doc.setDrawColor(148, 163, 184);
       doc.setLineWidth(0.5);
-      doc.line(40, sigY, 100, sigY);
+      doc.line(35, sigY, 95, sigY);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
       doc.setTextColor(30, 41, 59);
-      doc.text(completionDate || 'Recorded Date', 70, sigY - 3, { align: 'center' });
-      doc.setFont('helvetica', 'bold');
+      doc.text(completionDate || 'Recorded Date', 65, sigY - 3, { align: 'center' });
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
-      doc.text('DATE LOGGED', 70, sigY + 6, { align: 'center' });
+      doc.text('DATE LOGGED', 65, sigY + 5, { align: 'center' });
 
-      // Center Compliance Stamp Seal
-      doc.setFillColor(30, 58, 95);
-      doc.circle(pageWidth / 2, sigY - 2, 12, 'F');
-      doc.setDrawColor(255, 255, 255);
-      doc.setLineWidth(0.75);
-      doc.circle(pageWidth / 2, sigY - 2, 10.5, 'S');
+      // Center: Rectangular Official Company Stamp Box
+      const stampBoxW = 86;
+      const stampBoxH = 35;
+      const stampX = (pageWidth - stampBoxW) / 2;
+      const stampY = sigY - 23;
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(stampX, stampY, stampBoxW, stampBoxH, 2, 2, 'FD');
 
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), pageWidth / 2, stampY + 6.5, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.5);
-      doc.setTextColor(255, 255, 255);
-      doc.text('LOGGED', pageWidth / 2, sigY - 4, { align: 'center' });
-      doc.setFontSize(5.5);
-      doc.text('RECORD', pageWidth / 2, sigY + 0.5, { align: 'center' });
+      doc.setTextColor(51, 65, 85);
+      
+      let lineY = stampY + 11.5;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
 
-      // Right Column: Supervisor
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('OFFICIAL VERIFIED STAMP', pageWidth / 2, stampY + stampBoxH - 2.5, { align: 'center' });
+
+      // Right: Supervising Officer
       doc.setDrawColor(148, 163, 184);
       doc.setLineWidth(0.5);
-      doc.line(pageWidth - 100, sigY, pageWidth - 40, sigY);
+      doc.line(pageWidth - 95, sigY, pageWidth - 35, sigY);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
       doc.setTextColor(30, 41, 59);
-      doc.text(supervisorName || 'Authorized Officer', pageWidth - 70, sigY - 3, { align: 'center' });
-      doc.setFont('helvetica', 'bold');
+      doc.text(supervisorName || 'Authorized Officer', pageWidth - 65, sigY - 3, { align: 'center' });
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
-      doc.text('SUPERVISING OFFICER', pageWidth - 70, sigY + 6, { align: 'center' });
+      doc.text('SUPERVISING OFFICER', pageWidth - 65, sigY + 5, { align: 'center' });
 
-      // -----------------------------------------------------
-      // 4. LEGAL DISCLAIMER & FOOTER
-      // -----------------------------------------------------
+      // 6. Footer Disclaimer & System Attribution
       const docHash = `REC-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`;
       
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.5);
       doc.setTextColor(148, 163, 184);
+      doc.text('DISCLAIMER: This document serves solely as an internal operational log confirming the review of supplementary safety materials.', pageWidth / 2, 186, { align: 'center' });
+      doc.text('It is not a legally accredited, statutory, or sanctioned certificate of competence under any national safety framework.', pageWidth / 2, 189, { align: 'center' });
       
-      const disclaimerLine1 = "DISCLAIMER: This document serves solely as an internal operational log confirming the review of supplementary safety materials.";
-      const disclaimerLine2 = "It is not a legally accredited, statutory, or sanctioned certificate of competence under any national safety framework.";
-      const refLine = `Internal Record Ref: ${docHash} • Simple Solutions`;
-      
-      doc.text(disclaimerLine1, pageWidth / 2, 184, { align: 'center' });
-      doc.text(disclaimerLine2, pageWidth / 2, 187, { align: 'center' });
       doc.setFont('helvetica', 'bold');
-      doc.text(refLine, pageWidth / 2, 192, { align: 'center' });
+      doc.text(`Internal Record Ref: ${docHash} • Logged via The Vault by Simple Solutions`, pageWidth / 2, 193, { align: 'center' });
 
-      // Trigger Instant Download
-      const safeName = `Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`;
-      doc.save(safeName);
+      doc.save(`Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    // =========================================================================
+    // 2. OFFICIAL 2-PAGE GROUP ATTENDANCE REGISTER (MINIMALIST LANDSCAPE A4)
+    // =========================================================================
+    async function generateGroupLogSheetPDF(batchSessionId, moduleTitle, supervisorName, sessionDate) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF library is loading. Please try again in a moment.');
+        return;
+      }
+
+      // 1. Fetch batch trainee records
+      const { data: batchRecords, error } = await window.dbClient
+        .from('training_records')
+        .select('*')
+        .eq('batch_session_id', batchSessionId);
+
+      if (error || !batchRecords || batchRecords.length === 0) {
+        alert('Unable to load batch session records.');
+        return;
+      }
+
+      // 2. Fetch video curriculum objectives
+      const { data: videoData } = await window.dbClient
+        .from('videos')
+        .select('objectives, total_seconds')
+        .eq('title', moduleTitle)
+        .maybeSingle();
+
+      const objectives = (videoData?.objectives && Array.isArray(videoData.objectives)) ? videoData.objectives : [
+        'Equipment pre-inspection, materials, and safe operational procedures',
+        'Personal Protective Equipment (PPE) requirements and mandatory usage',
+        'Hazard identification, workspace safety, and emergency shutoff protocols',
+        'Proper equipment handling, transport, and secure end-of-shift storage',
+        'Standard reporting procedures for mechanical faults, defects, or injuries'
+      ];
+
+      const durationMins = videoData?.total_seconds ? Math.ceil(videoData.total_seconds / 60) : 30;
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
+      const supervisorSig = batchRecords[0]?.supervisor_signature_data || null;
+
+      const { jsPDF } = window.jspdf;
+      // Landscape A4: 297mm x 210mm
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = 297;
+      const pageHeight = 210;
+
+      // =======================================================================
+      // PAGE 1: CURRICULUM, STAMP & SUPERVISOR CONFIRMATION
+      // =======================================================================
+      
+      // 1. Clean Minimal Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), 16, 20);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('GROUP TRAINING RECORD & INDUCTION LOG', 16, 26);
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(16, 30, pageWidth - 16, 30);
+
+      // 2. Metadata Grid Strip
+      const metaY = 35;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(16, metaY, pageWidth - 32, 14, 1.5, 1.5, 'FD');
+
+      doc.line(80, metaY, 80, metaY + 14);
+      doc.line(150, metaY, 150, metaY + 14);
+      doc.line(220, metaY, 220, metaY + 14);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(100, 116, 139);
+      doc.text('TRAINER / SUPERVISOR', 20, metaY + 5);
+      doc.text('TRAINING DATE', 84, metaY + 5);
+      doc.text('DURATION', 154, metaY + 5);
+      doc.text('BATCH REF', 224, metaY + 5);
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(supervisorName || 'Authorized Supervisor', 20, metaY + 10.5);
+      doc.text(sessionDate || 'Recorded Date', 84, metaY + 10.5);
+      doc.text(`${durationMins} MIN`, 154, metaY + 10.5);
+      doc.text(batchSessionId.substring(0, 8).toUpperCase(), 224, metaY + 10.5);
+
+      // 3. Training Curriculum Section (Left Column)
+      const contentY = 56;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`TRAINING MODULE: ${moduleTitle.toUpperCase()} (VIDEO INDUCTION)`, 16, contentY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(51, 65, 85);
+      let bulletY = contentY + 8;
+      
+      objectives.forEach(obj => {
+        doc.setFillColor(30, 58, 95);
+        doc.circle(20, bulletY - 1, 1, 'F');
+        doc.text(obj, 25, bulletY);
+        bulletY += 7.5;
+      });
+
+      // 4. Bottom Verification Row: Supervisor Declaration (Left) + Company Stamp (Right)
+      const bottomY = 120;
+
+      // Left Box: Trainer Legal Attestation
+      const attestW = 160;
+      const attestH = 65;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(16, bottomY, attestW, attestH, 2, 2, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text('TRAINER LEGAL DECLARATION', 22, bottomY + 8);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+      const declarationText = `I, ${supervisorName}, hereby confirm that I have conducted and supervised this training induction. The employees listed on Page 2 were instructed on all safety protocols, operational guidelines, and hazard controls specified above.`;
+      doc.text(doc.splitTextToSize(declarationText, attestW - 12), 22, bottomY + 16);
+
+      // Digital Signature Area
+      if (supervisorSig) {
+        doc.addImage(supervisorSig, 'PNG', 22, bottomY + 28, 45, 18);
+      }
+      doc.setDrawColor(148, 163, 184);
+      doc.line(22, bottomY + 50, 85, bottomY + 50);
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Supervisor Signature', 22, bottomY + 55);
+
+      doc.line(95, bottomY + 50, 155, bottomY + 50);
+      doc.text(`Date: ${sessionDate}`, 95, bottomY + 55);
+
+      // Right Box: Rectangular Official Company Stamp
+      const stampBoxW = 95;
+      const stampBoxH = 65;
+      const stampX = pageWidth - 16 - stampBoxW;
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(stampX, bottomY, stampBoxW, stampBoxH, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), stampX + (stampBoxW / 2), bottomY + 12, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(51, 65, 85);
+      
+      let stampLineY = bottomY + 20;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('OFFICIAL VERIFIED STAMP', stampX + (stampBoxW / 2), bottomY + stampBoxH - 4, { align: 'center' });
+
+      // Page 1 Footer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Page 1 of 2 — Curriculum & Trainer Attestation • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+
+// =======================================================================
+      // PAGE 2: CLEAN MINIMALIST ATTENDANCE REGISTER
+      // =======================================================================
+      doc.addPage();
+
+      // Page 2 Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`${moduleTitle.toUpperCase()} — ATTENDANCE REGISTER`, 16, 18);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`DATE: ${sessionDate}   |   BATCH REF: ${batchSessionId.substring(0, 8).toUpperCase()}   |   COMPANY: ${companyName.toUpperCase()}`, 16, 24);
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(16, 27, pageWidth - 16, 27);
+
+      // Table Geometry (Total Width: 265mm across page)
+      const tableX = 16;
+      const tableY = 32;
+      const headerH = 8;
+      const rowH = 10;
+      const tableW = pageWidth - 32; // 265mm
+
+      // Columns without Verification: NO (14mm) | EMP NO (45mm) | FULL NAME (110mm) | GENDER (28mm) | SIGNATURE (68mm)
+      const colNo = 14;
+      const colEmp = 45;
+      const colName = 110;
+      const colGen = 28;
+      const colSig = 68;
+
+      const xNo = tableX;
+      const xEmp = xNo + colNo;
+      const xName = xEmp + colEmp;
+      const xGen = xName + colName;
+      const xSig = xGen + colGen;
+
+      // Table Header Row
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.rect(tableX, tableY, tableW, headerH, 'FD');
+
+      doc.line(xEmp, tableY, xEmp, tableY + headerH);
+      doc.line(xName, tableY, xName, tableY + headerH);
+      doc.line(xGen, tableY, xGen, tableY + headerH);
+      doc.line(xSig, tableY, xSig, tableY + headerH);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text('NO.', xNo + (colNo / 2), tableY + 5.5, { align: 'center' });
+      doc.text('EMPLOYEE NO', xEmp + 5, tableY + 5.5);
+      doc.text('EMPLOYEE NAME & SURNAME', xName + 5, tableY + 5.5);
+      doc.text('GENDER', xGen + (colGen / 2), tableY + 5.5, { align: 'center' });
+      doc.text('EMPLOYEE SIGNATURE', xSig + (colSig / 2), tableY + 5.5, { align: 'center' });
+
+      // Table Body Rows (Up to 15 rows)
+      const maxRows = 15;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(15, 23, 42);
+
+      for (let i = 0; i < maxRows; i++) {
+        const y = tableY + headerH + (i * rowH);
+        const trainee = batchRecords[i] || null;
+
+        doc.setDrawColor(226, 232, 240);
+        doc.rect(tableX, y, tableW, rowH, 'S');
+
+        doc.line(xEmp, y, xEmp, y + rowH);
+        doc.line(xName, y, xName, y + rowH);
+        doc.line(xGen, y, xGen, y + rowH);
+        doc.line(xSig, y, xSig, y + rowH);
+
+        doc.text(String(i + 1), xNo + (colNo / 2), y + 6.5, { align: 'center' });
+
+        if (trainee) {
+          doc.setFont('helvetica', 'bold');
+          doc.text(trainee.employee_number || '-', xEmp + 5, y + 6.5);
+          doc.setFont('helvetica', 'normal');
+          doc.text(trainee.employee_name || '', xName + 5, y + 6.5);
+          doc.text(trainee.gender || 'Male', xGen + (colGen / 2), y + 6.5, { align: 'center' });
+
+          // Render digital signature preserving natural 2.5:1 aspect ratio
+          if (trainee.employee_signature_data) {
+            const sigWidth = 22.5; // Natural proportion
+            const sigHeight = 9;
+            const sigX = xSig + (colSig - sigWidth) / 2;
+            doc.addImage(trainee.employee_signature_data, 'PNG', sigX, y + 0.5, sigWidth, sigHeight);
+          }
+        }
+      }
+
+      // Page 2 Footer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Page 2 of 2 — Trainee Sign-Off Register • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+      doc.save(`Group_Register_${moduleTitle.replace(/\s+/g, '_')}_${sessionDate}.pdf`);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

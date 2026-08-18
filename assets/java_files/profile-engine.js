@@ -55,7 +55,7 @@ function switchProfileTab(tabName) {
     tab.classList.add('hidden');
     tab.classList.remove('block');
   });
-  ['profile', 'security', 'plans', 'team'].forEach(name => {
+  ['profile', 'company', 'security', 'plans', 'team'].forEach(name => {
     const btn = document.getElementById(`tab-btn-${name}`);
     if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-100 transition-colors";
   });
@@ -169,25 +169,18 @@ async function saveUserProfile() {
     const fName = document.getElementById('profile-fname').value;
     const lName = document.getElementById('profile-lname').value;
     const jobTitle = document.getElementById('profile-title').value;
-    const companyName = document.getElementById('profile-company').value;
 
-    // 1. Update Profile (saving job title to role or job_title column)
     await window.dbClient.from('profiles').update({
       first_name: fName,
       last_name: lName,
       role: jobTitle
     }).eq('id', user.id);
 
-    // 2. Update Company Name
-    if (window.userCompanyId) {
-      await window.dbClient.from('companies').update({ name: companyName }).eq('id', window.userCompanyId);
-    }
-
     const initials = ((fName.charAt(0) || '') + (lName.charAt(0) || '')).toUpperCase() || 'U';
     document.querySelectorAll('[data-dynamic-initials]').forEach(el => el.textContent = initials);
 
-    const headerClientName = document.querySelector('header.hidden.lg\\:block .text-right p span:first-child');
-    if (headerClientName) headerClientName.parentElement.innerHTML = `<span>${fName}</span> <span>${lName}</span>`;
+    const topName = document.getElementById('topbar-user-name');
+    if (topName) topName.textContent = `${fName} ${lName}`.trim() || 'User';
 
     saveBtn.innerText = 'Saved!';
     setTimeout(() => { saveBtn.innerText = originalText; }, 2000);
@@ -195,6 +188,68 @@ async function saveUserProfile() {
     console.error('Error saving profile:', error);
     saveBtn.innerText = 'Error';
     setTimeout(() => { saveBtn.innerText = originalText; }, 2000);
+  }
+}
+
+async function saveCompanyProfile() {
+  const saveBtn = document.getElementById('save-company-btn');
+  const originalText = saveBtn ? saveBtn.innerText : 'Save';
+  if (saveBtn) saveBtn.innerText = 'Saving...';
+
+  try {
+    if (!window.userCompanyId) {
+      // Fallback: Attempt to resolve company_id directly from session
+      const { data: { user } } = await window.dbClient.auth.getUser();
+      const { data: profile } = await window.dbClient
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      window.userCompanyId = profile?.company_id || null;
+    }
+
+    if (!window.userCompanyId) {
+      throw new Error("No organization ID associated with your account.");
+    }
+
+    const companyName = document.getElementById('profile-company-name')?.value?.trim() || '';
+    const companyVat = document.getElementById('profile-company-vat')?.value?.trim() || '';
+    const companyPhone = document.getElementById('profile-company-phone')?.value?.trim() || '';
+    const companyAddress = document.getElementById('profile-company-address')?.value?.trim() || '';
+    const companyEmail = document.getElementById('profile-company-email')?.value?.trim() || '';
+
+    const { error } = await window.dbClient
+      .from('companies')
+      .update({ 
+        name: companyName,
+        vat_number: companyVat,
+        phone: companyPhone,
+        postal_address: companyAddress,
+        contact_email: companyEmail
+      })
+      .eq('id', window.userCompanyId);
+
+    if (error) {
+      console.error('[ProfileEngine] Supabase update error:', error);
+      throw error;
+    }
+
+    // Update topbar instantly
+    const topCompany = document.getElementById('topbar-company-name');
+    if (topCompany && companyName) topCompany.textContent = companyName;
+
+    if (saveBtn) {
+      saveBtn.innerText = 'Saved!';
+      setTimeout(() => { saveBtn.innerText = originalText; }, 2000);
+    }
+  } catch (error) {
+    console.error('Error saving organization profile:', error);
+    alert(`Failed to save organization details: ${error.message || 'Check console for details'}`);
+    if (saveBtn) {
+      saveBtn.innerText = 'Error';
+      setTimeout(() => { saveBtn.innerText = originalText; }, 2000);
+    }
   }
 }
 
@@ -358,28 +413,35 @@ async function loadUserProfile(userId) {
       return;
     }
 
-    // Check if user is Primary Admin vs Manager
+// Check if user is Primary Admin vs Manager
     const userRole = (profile.role || '').toLowerCase();
     const isPlanAdmin = userRole === 'master admin' || userRole === 'admin';
 
-    const managerNotice = document.getElementById('manager-plan-notice');
-    const billingActions = document.getElementById('admin-billing-actions');
-    const planButtons = document.querySelectorAll('.plan-upgrade-btn');
+    // === NEW: Lock Organization Tab for Managers ===
+    const managerCompanyNotice = document.getElementById('manager-company-notice');
+    const saveCompanyBtn = document.getElementById('save-company-btn');
+    const companyInputs = [
+      'profile-company-name', 'profile-company-vat', 'profile-company-phone',
+      'profile-company-address', 'profile-company-email'
+    ].map(id => document.getElementById(id));
 
     if (!isPlanAdmin) {
-      if (managerNotice) managerNotice.classList.remove('hidden');
-      if (billingActions) billingActions.classList.add('hidden');
-      planButtons.forEach(btn => {
-        btn.disabled = true;
-        btn.classList.add('opacity-40', 'cursor-not-allowed');
-        btn.setAttribute('title', 'Only Primary Administrators can change subscription plans.');
+      if (managerCompanyNotice) managerCompanyNotice.classList.remove('hidden');
+      if (saveCompanyBtn) saveCompanyBtn.classList.add('hidden');
+      companyInputs.forEach(input => {
+        if (input) {
+          input.readOnly = true;
+          input.classList.add('bg-slate-50', 'text-slate-500');
+        }
       });
     } else {
-      if (managerNotice) managerNotice.classList.add('hidden');
-      if (billingActions) billingActions.classList.remove('hidden');
-      planButtons.forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+      if (managerCompanyNotice) managerCompanyNotice.classList.add('hidden');
+      if (saveCompanyBtn) saveCompanyBtn.classList.remove('hidden');
+      companyInputs.forEach(input => {
+        if (input) {
+          input.readOnly = false;
+          input.classList.remove('bg-slate-50', 'text-slate-500');
+        }
       });
     }
 
@@ -397,24 +459,27 @@ window.userCompanyId = profile.company_id || companyObj?.id || null;
 
     applyTierRestrictions();
 
-    // --- Populate input fields ---------------------------------------------
-    // Runs regardless of whether the company embed succeeded above, so a broken
-    // company relationship can no longer blank out name/title too.
+    // --- Populate input fields --- //
     const fnameEl = document.getElementById('profile-fname');
     const lnameEl = document.getElementById('profile-lname');
     const titleEl = document.getElementById('profile-title');
-    const companyEl = document.getElementById('profile-company');
 
-    if (!fnameEl || !lnameEl || !titleEl || !companyEl) {
-      console.error('[ProfileEngine] One or more profile input elements are missing from the DOM - injection likely failed or ran after this point.', {
-        fnameEl: !!fnameEl, lnameEl: !!lnameEl, titleEl: !!titleEl, companyEl: !!companyEl
-      });
-    }
+    // Company Tab Fields
+    const companyNameEl = document.getElementById('profile-company-name');
+    const vatEl = document.getElementById('profile-company-vat');
+    const phoneEl = document.getElementById('profile-company-phone');
+    const addressEl = document.getElementById('profile-company-address');
+    const emailEl = document.getElementById('profile-company-email');
 
     if (fnameEl) fnameEl.value = profile.first_name || '';
     if (lnameEl) lnameEl.value = profile.last_name || '';
     if (titleEl) titleEl.value = profile.role || '';
-    if (companyEl) companyEl.value = companyObj?.name || '';
+    
+    if (companyNameEl) companyNameEl.value = companyObj?.name || '';
+    if (vatEl) vatEl.value = companyObj?.vat_number || '';
+    if (phoneEl) phoneEl.value = companyObj?.phone || '';
+    if (addressEl) addressEl.value = companyObj?.postal_address || '';
+    if (emailEl) emailEl.value = companyObj?.contact_email || '';
 
     const fName = profile.first_name || '';
     const lName = profile.last_name || '';
