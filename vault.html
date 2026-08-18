@@ -486,6 +486,9 @@
           return;
         }
 
+        const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+        const unlockedBasicCategories = ['general safety', 'machinery & workshop'];
+
         databaseVideos.forEach(video => {
           const fallbackThumb = 'assets/thumbnails/Simple/General_Farm_Employees.svg';
           const validThumbnail = (video.thumbnail_url && video.thumbnail_url.trim() !== '') 
@@ -493,6 +496,10 @@
             : fallbackThumb;
 
           const subTag = video.sub_tag || 'General Safety';
+          const subTagLower = subTag.toLowerCase().trim();
+
+          // Tier Gating Logic: Lock specialized modules on Basic
+          const isLocked = (currentTier === 'basic') && (!unlockedBasicCategories.includes(subTagLower));
 
           videoLibrary[video.id] = {
             title: video.title,
@@ -500,10 +507,11 @@
             subCategory: subTag,
             description: video.description || '',
             totalSeconds: video.total_seconds || 300,
-            thumbnail: validThumbnail
+            thumbnail: validThumbnail,
+            isLocked: isLocked
           };
 
-          // Color badge based on sub-category
+          // Sub-category badge styling
           let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
           if (subTag === 'Macadamia Processing') {
             badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/60';
@@ -513,27 +521,44 @@
             badgeClass = 'bg-cyan-50 text-cyan-700 border-cyan-200/60';
           }
 
+          const targetHref = isLocked 
+            ? `javascript:handleLockedModuleClick('${video.title.replace(/'/g, "\\'")}', '${subTag}')` 
+            : `module.html?v=${video.id}`;
+
           const cardHTML = `
-            <a href="module.html?v=${video.id}" 
-               class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" 
+            <a href="${targetHref}" 
+               class="video-card group block bg-white rounded-xl border ${isLocked ? 'border-amber-200/80 bg-slate-50/40' : 'border-slate-200'} overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative" 
                data-title="${video.title.toLowerCase()}" 
                data-category="${(video.category || 'agriculture').toLowerCase()}" 
-               data-subcategory="${subTag.toLowerCase().trim()}" 
+               data-subcategory="${subTagLower}" 
                data-language="${(video.language || 'zu').toLowerCase()}">
+              
               <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
                 <img src="${validThumbnail}" 
                      onerror="this.onerror=null; this.src='${fallbackThumb}';" 
                      alt="${video.title} thumbnail" 
-                     class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
-                  ${formatDuration(video.total_seconds)}
-                </div>
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                     class="absolute inset-0 w-full h-full object-contain p-1 ${isLocked ? 'grayscale opacity-30 blur-[1px]' : ''}">
+                
+                ${isLocked ? `
+                  <!-- Locked Badge Overlay -->
+                  <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center p-3 text-center">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 mb-1.5 shadow-lg">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-bold tracking-wide uppercase text-amber-300">Essential Module</span>
                   </div>
-                </div>
+                ` : `
+                  <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
+                    ${formatDuration(video.total_seconds)}
+                  </div>
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
+                      <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                  </div>
+                `}
               </div>
+
               <div class="p-4 flex flex-col justify-between">
                 <div>
                   <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">${video.title}</h3>
@@ -543,11 +568,19 @@
                     <span class="px-2 py-0.5 rounded-md ${badgeClass} text-[10px] font-semibold tracking-wide border">${subTag}</span>
                   </div>
                 </div>
+
                 <div class="flex items-center justify-between mt-2">
-                  <span id="status-${video.id}" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-${video.id}" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
+                  ${isLocked ? `
+                    <span class="text-xs font-semibold text-amber-700 flex items-center gap-1">
+                      🔒 Locked on Basic
+                    </span>
+                    <span class="text-[11px] text-primary underline font-medium">Upgrade &rarr;</span>
+                  ` : `
+                    <span id="status-${video.id}" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                    <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
+                      <div id="progress-${video.id}" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  `}
                 </div>
               </div>
             </a>
@@ -670,6 +703,12 @@
       await renderContinueWatchingBanner();
       fetchAndRenderVault();
     });
+
+    function handleLockedModuleClick(title, subTag) {
+      openProfileModal();
+      switchProfileTab('plans');
+      alert(`"${title}" (${subTag}) is part of our specialized agricultural processing library.\n\nUpgrade to Essential (R220/mo) to unlock full streaming access and employee compliance tracking.`);
+    }
   </script>
 
 </body>

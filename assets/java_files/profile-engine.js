@@ -501,6 +501,7 @@ function applyTierRestrictions() {
   }
 
   if (typeof updatePdfQuotaUI === 'function') updatePdfQuotaUI();
+  if (typeof fetchAndRenderVault === 'function') fetchAndRenderVault();
 }
 
 // DYNAMIC PLAN BUTTON LABELS & DISABLED STATES
