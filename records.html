@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Vault - Training Dashboard</title>
+  <title>Training Records - The Vault</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v2/inline.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -49,359 +51,1333 @@
 
     #sidebar,
     #mainContent {
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .vault-logo-icon {
-      transform: translateY(2px);
+    .employee-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.25s ease;
     }
 
-    @media (min-width: 1024px) {
-      #sidebar.collapsed {
-        width: 5rem;
-      }
+    .employee-panel.is-open {
+      opacity: 1;
+    }
 
-      #sidebar.collapsed #categoryFilters,
-      #sidebar.collapsed #sidebarSpacer {
-        display: none;
-      }
+    .employee-chevron {
+      transition: transform 0.25s ease;
+    }
 
-      #sidebar.collapsed .vault-title {
-        display: none;
-      }
-
-      #sidebar.collapsed .vault-logo-row {
-        justify-content: center;
-      }
-
-      #sidebar.collapsed .vault-logo-icon {
-        width: 3rem;
-        height: 3rem;
-        margin-right: 0;
-      }
-
-      #sidebar.collapsed nav {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-      }
-
-      #sidebar.collapsed nav a {
-        justify-content: center;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-      }
-
-      #sidebar.collapsed .nav-label {
-        display: none;
-      }
+    /* Collapsed Sidebar Rules */
+    #sidebar.collapsed {
+      width: 5rem !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    #sidebar.collapsed .sidebar-text,
+    #sidebar.collapsed .sidebar-category-header,
+    #sidebar.collapsed #sidebarToggle span {
+      display: none !important;
+    }
+    #sidebar.collapsed .sidebar-nav-btn {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    #sidebar.collapsed .sidebar-nav-btn svg {
+      margin: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    #sidebar.collapsed #sidebarToggle svg {
+      transform: rotate(180deg);
     }
   </style>
 </head>
-<body class="font-sans bg-gray-50 text-foreground antialiased">
-  <header class="lg:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800">
-    <div class="h-16 px-4 flex items-center justify-between">
-      <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="p-2 rounded-md hover:bg-slate-800 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
+
+  <!-- 1. FULL WIDTH TOP BAR -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+    <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
+      <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
         </svg>
-      </button>
-      <a href="vault.html" class="flex items-center gap-2" aria-label="Go to Video Library">
-        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1 class="text-sm font-semibold tracking-wide">The Vault</h1>
-      </a>
-      <div class="flex items-center gap-2">
-        <button class="relative p-2 text-slate-200 hover:text-white transition-colors" aria-label="Notifications">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
-          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-        </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
-          <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
-            <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
-          </div>
-        </button>
       </div>
+      <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
+    </a>
+
+    <!-- Right-Hand Controls -->
+    <div class="flex items-center gap-5 shrink-0">
+      <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="topbar-company-name" class="font-medium">Simple Solutions</span>
+        <span class="text-slate-300">|</span>
+        <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
+      </div>
+
+      <div class="relative">
+        <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
+          </div>
+          <div class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0 text-sm">🚀</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Workspace Active</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Your organization's Vault streaming modules are unlocked and ready.</p>
+              </div>
+            </div>
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 text-sm">🛡️</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Compliance Tracking Live</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Digital sign-off logging and employee directories are actively syncing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-6 w-px bg-slate-300/80"></div>
+
+      <button onclick="openProfileModal()" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-white border border-transparent hover:border-slate-200 transition-all text-left group">
+        <div class="relative w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center overflow-hidden border border-slate-300 shadow-sm">
+          <span data-dynamic-initials>?</span>
+          <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Avatar">
+        </div>
+        <div class="hidden sm:block leading-tight">
+          <p id="topbar-user-name" class="text-sm font-bold text-foreground group-hover:text-primary transition-colors">Loading...</p>
+          <p id="topbar-user-role" class="text-xs text-muted">Primary Admin</p>
+        </div>
+        <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
     </div>
   </header>
 
-  <div class="flex min-h-screen">
-    
-    <!-- Left Sidebar -->
-    <aside id="sidebar" class="fixed top-16 inset-x-0 z-50 transform -translate-y-full opacity-0 pointer-events-none transition-all duration-300 ease-in-out bg-slate-50 border-b border-slate-200 lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto lg:fixed lg:inset-y-0 lg:left-0 lg:top-0 lg:z-50 lg:w-64 lg:border-b-0 lg:flex lg:flex-col lg:h-full lg:overflow-hidden lg:rounded-tr-xl lg:rounded-br-xl">
-      <div id="sidebarContent" class="flex flex-col h-full">
-      <!-- Logo -->
-      <div id="sidebarLogo" class="hidden lg:flex h-20 px-6 items-center">
-        <a href="vault.html" class="vault-logo-row flex items-center justify-center" aria-label="Go to Video Library">
-          <svg class="vault-logo-icon h-11 w-11 text-black mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <h1 class="vault-title font-serif text-3xl font-semibold text-black tracking-tight">The Vault</h1>
-        </a>
-      </div>
-      
-      <!-- Main Navigation -->
-      <nav class="p-4 space-y-1">
-        <a href="vault.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg bg-black/5 text-black font-medium transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <span class="nav-label">Video Library</span>
-        </a>
-        <a href="records.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-          </svg>
-          <span class="nav-label">Training Records</span>
-        </a>
-        <a href="support.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <span class="nav-label">Support &amp; Requests</span>
-        </a>
-      </nav>
-      
-      <!-- Spacer -->
-      <div id="sidebarSpacer" class="flex-1"></div>
-      
-      </div>
-
-      <div class="hidden lg:block p-3 border-t border-border mt-auto">
-        <button
-          id="sidebarToggle"
-          type="button"
-          aria-expanded="true"
-          aria-label="Collapse sidebar"
-          class="w-full rounded-lg border border-border py-2 text-sm font-semibold text-foreground hover:bg-gray-50 transition-colors"
-        >
-          &lt;&lt;
-        </button>
-      </div>
-
-    </aside>
-    
-    <!-- Main Content Area -->
-    <main id="mainContent" class="flex-1 ml-0 lg:ml-64 pt-16 lg:pt-0 bg-white">
-      
-      <!-- Top Navbar -->
-      <header class="hidden lg:block bg-slate-50 sticky top-0 z-10">
-        <div class="h-20 flex items-center justify-end px-8">
-
-          
-          <!-- Right Side Actions -->
-          <div class="flex items-center gap-4">
-            <!-- Notifications -->
-            <button class="relative p-2 text-muted hover:text-foreground transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            
-            <!-- User Profile -->
-            <button data-ms-modal="profile" class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left">
-              <div class="text-right hidden sm:block">
-                <p class="text-sm font-medium text-foreground"><span data-ms-member="first-name">Client</span> <span data-ms-member="last-name">Name</span></p>
-                <p class="text-xs text-muted" data-ms-member="job-title">Safety Manager</p>
-              </div>
-              <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
-                <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-                <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
-              </div>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- Page Content -->
-      <div class="max-w-4xl mt-8 mx-auto p-8 bg-white rounded-lg border border-slate-200 shadow-sm">
-        <!-- Development Notice Banner -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 flex items-start gap-3 max-w-6xl mx-auto shadow-sm">
-          <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <div>
-            <h3 class="text-sm font-medium text-blue-800">Automated Dashboard in Development</h3>
-            <p class="text-sm text-blue-700 mt-1 leading-relaxed">
-              The full organization analytics and automated training records dashboard is currently being built and will be available in an upcoming update. 
-              <br><span class="font-semibold text-blue-900">Note: The "Request PDF Certificate" functionality is fully active. You can request your compliance certificates right now!</span>
-            </p>
-          </div>
-        </div>
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-          <div>
-            <h2 class="text-2xl font-serif text-foreground mb-2">Training Records</h2>
-            <p class="text-muted text-sm">View your completed safety modules and compliance status.</p>
-          </div>
-
-          <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-md">
-            <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span class="text-xs font-medium text-green-700">Actively syncing to Organization HR</span>
-          </div>
-        </div>
-
-        <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
-          <div class="relative w-full sm:w-72">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  <!-- 2. SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+    <div class="space-y-6">
+      <div>
+        <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
+        <nav class="space-y-1.5">
+          <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <input type="text" placeholder="Search employee or video..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md focus:ring-primary focus:border-primary outline-none transition-colors">
+            <span class="sidebar-text truncate">Video Library</span>
+          </a>
+
+          <!-- Training Records (Active) -->
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Training Records</span>
+          </a>
+
+          <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Help & Support</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Collapse Trigger Button -->
+    <div class="pt-3 border-t border-slate-200/80">
+      <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm" title="Toggle Sidebar">
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+        <span class="truncate">Collapse View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+    <div class="max-w-5xl mx-auto p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <div>
+          <h2 class="text-2xl font-serif text-foreground mb-1">Employee Directory</h2>
+          <p class="text-muted text-sm">Find all recorded employees down below with verified completion logs and downloadable certificates.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
+          <!-- Dynamic Tier PDF Quota & Countdown Pill -->
+          <div id="pdf-quota-pill" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all">
+            <!-- Injected via updatePdfQuotaUI() -->
           </div>
-          <div class="flex gap-2 w-full sm:w-auto">
-            <select class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
-              <option>All Categories</option>
-              <option>Heavy Machinery</option>
-              <option>Power Tools</option>
-            </select>
-            <button class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2">
+
+          <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-xl shadow-sm">
+            <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span class="text-xs font-medium text-green-700">Live HR Sync</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full sm:w-72">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input id="searchInput" type="text" placeholder="Search employee name or number..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:ring-primary focus:border-primary outline-none transition-colors">
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <select id="sortSelect" class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
+            <option value="all">All Employees</option>
+            <option value="recent">Recently Completed</option>
+            <option value="modules">Longest Module List</option>
+          </select>
+          <div class="relative">
+            <button id="filterToggleBtn" type="button" class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2" aria-expanded="false" aria-haspopup="true">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
               Filter
             </button>
+            <div id="filterMenu" class="absolute right-0 top-full z-20 mt-2 hidden min-w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="all">All Types</button>
+              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Individual">Individual Only</button>
+              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Group">Group Only</button>
+            </div>
           </div>
-        </div>
-
-        <div class="w-full overflow-hidden md:overflow-visible rounded-lg border border-slate-200">
-          <table class="block md:table w-full text-left text-sm text-muted whitespace-nowrap">
-            <thead class="hidden md:table-header-group bg-slate-50 text-xs uppercase text-foreground border-b border-slate-200">
-              <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Employee Name</th>
-                <th scope="col" class="px-6 py-4 font-medium">ID Number</th>
-                <th scope="col" class="px-6 py-4 font-medium">Training Module</th>
-                <th scope="col" class="px-6 py-4 font-medium">Date Completed</th>
-                <th scope="col" class="px-6 py-4 font-medium text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody class="block md:table-row-group divide-y divide-slate-200 bg-white">
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>Sipho Nkosi</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>920412 5054 081</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Forklift Operation & Safety</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Oct 24, 2025</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
-
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>David van der Merwe</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>881105 5123 088</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Tractor PTO Safety</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Jan 22, 2026</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
-
-              <tr class="block md:table-row bg-white border border-slate-200 rounded-lg mb-4 p-4 shadow-sm md:bg-transparent md:border-0 md:rounded-none md:mb-0 md:p-0 md:shadow-none hover:bg-slate-50 transition-colors">
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-medium text-foreground md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Employee Name:</span>
-                  <span>Sarah Johnson</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 font-mono text-xs md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">ID Number:</span>
-                  <span>950321 0045 082</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Training Module:</span>
-                  <span>Chemical Handling (HAZMAT)</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Date Completed:</span>
-                  <span>Mar 19, 2026</span>
-                </td>
-                <td class="flex justify-between items-center border-b border-slate-100 last:border-0 py-3 md:table-cell md:border-b md:border-slate-200 md:py-4 md:px-6 md:text-right">
-                  <span class="font-bold text-slate-500 text-sm md:hidden">Status:</span>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Verified</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
-          <p class="text-xs text-muted">Need a physical copy for a site inspection?</p>
-          <a href="request.html" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-            Request PDF Certificate &rarr;
-          </a>
         </div>
       </div>
 
-      <footer class="mt-12 rounded-2xl bg-[#1e3a5f] px-6 py-8 text-white md:px-8">
-        <div class="flex flex-col gap-6 md:flex-row md:justify-between">
-          <div class="max-w-sm space-y-3">
-            <div class="flex items-center gap-3">
-              <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
-                <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
-              </div>
-              <div>
-                <p class="text-lg font-semibold">Simple Solutions</p>
-                <p class="text-xs uppercase tracking-[0.28em] text-slate-300">Safety and compliance</p>
-              </div>
+      <div id="recordsLoadingState" class="flex min-h-[16rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12">
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+          <div>
+            <p class="text-sm font-medium text-foreground">Loading employee directory</p>
+            <p class="text-xs text-muted">Fetching completed training records from Supabase.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="recordsDirectory" class="hidden space-y-4"></div>
+
+      <div id="recordsEmptyState" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+        <p class="text-sm font-medium text-foreground">No verified training records logged yet.</p>
+        <p class="mt-1 text-xs text-muted">Once employees complete modules, they will appear here by name.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+      <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+        <!-- Brand Summary -->
+        <div class="max-w-sm space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+              <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
             </div>
-            <p class="text-sm leading-6 text-slate-300">Streamlining operational architectures for modern business safety and compliance.</p>
+            <div>
+              <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+              <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+            </div>
           </div>
-
-          <div class="space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white">Quick Links</h3>
-            <nav class="grid gap-2 text-sm text-slate-300">
-              <a href="vault.html" class="transition-colors hover:text-white">The Vault</a>
-              <a href="support.html" class="transition-colors hover:text-white">Support</a>
-              <a href="records.html" class="transition-colors hover:text-white">Training Records</a>
-              <a href="request.html" class="transition-colors hover:text-white">Request Certificate</a>
-            </nav>
-          </div>
-
-          <div class="max-w-md space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white">Subscription Management</h3>
-            <p class="text-sm leading-6 text-slate-300">To update your payment details or cancel your active R220/mo subscription, please contact support directly at simple.lucadudley@gmail.com</p>
-            <p class="text-sm leading-6 text-slate-300">(PLEASE NOTE: Removing your plan in your profile modal stops access but does not automatically cancel your bank mandate)</p>
-          </div>
+          <p class="text-xs leading-relaxed text-slate-300">
+            Streamlining operational architectures for modern business safety and workplace compliance.
+          </p>
         </div>
 
-        <div class="mt-8 border-t border-blue-800 pt-4 text-xs text-slate-300">
-          © 2026 Simple Solutions. All rights reserved.
+        <!-- Quick Links -->
+        <div class="space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+          <nav class="grid gap-2 text-xs text-slate-300">
+            <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+            <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+            <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+          </nav>
         </div>
-      </footer>
+
+        <!-- Subscription Management -->
+        <div class="max-w-xs sm:max-w-sm space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
+          <p class="text-xs leading-relaxed text-slate-300">
+            To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
+          </p>
+        </div>
+      </div>
+
+      <!-- Legal Sub-bar -->
+      <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+        <p>© 2026 Simple Solutions. All rights reserved.</p>
+        <p class="text-slate-400">Internal Operational Compliance Portal</p>
+      </div>
+    </footer>
+  </main>
 
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
+  <script>
+    let allEmployeesData = [];
+    let activeTrainingTypeFilter = 'all';
+
+    const recordsLoadingState = document.getElementById('recordsLoadingState');
+    const recordsDirectory = document.getElementById('recordsDirectory');
+    const recordsEmptyState = document.getElementById('recordsEmptyState');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterMenu = document.getElementById('filterMenu');
+
+    let searchDebounceId = null;
+
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => {
+      const escapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+      return escapes[character] || character;
+    });
+
+    const formatDate = (value) => {
+      if (!value) return 'Date unavailable';
+      const parsedDate = new Date(value);
+      if (Number.isNaN(parsedDate.getTime())) return 'Date unavailable';
+      return new Intl.DateTimeFormat('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsedDate);
+    };
+
+    const formatDateTimeValue = (value) => {
+      const parsedDate = new Date(value);
+      return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+    };
+
+    const buildEmployeeKey = (record) => {
+      const fallback = record.employee_name || 'unknown-employee';
+      return String(record.employee_number || fallback).trim().toLowerCase();
+    };
+
+    const groupTrainingRecords = (records) => {
+      const groupedRecords = new Map();
+      records.forEach((record) => {
+        const key = buildEmployeeKey(record);
+        const recordDate = record.created_at || record.completed_at || null;
+
+        if (!groupedRecords.has(key)) {
+          groupedRecords.set(key, {
+            employee_name: record.employee_name || 'Unnamed employee',
+            employee_number: record.employee_number || '',
+            company_id: record.company_id || '',
+            modules: [],
+            latestCompletedAt: recordDate,
+          });
+        }
+
+        const employee = groupedRecords.get(key);
+        employee.employee_name = employee.employee_name || record.employee_name || 'Unnamed employee';
+        employee.employee_number = employee.employee_number || record.employee_number || '';
+        employee.company_id = employee.company_id || record.company_id || '';
+        employee.latestCompletedAt = formatDateTimeValue(recordDate) > formatDateTimeValue(employee.latestCompletedAt)
+          ? recordDate
+          : employee.latestCompletedAt;
+        employee.modules.push({
+          id: record.id,
+          module_title: record.module_title || 'Untitled module',
+          supervisor_name: record.supervisor_name || '',
+          supervisor_signature_data: record.supervisor_signature_data || null,
+          employee_signature_data: record.employee_signature_data || null,
+          training_type: record.training_type || 'Individual',
+          batch_session_id: record.batch_session_id || null,
+          created_at: recordDate,
+        });
+      });
+
+      return Array.from(groupedRecords.values())
+        .map((employee) => ({
+          ...employee,
+          modules: employee.modules.sort((a, b) => formatDateTimeValue(b.created_at) - formatDateTimeValue(a.created_at)),
+        }))
+        .sort((a, b) => {
+          const rightDate = formatDateTimeValue(b.latestCompletedAt);
+          const leftDate = formatDateTimeValue(a.latestCompletedAt);
+          if (rightDate !== leftDate) return rightDate - leftDate;
+          return a.employee_name.localeCompare(b.employee_name);
+        });
+    };
+
+    const getActiveSearchQuery = () => (searchInput?.value || '').trim().toLowerCase();
+
+    const matchesSearchQuery = (employee, query) => {
+      if (!query) return true;
+      const employeeName = (employee.employee_name || '').toLowerCase();
+      const empNumber = (employee.employee_number || '').toLowerCase();
+      const moduleMatch = employee.modules.some((module) => (module.module_title || '').toLowerCase().includes(query));
+      return employeeName.includes(query) || empNumber.includes(query) || moduleMatch;
+    };
+
+    const matchesTrainingTypeFilter = (employee, trainingTypeFilter) => {
+      if (trainingTypeFilter === 'all') return true;
+      return employee.modules.some((module) => (module.training_type || 'Individual') === trainingTypeFilter);
+    };
+
+    const sortEmployees = (employees, sortValue) => {
+      const clonedEmployees = [...employees];
+      if (sortValue === 'recent') {
+        return clonedEmployees.sort((a, b) => {
+          const rightDate = formatDateTimeValue(b.latestCompletedAt);
+          const leftDate = formatDateTimeValue(a.latestCompletedAt);
+          if (rightDate !== leftDate) return rightDate - leftDate;
+          return a.employee_name.localeCompare(b.employee_name);
+        });
+      }
+      if (sortValue === 'modules') {
+        return clonedEmployees.sort((a, b) => {
+          if (b.modules.length !== a.modules.length) return b.modules.length - a.modules.length;
+          const rightDate = formatDateTimeValue(b.latestCompletedAt);
+          const leftDate = formatDateTimeValue(a.latestCompletedAt);
+          if (rightDate !== leftDate) return rightDate - leftDate;
+          return a.employee_name.localeCompare(b.employee_name);
+        });
+      }
+      return clonedEmployees;
+    };
+
+    const applyFiltersAndRender = () => {
+      const query = getActiveSearchQuery();
+      const sortValue = sortSelect?.value || 'all';
+
+      const filteredEmployees = sortEmployees(
+        allEmployeesData.filter((employee) => {
+          return matchesSearchQuery(employee, query) && matchesTrainingTypeFilter(employee, activeTrainingTypeFilter);
+        }),
+        sortValue,
+      );
+
+      if (!filteredEmployees.length) {
+        setEmptyState('No matching employees found.', 'Try adjusting your search query or clear active filters.');
+        return;
+      }
+
+      renderEmployeeDirectory(filteredEmployees);
+    };
+
+    const setLoadingState = () => {
+      recordsLoadingState?.classList.remove('hidden');
+      recordsDirectory?.classList.add('hidden');
+      recordsEmptyState?.classList.add('hidden');
+    };
+
+    const setEmptyState = (message, subtext = '') => {
+      if (recordsLoadingState) recordsLoadingState.classList.add('hidden');
+      if (recordsDirectory) recordsDirectory.classList.add('hidden');
+      if (recordsEmptyState) {
+        recordsEmptyState.innerHTML = `
+          <p class="text-sm font-medium text-foreground">${escapeHtml(message)}</p>
+          ${subtext ? `<p class="mt-1 text-xs text-muted">${escapeHtml(subtext)}</p>` : ''}
+        `;
+        recordsEmptyState.classList.remove('hidden');
+      }
+    };
+
+    const renderEmployeeDirectory = (employees) => {
+      if (!recordsDirectory) return;
+
+      const cardsHtml = employees.map((employee, index) => {
+        const panelId = `employee-panel-${index}`;
+        const displayId = employee.employee_number ? `Emp No: ${escapeHtml(employee.employee_number)}` : 'Employee';
+        const moduleCount = employee.modules.length;
+        const moduleLabel = moduleCount === 1 ? 'Module Completed' : 'Modules Completed';
+
+        const modulesHtml = employee.modules.map((module) => {
+          const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Authorized Safety Officer';
+
+          const trainingType = module.training_type || 'Individual';
+          const dateFormatted = formatDate(module.created_at);
+
+          const empSafe = escapeHtml(employee.employee_name).replace(/'/g, "\\'");
+          const idSafe = escapeHtml(employee.employee_number || '').replace(/'/g, "\\'");
+          const modSafe = escapeHtml(module.module_title).replace(/'/g, "\\'");
+          const supSafe = supervisorName.replace(/'/g, "\\'");
+          const batchIdSafe = escapeHtml(module.batch_session_id || '').replace(/'/g, "\\'");
+
+          return `
+            <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
+              <td class="px-4 py-4 align-middle text-foreground sm:px-6">
+                <div class="font-semibold text-slate-800">${escapeHtml(module.module_title)}</div>
+              </td>
+              <td class="px-4 py-4 align-middle sm:px-6">
+                <span class="inline-flex items-center rounded-full ${trainingType === 'Group' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'} px-2.5 py-0.5 text-xs font-semibold">
+                  ${escapeHtml(trainingType)}
+                </span>
+              </td>
+              <td class="px-4 py-4 align-middle text-foreground sm:px-6">
+                <div class="font-medium text-slate-700">${supervisorName}</div>
+              </td>
+              <td class="px-4 py-4 align-middle text-slate-500 sm:px-6 text-xs">
+                ${escapeHtml(dateFormatted)}
+              </td>
+              <td class="px-4 py-4 align-middle text-right sm:px-6">
+                <div class="flex items-center justify-end gap-2">
+                  <!-- Individual Cert Button -->
+                  <button 
+                    onclick="generateIndividualCertificatePDF('${empSafe}', '${idSafe}', '${modSafe}', '${dateFormatted}', '${supSafe}')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
+                    title="Download Individual Worker Certificate">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Cert</span>
+                  </button>
+
+                  <!-- 2-Page Group Register Button (Only for Group trainings) -->
+                  ${trainingType === 'Group' && batchIdSafe ? `
+                    <button 
+                      onclick="generateGroupLogSheetPDF('${batchIdSafe}', '${modSafe}', '${supSafe}', '${dateFormatted}')"
+                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 text-amber-800 text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                      title="Download 2-Page Group Attendance Register">
+                      <span>📋 Register</span>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md">
+            <button
+              type="button"
+              class="employee-toggle flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
+              aria-expanded="false"
+              aria-controls="${panelId}"
+              data-panel-id="${panelId}"
+            >
+              <div class="flex min-w-0 items-center gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary font-semibold">
+                  ${escapeHtml(employee.employee_name.slice(0, 1) || 'E')}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="truncate text-lg font-semibold text-foreground">${escapeHtml(employee.employee_name)}</h3>
+                  <p class="truncate text-sm text-muted">${displayId}</p>
+                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-3">
+                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  ${moduleCount} ${moduleLabel}
+                </span>
+                <svg class="employee-chevron h-5 w-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </button>
+
+            <div id="${panelId}" class="employee-panel" style="max-height: 0px;">
+              <div class="border-t border-slate-200 bg-slate-50 px-5 py-5 sm:px-6">
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm">
+                      <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground">
+                        <tr>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Module Title</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Training Type</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Supervisor</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Completion Date</th>
+                          <th scope="col" class="px-4 py-3 font-semibold sm:px-6 text-right">Certificate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${modulesHtml}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      recordsDirectory.innerHTML = cardsHtml;
+      recordsDirectory.classList.remove('hidden');
+      recordsEmptyState?.classList.add('hidden');
+      recordsLoadingState?.classList.add('hidden');
+      bindEmployeeAccordionEvents();
+    };
+
+    const bindEmployeeAccordionEvents = () => {
+      const toggleButtons = document.querySelectorAll('.employee-toggle');
+      toggleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const panelId = button.getAttribute('data-panel-id');
+          const panel = panelId ? document.getElementById(panelId) : null;
+          const chevron = button.querySelector('.employee-chevron');
+          if (!panel) return;
+
+          const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+          if (isExpanded) {
+            panel.style.maxHeight = `${panel.scrollHeight}px`;
+            panel.classList.add('is-open');
+            requestAnimationFrame(() => {
+              panel.style.maxHeight = '0px';
+              panel.classList.remove('is-open');
+            });
+          } else {
+            panel.classList.add('is-open');
+            panel.style.maxHeight = `${panel.scrollHeight}px`;
+            const handleTransitionEnd = (event) => {
+              if (event.propertyName === 'max-height' && button.getAttribute('aria-expanded') === 'true') {
+                panel.style.maxHeight = 'none';
+              }
+            };
+            panel.addEventListener('transitionend', handleTransitionEnd, { once: true });
+          }
+
+          button.setAttribute('aria-expanded', String(!isExpanded));
+          chevron?.classList.toggle('rotate-180', !isExpanded);
+        });
+      });
+    };
+
+    const syncExpandedPanelHeights = () => {
+      document.querySelectorAll('.employee-toggle[aria-expanded="true"]').forEach((button) => {
+        const panelId = button.getAttribute('data-panel-id');
+        const panel = panelId ? document.getElementById(panelId) : null;
+        if (panel) panel.style.maxHeight = 'none';
+      });
+    };
+
+    async function fetchAndRenderTrainingRecords() {
+      if (!recordsDirectory || !recordsLoadingState) return;
+      setLoadingState();
+
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session) {
+          setEmptyState('Please sign in to view training records.', 'Your employee directory is only available to authenticated users.');
+          return;
+        }
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile || !profile.company_id) {
+          setEmptyState('No associated company profile found.', 'A linked company profile is required before training records can be displayed.');
+          return;
+        }
+
+        const { data: companyInfo } = await window.dbClient
+          .from('companies')
+          .select('name, vat_number, phone, postal_address, contact_email')
+          .eq('id', profile.company_id)
+          .maybeSingle();
+
+        window.currentCompanyInfo = companyInfo || {};
+
+        const { data: records, error } = await window.dbClient
+          .from('training_records')
+          .select('id, employee_name, employee_number, company_id, module_title, supervisor_name, supervisor_signature_data, employee_signature_data, training_type, created_at, completed_at, batch_session_id')
+          .eq('company_id', profile.company_id)
+          .order('completed_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!records || records.length === 0) {
+          setEmptyState('No verified training records logged yet.', 'Once employees complete modules, they will appear here by name.');
+          return;
+        }
+
+        allEmployeesData = groupTrainingRecords(records);
+        applyFiltersAndRender();
+      } catch (err) {
+        console.error('Error fetching training records:', err);
+        setEmptyState('Failed to load training records.', 'Please refresh the page and try again.');
+      }
+    }
+
+    const closeFilterMenu = () => {
+      filterMenu?.classList.add('hidden');
+      filterToggleBtn?.setAttribute('aria-expanded', 'false');
+    };
+
+    const toggleFilterMenu = () => {
+      if (!filterMenu || !filterToggleBtn) return;
+      const isHidden = filterMenu.classList.contains('hidden');
+      filterMenu.classList.toggle('hidden', !isHidden);
+      filterToggleBtn.setAttribute('aria-expanded', String(isHidden));
+    };
+
+    // =========================================================================
+    // DYNAMIC PDF QUOTA & RESET COUNTDOWN ENGINE
+    // =========================================================================
+    function getDaysUntilNextMonth() {
+      const now = new Date();
+      // First day of next calendar month at 00:00:00
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const diffMs = nextMonth - now;
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      
+      const nextMonthName = nextMonth.toLocaleString('en-US', { month: 'short' });
+      return { days: diffDays, resetLabel: `1 ${nextMonthName}` };
+    }
+
+    function updatePdfQuotaUI() {
+      const pill = document.getElementById('pdf-quota-pill');
+      if (!pill) return;
+
+      const tier = (window.currentCompanyTier || 'basic').toLowerCase();
+      const companyId = window.userCompanyId || 'default';
+      const now = new Date();
+      const currentMonthKey = `cert_quota_${companyId}_${now.getFullYear()}_${now.getMonth() + 1}`;
+      const { days, resetLabel } = getDaysUntilNextMonth();
+
+      pill.className = 'hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all';
+      pill.classList.remove('hidden');
+      pill.classList.add('flex');
+
+      if (tier === 'enterprise') {
+        pill.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+        pill.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <span><strong>Unlimited</strong> PDF Certificates</span>
+        `;
+      } else if (tier === 'essential') {
+        const usedCount = parseInt(localStorage.getItem(currentMonthKey) || '0', 10);
+        const monthlyLimit = 5;
+        const remaining = Math.max(0, monthlyLimit - usedCount);
+
+        if (remaining > 0) {
+          pill.classList.add('bg-slate-50', 'border-slate-200', 'text-slate-700');
+          pill.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+            <span>PDF Limit: <strong>${remaining} of ${monthlyLimit} left</strong></span>
+            <span class="text-slate-300">|</span>
+            <span class="text-[11px] text-muted">Resets in ${days}d (${resetLabel})</span>
+          `;
+        } else {
+          // Monthly Cap Hit
+          pill.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+          pill.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span><strong>0 of ${monthlyLimit} left</strong> (Capped)</span>
+            <span class="text-red-200">|</span>
+            <span class="text-[11px]">Resets ${resetLabel}</span>
+            <button onclick="openProfileModal(); switchProfileTab('plans');" class="ml-1 text-[11px] font-bold text-red-900 underline hover:text-red-700">
+              Upgrade
+            </button>
+          `;
+        }
+      } else {
+        pill.classList.add('bg-slate-100', 'border-slate-300', 'text-slate-600');
+        pill.innerHTML = `<span>PDF Downloads Locked</span>`;
+      }
+    }
+
+    // =========================================================================
+    // FRESH COMPANY METADATA FETCHER (PREVENTS STALE STAMP DATA)
+    // =========================================================================
+    async function getFreshCompanyInfo() {
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session?.user?.id) return window.currentCompanyInfo || {};
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.company_id) {
+          const { data: companyData } = await window.dbClient
+            .from('companies')
+            .select('name, vat_number, phone, postal_address, contact_email')
+            .eq('id', profile.company_id)
+            .maybeSingle();
+
+          if (companyData) {
+            window.currentCompanyInfo = companyData;
+            return companyData;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed fetching fresh company info:', err);
+      }
+      return window.currentCompanyInfo || {};
+    }
+
+    // =========================================================================
+    // REWORKED INDIVIDUAL CERTIFICATE (WITH LIVE DYNAMIC STAMP)
+    // =========================================================================
+    async function generateIndividualCertificatePDF(employeeName, employeeNumber, moduleTitle, completionDate, supervisorName) {
+      const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+      const companyId = window.userCompanyId || 'default';
+      const currentMonthKey = `cert_quota_${companyId}_${new Date().getFullYear()}_${new Date().getMonth() + 1}`;
+      const { days, resetLabel } = getDaysUntilNextMonth();
+
+      if (currentTier === 'basic') {
+        openProfileModal();
+        switchProfileTab('plans');
+        alert('PDF Record Generation is available on Essential (5/mo) and Enterprise (Unlimited). Please upgrade your plan.');
+        return;
+      }
+
+      if (currentTier === 'essential') {
+        let usedCount = parseInt(localStorage.getItem(currentMonthKey) || '0', 10);
+        const monthlyLimit = 5;
+
+        if (usedCount >= monthlyLimit) {
+          openProfileModal();
+          switchProfileTab('plans');
+          alert(`You have reached your monthly limit of ${monthlyLimit} certificate downloads on the Essential plan (resets in ${days} days on ${resetLabel}). Upgrade to Enterprise for unlimited certificate generation.`);
+          return;
+        }
+
+        localStorage.setItem(currentMonthKey, (usedCount + 1).toString());
+        updatePdfQuotaUI();
+      }
+
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF Generation library is loading. Please try again.');
+        return;
+      }
+
+      // Fetch live company stamp details directly from Supabase
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = 297;
+      const pageHeight = 210;
+
+      // 1. Soft Clean Background
+      doc.setFillColor(253, 254, 255);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+      // 2. Primary Outer Navy Border
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(3);
+      doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+      // Inner Accent Slate Border
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.75);
+      doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+
+      // Corner Accents (Geometric Solid Squares)
+      const cSize = 10;
+      doc.setFillColor(30, 58, 95);
+      doc.rect(8, 8, cSize, cSize, 'F');
+      doc.rect(pageWidth - 8 - cSize, 8, cSize, cSize, 'F');
+      doc.rect(8, pageHeight - 8 - cSize, cSize, cSize, 'F');
+      doc.rect(pageWidth - 8 - cSize, pageHeight - 8 - cSize, cSize, cSize, 'F');
+
+      // 3. Prominent Company Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(26);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), pageWidth / 2, 28, { align: 'center' });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('INTERNAL OPERATIONAL TRAINING RECORD', pageWidth / 2, 36, { align: 'center' });
+
+      // Geometric Divider Line
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(30, 44, pageWidth - 30, 44);
+
+      // 4. Recipient Details & Statement
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text('This operational record logs that', pageWidth / 2, 60, { align: 'center' });
+
+      // Employee Full Name
+      doc.setFont('times', 'bold');
+      doc.setFontSize(28);
+      doc.setTextColor(15, 23, 42);
+      doc.text((employeeName || 'VERIFIED OPERATOR').toUpperCase(), pageWidth / 2, 74, { align: 'center' });
+
+      // Employee / Clock Code
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      const idText = (employeeNumber && employeeNumber.trim() !== '' && employeeNumber !== 'N/A') 
+        ? `Employee / Clock No: ${employeeNumber.trim().toUpperCase()}` 
+        : `Verified Company Employee`;
+      doc.text(idText, pageWidth / 2, 82, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text('has reviewed the internal safety protocols and guidelines for:', pageWidth / 2, 97, { align: 'center' });
+
+      // Module Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(19);
+      doc.setTextColor(30, 58, 95);
+      doc.text(moduleTitle.toUpperCase(), pageWidth / 2, 111, { align: 'center' });
+
+      // 5. Bottom Verification & Rectangular Stamp Row
+      const sigY = 158;
+
+      // Left: Date Logged
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.5);
+      doc.line(35, sigY, 95, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(completionDate || 'Recorded Date', 65, sigY - 3, { align: 'center' });
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('DATE LOGGED', 65, sigY + 5, { align: 'center' });
+
+      // Center: Rectangular Official Company Stamp Box
+      const stampBoxW = 86;
+      const stampBoxH = 35;
+      const stampX = (pageWidth - stampBoxW) / 2;
+      const stampY = sigY - 23;
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(stampX, stampY, stampBoxW, stampBoxH, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), pageWidth / 2, stampY + 6.5, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(51, 65, 85);
+      
+      let lineY = stampY + 11.5;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, pageWidth / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('OFFICIAL VERIFIED STAMP', pageWidth / 2, stampY + stampBoxH - 2.5, { align: 'center' });
+
+      // Right: Supervising Officer
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.5);
+      doc.line(pageWidth - 95, sigY, pageWidth - 35, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(supervisorName || 'Authorized Officer', pageWidth - 65, sigY - 3, { align: 'center' });
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('SUPERVISING OFFICER', pageWidth - 65, sigY + 5, { align: 'center' });
+
+      // 6. Footer Disclaimer & System Attribution
+      const docHash = `REC-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('DISCLAIMER: This document serves solely as an internal operational log confirming the review of supplementary safety materials.', pageWidth / 2, 186, { align: 'center' });
+      doc.text('It is not a legally accredited, statutory, or sanctioned certificate of competence under any national safety framework.', pageWidth / 2, 189, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Internal Record Ref: ${docHash} • Logged via The Vault by Simple Solutions`, pageWidth / 2, 193, { align: 'center' });
+
+      doc.save(`Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    // =========================================================================
+    // 2. OFFICIAL 2-PAGE GROUP ATTENDANCE REGISTER (MINIMALIST LANDSCAPE A4)
+    // =========================================================================
+    async function generateGroupLogSheetPDF(batchSessionId, moduleTitle, supervisorName, sessionDate) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF library is loading. Please try again in a moment.');
+        return;
+      }
+
+      // 1. Fetch batch trainee records
+      const { data: batchRecords, error } = await window.dbClient
+        .from('training_records')
+        .select('*')
+        .eq('batch_session_id', batchSessionId);
+
+      if (error || !batchRecords || batchRecords.length === 0) {
+        alert('Unable to load batch session records.');
+        return;
+      }
+
+      // 2. Fetch video curriculum objectives (Case-insensitive & handles duplicate rows gracefully)
+      let objectives = [];
+      let durationMins = 30;
+
+      const cleanTitle = (moduleTitle || '').trim();
+
+      const { data: videoRows, error: videoError } = await window.dbClient
+        .from('videos')
+        .select('objectives, total_seconds')
+        .ilike('title', cleanTitle)
+        .limit(1);
+
+      if (videoRows && videoRows.length > 0) {
+        const vData = videoRows[0];
+        if (vData.total_seconds) {
+          durationMins = Math.ceil(vData.total_seconds / 60);
+        }
+        
+        if (vData.objectives) {
+          if (Array.isArray(vData.objectives)) {
+            objectives = vData.objectives;
+          } else if (typeof vData.objectives === 'string') {
+            try {
+              const parsed = JSON.parse(vData.objectives);
+              objectives = Array.isArray(parsed) ? parsed : Object.values(parsed);
+            } catch (e) {
+              console.warn('Failed parsing stringified objectives:', e);
+            }
+          } else if (typeof vData.objectives === 'object') {
+            objectives = Object.values(vData.objectives);
+          }
+        }
+      }
+
+      // Fallback only if database column is empty
+      if (!objectives || objectives.length === 0) {
+        objectives = [
+          'Machine components, disc ratings, and spindle guard positioning',
+          'Mandatory Personal Protective Equipment (PPE) requirements',
+          'Pre-operational inspection: disc integrity, cracks, and mounting',
+          'Safe handling, two-handed operation, and spark direction control',
+          'Flammable materials clearance and hot work safety precautions',
+          'Power isolation, disc replacement, and fault reporting'
+        ];
+      }
+
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
+      const supervisorSig = batchRecords[0]?.supervisor_signature_data || null;
+
+      const { jsPDF } = window.jspdf;
+      // Landscape A4: 297mm x 210mm
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = 297;
+      const pageHeight = 210;
+
+      // =======================================================================
+      // PAGE 1: CURRICULUM, STAMP & SUPERVISOR CONFIRMATION
+      // =======================================================================
+      
+      // 1. Clean Minimal Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), 16, 20);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('GROUP TRAINING RECORD & INDUCTION LOG', 16, 26);
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(16, 30, pageWidth - 16, 30);
+
+      // 2. Metadata Grid Strip
+      const metaY = 35;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(16, metaY, pageWidth - 32, 14, 1.5, 1.5, 'FD');
+
+      doc.line(80, metaY, 80, metaY + 14);
+      doc.line(150, metaY, 150, metaY + 14);
+      doc.line(220, metaY, 220, metaY + 14);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(100, 116, 139);
+      doc.text('TRAINER / SUPERVISOR', 20, metaY + 5);
+      doc.text('TRAINING DATE', 84, metaY + 5);
+      doc.text('DURATION', 154, metaY + 5);
+      doc.text('BATCH REF', 224, metaY + 5);
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(supervisorName || 'Authorized Supervisor', 20, metaY + 10.5);
+      doc.text(sessionDate || 'Recorded Date', 84, metaY + 10.5);
+      doc.text(`${durationMins} MIN`, 154, metaY + 10.5);
+      doc.text(batchSessionId.substring(0, 8).toUpperCase(), 224, metaY + 10.5);
+
+      // 3. Training Curriculum Section (Left Column)
+      const contentY = 56;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`TRAINING MODULE: ${moduleTitle.toUpperCase()} (VIDEO INDUCTION)`, 16, contentY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+      let bulletY = contentY + 7.5;
+      
+      objectives.forEach(obj => {
+        doc.setFillColor(30, 58, 95);
+        doc.circle(20, bulletY - 1, 0.9, 'F');
+        // Wrap text to 255mm so longer compliance points wrap cleanly
+        const wrappedLines = doc.splitTextToSize(obj, 255);
+        doc.text(wrappedLines, 24, bulletY);
+        bulletY += (wrappedLines.length * 4.5) + 2.5;
+      });
+
+      // 4. Bottom Verification Row: Positioned dynamically below objectives
+      const bottomY = Math.max(bulletY + 8, 125);
+
+      // Left Box: Trainer Legal Attestation
+      const attestW = 160;
+      const attestH = 65;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(16, bottomY, attestW, attestH, 2, 2, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text('TRAINER LEGAL DECLARATION', 22, bottomY + 8);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+      const declarationText = `I, ${supervisorName}, hereby confirm that I have conducted and supervised this training induction. The employees listed on Page 2 were instructed on all safety protocols, operational guidelines, and hazard controls specified above.`;
+      doc.text(doc.splitTextToSize(declarationText, attestW - 12), 22, bottomY + 16);
+
+      // Digital Signature Area
+      if (supervisorSig) {
+        doc.addImage(supervisorSig, 'PNG', 22, bottomY + 28, 45, 18);
+      }
+      doc.setDrawColor(148, 163, 184);
+      doc.line(22, bottomY + 50, 85, bottomY + 50);
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Supervisor Signature', 22, bottomY + 55);
+
+      doc.line(95, bottomY + 50, 155, bottomY + 50);
+      doc.text(`Date: ${sessionDate}`, 95, bottomY + 55);
+
+      // Right Box: Rectangular Official Company Stamp
+      const stampBoxW = 95;
+      const stampBoxH = 65;
+      const stampX = pageWidth - 16 - stampBoxW;
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(stampX, bottomY, stampBoxW, stampBoxH, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), stampX + (stampBoxW / 2), bottomY + 12, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(51, 65, 85);
+      
+      let stampLineY = bottomY + 20;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, stampX + (stampBoxW / 2), stampLineY, { align: 'center' });
+        stampLineY += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('OFFICIAL VERIFIED STAMP', stampX + (stampBoxW / 2), bottomY + stampBoxH - 4, { align: 'center' });
+
+      // Page 1 Footer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Page 1 of 2 — Curriculum & Trainer Attestation • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+
+// =======================================================================
+      // PAGE 2: CLEAN MINIMALIST ATTENDANCE REGISTER
+      // =======================================================================
+      doc.addPage();
+
+      // Page 2 Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`${moduleTitle.toUpperCase()} — ATTENDANCE REGISTER`, 16, 18);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`DATE: ${sessionDate}   |   BATCH REF: ${batchSessionId.substring(0, 8).toUpperCase()}   |   COMPANY: ${companyName.toUpperCase()}`, 16, 24);
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(16, 27, pageWidth - 16, 27);
+
+      // Table Geometry (Total Width: 265mm across page)
+      const tableX = 16;
+      const tableY = 32;
+      const headerH = 8;
+      const rowH = 10;
+      const tableW = pageWidth - 32; // 265mm
+
+      // Columns without Verification: NO (14mm) | EMP NO (45mm) | FULL NAME (110mm) | GENDER (28mm) | SIGNATURE (68mm)
+      const colNo = 14;
+      const colEmp = 45;
+      const colName = 110;
+      const colGen = 28;
+      const colSig = 68;
+
+      const xNo = tableX;
+      const xEmp = xNo + colNo;
+      const xName = xEmp + colEmp;
+      const xGen = xName + colName;
+      const xSig = xGen + colGen;
+
+      // Table Header Row
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.rect(tableX, tableY, tableW, headerH, 'FD');
+
+      doc.line(xEmp, tableY, xEmp, tableY + headerH);
+      doc.line(xName, tableY, xName, tableY + headerH);
+      doc.line(xGen, tableY, xGen, tableY + headerH);
+      doc.line(xSig, tableY, xSig, tableY + headerH);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text('NO.', xNo + (colNo / 2), tableY + 5.5, { align: 'center' });
+      doc.text('EMPLOYEE NO', xEmp + 5, tableY + 5.5);
+      doc.text('EMPLOYEE NAME & SURNAME', xName + 5, tableY + 5.5);
+      doc.text('GENDER', xGen + (colGen / 2), tableY + 5.5, { align: 'center' });
+      doc.text('EMPLOYEE SIGNATURE', xSig + (colSig / 2), tableY + 5.5, { align: 'center' });
+
+      // Table Body Rows (Up to 15 rows)
+      const maxRows = 15;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(15, 23, 42);
+
+      for (let i = 0; i < maxRows; i++) {
+        const y = tableY + headerH + (i * rowH);
+        const trainee = batchRecords[i] || null;
+
+        doc.setDrawColor(226, 232, 240);
+        doc.rect(tableX, y, tableW, rowH, 'S');
+
+        doc.line(xEmp, y, xEmp, y + rowH);
+        doc.line(xName, y, xName, y + rowH);
+        doc.line(xGen, y, xGen, y + rowH);
+        doc.line(xSig, y, xSig, y + rowH);
+
+        doc.text(String(i + 1), xNo + (colNo / 2), y + 6.5, { align: 'center' });
+
+        if (trainee) {
+          doc.setFont('helvetica', 'bold');
+          doc.text(trainee.employee_number || '-', xEmp + 5, y + 6.5);
+          doc.setFont('helvetica', 'normal');
+          doc.text(trainee.employee_name || '', xName + 5, y + 6.5);
+          doc.text(trainee.gender || 'Male', xGen + (colGen / 2), y + 6.5, { align: 'center' });
+
+          // Render digital signature preserving natural 2.5:1 aspect ratio
+          if (trainee.employee_signature_data) {
+            const sigWidth = 22.5; // Natural proportion
+            const sigHeight = 9;
+            const sigX = xSig + (colSig - sigWidth) / 2;
+            doc.addImage(trainee.employee_signature_data, 'PNG', sigX, y + 0.5, sigWidth, sigHeight);
+          }
+        }
+      }
+
+      // Page 2 Footer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Page 2 of 2 — Trainee Sign-Off Register • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+      doc.save(`Group_Register_${moduleTitle.replace(/\s+/g, '_')}_${sessionDate}.pdf`);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAndRenderTrainingRecords();
+      setTimeout(updatePdfQuotaUI, 500); // Initial check once profile-engine resolves tier
+      searchInput?.addEventListener('input', () => {
+        window.clearTimeout(searchDebounceId);
+        searchDebounceId = window.setTimeout(() => {
+          applyFiltersAndRender();
+        }, 150);
+      });
+
+      sortSelect?.addEventListener('change', applyFiltersAndRender);
+
+      filterToggleBtn?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleFilterMenu();
+      });
+
+      filterMenu?.addEventListener('click', (event) => {
+        const option = event.target.closest('.filter-option');
+        if (!option) return;
+        activeTrainingTypeFilter = option.getAttribute('data-training-type') || 'all';
+        applyFiltersAndRender();
+        closeFilterMenu();
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!filterMenu || !filterToggleBtn) return;
+        if (filterMenu.contains(event.target) || filterToggleBtn.contains(event.target)) return;
+        closeFilterMenu();
+      });
+
+      window.addEventListener('resize', syncExpandedPanelHeights);
+    });
+  </script>
 </body>
 </html>

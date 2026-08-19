@@ -10,7 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v2/inline.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -33,525 +34,884 @@
     ::-webkit-scrollbar {
       width: 6px;
     }
-
     ::-webkit-scrollbar-track {
       background: #f1f1f1;
     }
-
     ::-webkit-scrollbar-thumb {
       background: #d1d5db;
       border-radius: 3px;
     }
-
     ::-webkit-scrollbar-thumb:hover {
       background: #9ca3af;
     }
 
     #sidebar,
     #mainContent {
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .vault-logo-icon {
-      transform: translateY(2px);
+    /* Collapsed Sidebar Rules */
+    #sidebar.collapsed {
+      width: 5rem !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
     }
-
-    @media (min-width: 1024px) {
-      #sidebar.collapsed {
-        width: 5rem;
-      }
-
-      #sidebar.collapsed #categoryFilters,
-      #sidebar.collapsed #sidebarSpacer {
-        display: none;
-      }
-
-      #sidebar.collapsed .vault-title {
-        display: none;
-      }
-
-      #sidebar.collapsed .vault-logo-row {
-        justify-content: center;
-      }
-
-      #sidebar.collapsed .vault-logo-icon {
-        width: 3rem;
-        height: 3rem;
-        margin-right: 0;
-      }
-
-      #sidebar.collapsed nav {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-      }
-
-      #sidebar.collapsed nav a {
-        justify-content: center;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-      }
-
-      #sidebar.collapsed .nav-label {
-        display: none;
-      }
+    #sidebar.collapsed .sidebar-text,
+    #sidebar.collapsed .sidebar-category-header,
+    #sidebar.collapsed #sidebarToggle span {
+      display: none !important;
+    }
+    #sidebar.collapsed .sidebar-nav-btn {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    #sidebar.collapsed .sidebar-nav-btn svg {
+      margin: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    #sidebar.collapsed #sidebarToggle svg {
+      transform: rotate(180deg);
     }
 
     details > summary {
       list-style: none;
     }
-
     details > summary::-webkit-details-marker {
       display: none;
     }
   </style>
-  <script async src="https://tally.so/widgets/embed.js"></script>
 </head>
-<body class="font-sans bg-gray-50 text-foreground antialiased">
-  <header class="lg:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800">
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
+
+  <!-- Mobile Header -->
+  <header class="lg:hidden sticky top-0 z-40 bg-[#f8fafc] text-slate-800 border-b border-slate-200">
     <div class="h-16 px-4 flex items-center justify-between">
-      <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="p-2 rounded-md hover:bg-slate-800 transition-colors">
+      <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="p-2 rounded-lg hover:bg-slate-200 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
       <a href="vault.html" class="flex items-center gap-2" aria-label="Go to Video Library">
-        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1 class="text-sm font-semibold tracking-wide">The Vault</h1>
+        <span class="font-serif text-lg font-bold text-foreground">The Vault</span>
       </a>
-      <div class="flex items-center gap-2">
-        <button class="relative p-2 text-slate-200 hover:text-white transition-colors" aria-label="Notifications">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
-          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-        </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
-          <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
-            <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
-          </div>
-        </button>
-      </div>
+      <button onclick="openProfileModal()" class="w-9 h-9 flex items-center justify-center">
+        <div class="relative w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs overflow-hidden border border-slate-300">
+          <span data-dynamic-initials>?</span>
+          <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+        </div>
+      </button>
     </div>
   </header>
 
-  <div class="flex min-h-screen">
-    <aside id="sidebar" class="fixed top-16 inset-x-0 z-50 transform -translate-y-full opacity-0 pointer-events-none transition-all duration-300 ease-in-out bg-slate-50 border-b border-slate-200 lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto lg:fixed lg:inset-y-0 lg:left-0 lg:top-0 lg:z-50 lg:w-64 lg:border-b-0 lg:flex lg:flex-col lg:h-full lg:overflow-hidden lg:rounded-tr-xl lg:rounded-br-xl">
-      <div id="sidebarContent" class="flex flex-col h-full">
-        <div id="sidebarLogo" class="hidden lg:flex h-20 px-6 items-center">
-          <a href="vault.html" class="vault-logo-row flex items-center justify-center" aria-label="Go to Video Library">
-            <svg class="vault-logo-icon h-11 w-11 text-black mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4 transform -translate-y-full opacity-0 pointer-events-none lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto transition-all duration-300">
+    <div class="space-y-6">
+      <!-- Brand Logo Header for Module Page -->
+      <div class="hidden lg:flex items-center px-1 py-2">
+        <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-1">
+          <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
             </svg>
-            <h1 class="vault-title font-serif text-3xl font-semibold text-black tracking-tight">The Vault</h1>
-          </a>
-        </div>
-
-        <nav class="p-4 space-y-1">
-          <a href="vault.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span class="nav-label">Video Library</span>
-          </a>
-          <a href="records.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-            </svg>
-            <span class="nav-label">Training Records</span>
-          </a>
-          <a href="support.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <span class="nav-label">Support &amp; Requests</span>
-          </a>
-        </nav>
-
-        <div id="sidebarSpacer" class="flex-1"></div>
+          </div>
+          <span class="sidebar-text font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
+        </a>
       </div>
 
-      <div class="hidden lg:block p-3 border-t border-border mt-auto">
-        <button
-          id="sidebarToggle"
-          type="button"
-          aria-expanded="true"
-          aria-label="Collapse sidebar"
-          class="w-full rounded-lg border border-border py-2 text-sm font-semibold text-foreground hover:bg-gray-50 transition-colors"
-        >
-          &lt;&lt;
+      <div>
+        <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
+        <nav class="space-y-1.5">
+          <!-- Video Library (Active) -->
+          <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Video Library</span>
+          </a>
+
+          <!-- Training Records -->
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Training Records</span>
+          </a>
+
+          <!-- Help & Support -->
+          <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Help & Support</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Collapse Trigger Button -->
+    <div class="pt-3 border-t border-slate-200/80">
+      <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm" title="Toggle Sidebar">
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+        <span class="truncate">Collapse View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Player Workspace -->
+  <main id="mainContent" class="ml-0 lg:ml-64 p-6 sm:p-10">
+    <div class="max-w-5xl mx-auto">
+      
+      <!-- Back Navigation & Meta -->
+      <div class="flex items-center justify-between mb-6">
+        <a href="vault.html" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Video Library
+        </a>
+        <div class="text-right">
+          <p id="headerTitle" class="text-sm font-bold text-foreground">Loading Module...</p>
+          <p id="headerMeta" class="text-xs text-muted">Module • --:--</p>
+        </div>
+      </div>
+
+      <!-- Player Frame -->
+      <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+        <iframe
+          id="videoPlayer"
+          class="w-full h-full"
+          frameborder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <!-- Module Details -->
+      <div class="mt-8 space-y-6 max-w-4xl mx-auto">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <span data-module-category class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Module</span>
+            <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: --:--</span>
+            <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: --</span>
+          </div>
+          <h1 id="moduleTitle" class="text-3xl font-serif font-bold text-foreground mb-3">Loading Module...</h1>
+          <p id="moduleDescription" class="text-sm text-slate-600 leading-relaxed">
+            Loading module description...
+          </p>
+        </div>
+
+        <details class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <summary class="cursor-pointer px-6 py-4 flex items-center justify-between bg-slate-50 border-b border-slate-100 font-semibold text-sm text-foreground uppercase tracking-wider">
+            <span>Key Learning Objectives</span>
+            <span class="text-xs text-muted font-normal">Expand / Collapse</span>
+          </summary>
+          <div class="p-6">
+            <ul id="moduleObjectives" class="space-y-3 text-sm text-slate-600"></ul>
+          </div>
+        </details>
+
+        <!-- Compliance Form Trigger -->
+        <div id="compliance-card-container" class="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+          <h3 class="font-serif text-2xl font-bold text-foreground mb-2">Compliance Registration</h3>
+          <p class="text-slate-500 text-sm mb-6 max-w-md mx-auto">Submit your completion data to sync with your organization's verified audit trail.</p>
+          <button onclick="openComplianceModal()" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-xl hover:bg-primary/90 transition-colors shadow-md">
+            Log Training Completion &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- NATIVE COMPLIANCE & SIGN-OFF MODAL -->
+  <div id="complianceModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">Compliance Audit Trail</span>
+          <h3 class="text-lg font-serif font-bold text-foreground mt-1">Log Training Completion</h3>
+        </div>
+        <button type="button" onclick="closeComplianceModal()" class="p-1.5 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <p class="hidden lg:block pb-2 text-[10px] text-muted text-center">&copy; 2026 Solutions Inc.</p>
-    </aside>
-
-    <main id="mainContent" class="flex-1 ml-0 lg:ml-64 pt-16 lg:pt-0 bg-white">
-      <header class="hidden lg:block bg-slate-50 sticky top-0 z-10 border-b border-border">
-        <div class="h-20 flex items-center justify-between px-8">
-          <a href="vault.html" class="inline-flex items-center text-sm font-medium text-muted hover:text-primary transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Training Library
-          </a>
+      <!-- Modal Body -->
+      <div class="p-6 max-h-[75vh] overflow-y-auto space-y-6">
+        
+        <!-- Module Context Banner -->
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+          <div>
+            <span class="text-muted block">Active Training Module</span>
+            <span id="modalModuleTitle" class="font-bold text-slate-800 text-sm">--</span>
+          </div>
           <div class="text-right">
-            <p id="headerTitle" class="text-sm font-medium text-foreground">Agricultural Sprayer Calibration &amp; Safety</p>
-            <p id="headerMeta" class="text-xs text-muted">Agriculture Module • 5:50</p>
+            <span class="text-muted block">Date</span>
+            <span id="modalCurrentDate" class="font-semibold text-slate-700">--</span>
           </div>
         </div>
-      </header>
 
-      <div class="px-6 sm:px-8 py-8">
-        <div class="max-w-6xl mx-auto">
-          <div class="w-full max-w-5xl mx-auto aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
-            <iframe
-              id="videoPlayer"
-              src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0"
-              class="w-full h-full"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen>
-            </iframe>
+        <!-- Mode Toggle: Individual vs Group -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Training Format</label>
+          <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+            <button type="button" id="modeBtnIndividual" onclick="setLogMode('Individual')" class="py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all">
+              Individual Worker (1)
+            </button>
+            <button type="button" id="modeBtnGroup" onclick="setLogMode('Group')" class="py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+              Group Session (Batch)
+            </button>
+          </div>
+        </div>
+
+        <!-- Worker Rows Container -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Trainee Details</label>
+            <span id="workerCountBadge" class="text-xs text-muted">1 Trainee</span>
           </div>
 
-          <div class="mt-10">
-            <section class="space-y-5 max-w-3xl mx-auto">
-              <div class="rounded-xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center gap-3 mb-3">
-                  <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Agriculture Module</span>
-                  <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: 5:50</span>
-                  <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: English, isiZulu</span>
-                </div>
-                <h1 id="moduleTitle" class="text-3xl font-serif text-foreground mb-3">Agricultural Sprayer Calibration &amp; Safety</h1>
-                <p id="moduleDescription" class="text-sm text-muted leading-relaxed">
-                  Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.
-                </p>
-              </div>
-
-              <details class="rounded-xl border border-slate-200 bg-white">
-                <summary class="cursor-pointer px-6 py-4 flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-foreground uppercase tracking-wider">Key Learning Objectives</h3>
-                  <span class="text-xs text-muted">Expand/Collapse</span>
-                </summary>
-                <div class="px-6 pb-5">
-                  <ul id="moduleObjectives" class="space-y-3 text-sm text-muted"></ul>
-                </div>
-              </details>
-
-              <!--
-              <details class="rounded-xl border border-slate-200 bg-white">
-                <summary class="cursor-pointer px-6 py-4 flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-foreground uppercase tracking-wider">Module Resources</h3>
-                  <span class="text-xs text-muted">Expand/Collapse</span>
-                </summary>
-                <div class="px-6 pb-5 text-sm text-muted space-y-2">
-                  <p>PPE checklist (PDF)</p>
-                  <p>Sprayer calibration worksheet</p>
-                  <p>Chemical spill quick response guide</p>
-                </div>
-              </details>
-              -->
-
-              <div class="mt-8 pt-8 border-t border-slate-200">
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center max-w-2xl mx-auto">
-                  <h3 class="font-serif text-2xl text-foreground mb-2">Compliance Registration</h3>
-                  <p class="text-slate-500 mb-6">Submit your completion data to sync with your organization's HR dashboard.</p>
-                  <button onclick="openTallyCompliance()" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
-                    Open Registration Form &rarr;
-                  </button>
-                </div>
-              </div>
-            </section>
+          <div id="traineeRowsContainer" class="space-y-2.5">
+            <!-- Dynamic worker rows inserted here -->
           </div>
+
+          <button type="button" id="addTraineeRowBtn" onclick="addTraineeRow()" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 hover:border-primary text-xs font-semibold text-slate-600 hover:text-primary rounded-xl transition-all hidden flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Add Another Worker
+          </button>
+        </div>
+
+        <!-- Supervisor Declaration & Signature -->
+        <div class="border-t border-slate-200 pt-5 space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Supervising Officer</label>
+            <input type="text" id="modalSupervisorName" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary" placeholder="e.g. Siyabonga Maseko">
+          </div>
+
+          <div class="bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 text-xs text-blue-900 leading-relaxed">
+            <p><strong>Legal Declaration:</strong> I hereby confirm that I have conducted and supervised this safety training induction. The above-named employee(s) have reviewed all guidelines and safety procedures.</p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Supervisor Signature</label>
+              <button type="button" onclick="clearSignaturePad()" class="text-[11px] text-muted hover:text-red-600 underline">Clear Signature</button>
+            </div>
+            <div class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner">
+              <canvas id="supervisorSignaturePad" width="550" height="130" class="w-full h-32 cursor-crosshair touch-none"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Action -->
+        <div class="pt-2">
+          <button type="button" id="submitComplianceBtn" onclick="submitComplianceLog()" class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Confirm & Sync to Audit Records</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOUCH-SCREEN WORKER SIGNATURE POPUP MODAL -->
+  <div id="workerSignModal" class="fixed inset-0 z-[60] hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+      
+      <!-- Header -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Worker Acknowledgement</span>
+          <h4 id="workerSignModalName" class="text-base font-serif font-bold text-foreground mt-1">Sign Attendance</h4>
+        </div>
+        <button type="button" onclick="closeWorkerSignatureModal()" class="p-1.5 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Signing Canvas Area -->
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-slate-500">Please sign in the box below using your finger or stylus to confirm attendance:</p>
+        
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50 relative shadow-inner">
+          <canvas id="workerPopupCanvas" width="500" height="200" class="w-full h-44 cursor-crosshair touch-none bg-white"></canvas>
+          <div class="absolute bottom-2 left-3 pointer-events-none text-[10px] text-slate-300 uppercase tracking-widest font-semibold">
+            Signature Line ✕
+          </div>
+        </div>
+
+        <!-- Controls: Clear / Cross vs Confirm / Tick -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button type="button" onclick="clearWorkerPopupCanvas()" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-700 text-xs font-bold transition-all shadow-sm">
+            <span class="text-base">✕</span>
+            <span>Clear / Reset</span>
+          </button>
+          <button type="button" onclick="confirmWorkerSignature()" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md">
+            <span class="text-base">✓</span>
+            <span>Accept Signature</span>
+          </button>
         </div>
       </div>
-    </main>
+
+    </div>
   </div>
 
   <script>
-    const moduleVideoPlayer = document.getElementById('videoPlayer');
+    // =========================================================================
+    // UNIFIED ACCURATE SIGNATURE & COMPLIANCE ENGINE
+    // =========================================================================
+    let currentLogMode = 'Individual';
+    let activeSigningRowId = null;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestedVideoId = urlParams.get('v') || '1179583326';
-    const requestedStartTime = Math.max(0, Number(urlParams.get('t') || 0));
+    let sigCanvas, sigCtx, isSupervisorDrawing = false;
+    let workerCanvas, workerCtx, isWorkerDrawing = false;
 
-    moduleVideoPlayer.src = `https://player.vimeo.com/video/${encodeURIComponent(requestedVideoId)}?title=0&byline=0&portrait=0&badge=0&autoplay=1#t=${Math.floor(requestedStartTime)}s`;
+    // Helper: calculate exact canvas coordinates regardless of screen scaling or devicePixelRatio
+    function getCanvasCoordinates(canvas, clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
 
-    const player = new Vimeo.Player(moduleVideoPlayer);
+    // --- SUPERVISOR SIGNATURE PAD ---
+    function initSignaturePad() {
+      sigCanvas = document.getElementById('supervisorSignaturePad');
+      if (!sigCanvas) return;
 
-    const saveVideoProgress = (watchedSeconds, totalSeconds) => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      let progressByVideo = {};
+      sigCanvas.width = sigCanvas.offsetWidth || 550;
+      sigCanvas.height = sigCanvas.offsetHeight || 130;
 
-      if (rawProgress) {
-        try {
-          progressByVideo = JSON.parse(rawProgress) || {};
-        } catch (error) {
-          progressByVideo = {};
-        }
+      sigCtx = sigCanvas.getContext('2d');
+      sigCtx.strokeStyle = '#000000'; // Crisp black ink
+      sigCtx.lineWidth = 2.5;
+      sigCtx.lineCap = 'round';
+      sigCtx.lineJoin = 'round';
+
+      // Mouse
+      sigCanvas.onmousedown = (e) => {
+        isSupervisorDrawing = true;
+        const pos = getCanvasCoordinates(sigCanvas, e.clientX, e.clientY);
+        sigCtx.beginPath();
+        sigCtx.moveTo(pos.x, pos.y);
+      };
+      sigCanvas.onmousemove = (e) => {
+        if (!isSupervisorDrawing) return;
+        const pos = getCanvasCoordinates(sigCanvas, e.clientX, e.clientY);
+        sigCtx.lineTo(pos.x, pos.y);
+        sigCtx.stroke();
+      };
+      window.addEventListener('mouseup', () => { isSupervisorDrawing = false; });
+
+      // Touch
+      sigCanvas.ontouchstart = (e) => {
+        e.preventDefault();
+        isSupervisorDrawing = true;
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(sigCanvas, touch.clientX, touch.clientY);
+        sigCtx.beginPath();
+        sigCtx.moveTo(pos.x, pos.y);
+      };
+      sigCanvas.ontouchmove = (e) => {
+        if (!isSupervisorDrawing) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(sigCanvas, touch.clientX, touch.clientY);
+        sigCtx.lineTo(pos.x, pos.y);
+        sigCtx.stroke();
+      };
+      sigCanvas.ontouchend = () => { isSupervisorDrawing = false; };
+    }
+
+    function clearSignaturePad() {
+      if (!sigCanvas || !sigCtx) return;
+      sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    }
+
+    function isSignatureBlank() {
+      if (!sigCanvas) return true;
+      const blank = document.createElement('canvas');
+      blank.width = sigCanvas.width;
+      blank.height = sigCanvas.height;
+      return sigCanvas.toDataURL() === blank.toDataURL();
+    }
+
+    // --- WORKER POPUP SIGNATURE PAD ---
+    function initWorkerCanvas() {
+      workerCanvas = document.getElementById('workerPopupCanvas');
+      if (!workerCanvas) return;
+
+      // 2x HiDPI resolution to prevent pixelation on PDF exports
+      workerCanvas.width = 800;
+      workerCanvas.height = 320;
+
+      workerCtx = workerCanvas.getContext('2d');
+      workerCtx.strokeStyle = '#000000'; // Crisp black ink
+      workerCtx.lineWidth = 3.5;
+      workerCtx.lineCap = 'round';
+      workerCtx.lineJoin = 'round';
+
+      // Mouse
+      workerCanvas.onmousedown = (e) => {
+        isWorkerDrawing = true;
+        const pos = getCanvasCoordinates(workerCanvas, e.clientX, e.clientY);
+        workerCtx.beginPath();
+        workerCtx.moveTo(pos.x, pos.y);
+      };
+      workerCanvas.onmousemove = (e) => {
+        if (!isWorkerDrawing) return;
+        const pos = getCanvasCoordinates(workerCanvas, e.clientX, e.clientY);
+        workerCtx.lineTo(pos.x, pos.y);
+        workerCtx.stroke();
+      };
+      window.addEventListener('mouseup', () => { isWorkerDrawing = false; });
+
+      // Touch
+      workerCanvas.ontouchstart = (e) => {
+        e.preventDefault();
+        isWorkerDrawing = true;
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(workerCanvas, touch.clientX, touch.clientY);
+        workerCtx.beginPath();
+        workerCtx.moveTo(pos.x, pos.y);
+      };
+      workerCanvas.ontouchmove = (e) => {
+        if (!isWorkerDrawing) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(workerCanvas, touch.clientX, touch.clientY);
+        workerCtx.lineTo(pos.x, pos.y);
+        workerCtx.stroke();
+      };
+      workerCanvas.ontouchend = () => { isWorkerDrawing = false; };
+    }
+
+    function openWorkerSignatureModal(rowId) {
+      activeSigningRowId = rowId;
+      const row = document.getElementById(rowId);
+      const nameInput = row?.querySelector('.worker-name')?.value?.trim();
+      const codeInput = row?.querySelector('.worker-code')?.value?.trim();
+
+      const modalTitle = document.getElementById('workerSignModalName');
+      if (modalTitle) {
+        modalTitle.textContent = nameInput 
+          ? `Sign: ${nameInput} ${codeInput ? `(${codeInput})` : ''}` 
+          : 'Worker Signature';
       }
 
-      progressByVideo[requestedVideoId] = {
-        watchedSeconds: Math.max(0, Math.floor(watchedSeconds)),
-        totalSeconds: Math.max(0, Math.floor(totalSeconds || 0)),
-        lastWatchedAt: Date.now()
-      };
+      document.getElementById('workerSignModal')?.classList.remove('hidden');
+      setTimeout(() => {
+        initWorkerCanvas();
+        clearWorkerPopupCanvas();
+      }, 50);
+    }
 
-      localStorage.setItem('vaultVideoProgress', JSON.stringify(progressByVideo));
-    };
+    function closeWorkerSignatureModal() {
+      document.getElementById('workerSignModal')?.classList.add('hidden');
+      activeSigningRowId = null;
+    }
 
-    let lastSavedSecond = -1;
-    player.on('timeupdate', (event) => {
-      const currentSecond = Math.floor(event.seconds || 0);
-      if (currentSecond === lastSavedSecond) {
+    function clearWorkerPopupCanvas() {
+      if (!workerCanvas || !workerCtx) return;
+      workerCtx.clearRect(0, 0, workerCanvas.width, workerCanvas.height);
+    }
+
+    function isWorkerCanvasBlank() {
+      if (!workerCanvas) return true;
+      const blank = document.createElement('canvas');
+      blank.width = workerCanvas.width;
+      blank.height = workerCanvas.height;
+      return workerCanvas.toDataURL() === blank.toDataURL();
+    }
+
+    function confirmWorkerSignature() {
+      if (isWorkerCanvasBlank()) {
+        alert('Please draw your signature before clicking accept.');
         return;
       }
 
-      lastSavedSecond = currentSecond;
-      saveVideoProgress(event.seconds || 0, event.duration || 0);
-    });
+      if (!activeSigningRowId) return;
 
-    player.on('ended', (event) => {
-      const duration = event && event.duration ? event.duration : 0;
-      saveVideoProgress(duration, duration);
-    });
+      const row = document.getElementById(activeSigningRowId);
+      if (row) {
+        const sigInput = row.querySelector('.worker-sig-data');
+        const sigBtn = row.querySelector('.worker-sig-btn');
 
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const desktopSidebarToggle = document.getElementById('sidebarToggle');
-      if (sidebar && mainContent && desktopSidebarToggle && window.innerWidth >= 1024) {
-        sidebar.classList.add('collapsed');
-        mainContent.style.marginLeft = '5rem';
-        desktopSidebarToggle.textContent = '>>';
-        desktopSidebarToggle.setAttribute('aria-expanded', 'false');
-        desktopSidebarToggle.setAttribute('aria-label', 'Expand sidebar');
-      }
-    });
-  </script>
-  <script>
-    // 1. The Video Database (All your video data lives here now, NOT hardcoded in HTML)
-    const videoDatabase = {
-      "1179583326": {
-        title: "Chemical Spraying",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0&badge=0", 
-        description: "Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. This module covers pre-operation checks, PPE selection, and emergency response for chemical incidents.",
-        duration: "Duration: 5:50",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify and inspect critical sprayer components prior to operation.",
-          "Demonstrate the correct selection and donning of HAZMAT PPE.",
-          "Execute safe chemical mixing and tank calibration procedures."
-        ]
-      },
-      "1187071672": {
-        title: "Oxy Torch",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071672?title=0&byline=0&portrait=0&badge=0",
-        description: "Learn the critical safety protocols for operating oxy-acetylene cutting torches. This module covers pre-use inspections, safe lighting and extinguishing procedures, cylinder storage, and the mandatory PPE required to prevent burns and inhalation hazards.",
-        duration: "Duration: 5:46",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify the components of an oxy-acetylene torch and perform a standard pre-use safety inspection.",
-          "Demonstrate the correct sequence for safely lighting, adjusting, and extinguishing the torch.",
-          "Select and properly wear the necessary personal protective equipment (PPE) for hot work operations."
-        ]
-      },
-      "1187071582": {
-        title: "Chainsaw",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071582?title=0&byline=0&portrait=0&badge=0",
-        description: "Master the fundamentals of safe chainsaw operation, maintenance, and timber cutting. This module covers pre-start checks, kickback prevention, and the mandatory forestry-grade PPE required for clearing tasks.",
-        duration: "Duration: 6:15",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify and inspect critical chainsaw safety features (chain brake, catch pin) prior to operation.",
-          "Demonstrate the correct selection and donning of forestry-grade PPE (chaps, face shield, hearing protection).",
-          "Execute safe starting procedures and identify safe cutting zones to prevent kickback."
-        ]
-      },
-      "1187071549": {
-        title: "Band/Prop Saw",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071549?title=0&byline=0&portrait=0&badge=0",
-        description: "Understand the specific risks and operational guidelines for using stationary band and prop saws. This module emphasizes blade inspection, secure material handling, and the use of guards to prevent severe lacerations or amputations.",
-        duration: "Duration: 4:50",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Perform a visual inspection of the saw blade for tension, sharpness, and missing teeth.",
-          "Demonstrate how to securely position and feed material through the saw while keeping hands clear of the blade path.",
-          "Ensure all safety guards and emergency stop mechanisms are functional before use."
-        ]
-      },
-      "1187071612": {
-        title: "Farm Saw",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071612?title=0&byline=0&portrait=0&badge=0",
-        description: "Essential safety training for operating general-purpose farm saws (circular or table saws). Focuses on preventing blade binding, managing kickback, and maintaining a clean work area free of offcuts and sawdust hazards.",
-        duration: "Duration: 5:53",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Recognize the signs of blade wear and understand when a replacement is necessary.",
-          "Apply correct feeding techniques to prevent material binding and sudden kickback.",
-          "Maintain a safe, clutter-free workspace around the saw to prevent slips, trips, and falls."
-        ]
-      },
-      "1187071628": {
-        title: "General Farm Staff",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071628?title=0&byline=0&portrait=0&badge=0",
-        description: "A comprehensive safety overview for all general farm laborers. This introductory module covers hazard identification, the importance of situational awareness, standard PPE requirements, and basic emergency response protocols on a working farm.",
-        duration: "Duration: 7:04",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify common hazards found in a dynamic farm environment (moving machinery, uneven terrain, livestock).",
-          "Understand the purpose and correct usage of standard farm PPE (boots, overalls, sun protection).",
-          "Locate emergency assembly points and understand how to report incidents or unsafe conditions."
-        ]
-      },
-      "1187071597": {
-        title: "Farm Noise",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071597?title=0&byline=0&portrait=0&badge=0",
-        description: "Learn about the dangers of prolonged exposure to high decibel levels from farm machinery and equipment. This module educates staff on identifying hazardous noise zones and the mandatory use of hearing protection devices (HPDs).",
-        duration: "Duration: 5:38",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify the difference between continuous, impulse, and mechanical noise sources on a farm.",
-          "Recognize high-noise areas and the long-term health risks of unprotected exposure.",
-          "Select, correctly fit, and maintain appropriate hearing protection (earplugs or earmuffs)."
-        ]
-      },
-      "1187071647": {
-        title: "Irrigation Pump House",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071647?title=0&byline=0&portrait=0&badge=0",
-        description: "Safety protocols for operating and maintaining farm irrigation systems and pump houses. Covers the hazards of high-pressure water, electrical safety in wet environments, and safe pump start-up/shut-down procedures.",
-        duration: "Duration: 5:03",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Identify the hazards associated with high-pressure lines, pumps, and unguarded PTO shafts.",
-          "Demonstrate safe entry and inspection procedures for irrigation pump houses.",
-          "Recognize electrical hazards near water and understand that only qualified electricians should handle wiring."
-        ]
-      },
-      "1187071561": {
-        title: "Brush Cutter",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071561?title=0&byline=0&portrait=0&badge=0",
-        description: "Guidelines for the safe operation of motorized brush cutters and strimmers. This training highlights the dangers of flying debris, blade selection, harness adjustment, and maintaining a safe exclusion zone around the operator.",
-        duration: "Duration: 5:46",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Select the correct cutting attachment (nylon line vs. steel blade) for the specific clearing task.",
-          "Properly adjust the harness and handles to maintain balance and reduce fatigue during operation.",
-          "Establish a safe working distance from other workers to prevent injury from flying debris."
-        ]
-      },
-      "1187071529": {
-        title: "Angle Grinder",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071529?title=0&byline=0&portrait=0&badge=0",
-        description: "Crucial safety instructions for using angle grinders in farm workshops. Emphasizes the severe risks of disc shattering, the necessity of guards, securing workpieces, and protecting against sparks and hot metal.",
-        duration: "Duration: 5:16",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Inspect the grinder, power cord, and ensure the correct disc guard is securely in place before use.",
-          "Verify that the selected disc matches the grinder's RPM rating and the material being cut/ground.",
-          "Securely clamp all materials before grinding and direct sparks away from self, others, and flammable materials."
-        ]
-      },
-      "1187071697": {
-        title: "Welding",
-        module: "Agriculture Module",
-        videoUrl: "https://player.vimeo.com/video/1187071697?title=0&byline=0&portrait=0&badge=0",
-        description: "Essential health and safety training for arc and MIG welding operations. This module covers electrical hazards, the prevention of 'arc eye' (welder's flash), fire prevention strategies, and required protective clothing.",
-        duration: "Duration: 4:53",
-        language: "Audio Tracks: English, isiZulu",
-        objectives: [
-          "Inspect the welding machine, cables, and electrode holder for damage before striking an arc.",
-          "Select and use the correct welding helmet, fire-resistant gauntlets, and protective clothing to prevent UV damage and burns.",
-          "Ensure the welding area is free of flammable materials, grease, and trip hazards before commencing work."
-        ]
-      },
-      "placeholder": {
-        title: "New Training Module",
-        module: "Agriculture Module",
-        videoUrl: "", 
-        description: "Module description loading...",
-        duration: "--:-- remaining",
-        language: "English",
-        objectives: ["Objective 1 loading...", "Objective 2 loading..."]
-      }
-    };
+        if (sigInput) sigInput.value = workerCanvas.toDataURL('image/png');
 
-    function openTallyCompliance() {
-      const currentModule = document.getElementById('moduleTitle').innerText;
-      
-      Tally.openPopup('D4DAAE', {
-        layout: 'modal',
-        width: 600,
-        hiddenFields: {
-          module_name: currentModule
+        if (sigBtn) {
+          sigBtn.className = 'worker-sig-btn shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-sm transition-all';
+          sigBtn.innerHTML = `<span>✓</span><span class="btn-text">Signed</span>`;
         }
-      });
+      }
+
+      closeWorkerSignatureModal();
     }
 
-    // 2. The Dynamic Loader (Overwrites the HTML skeleton)
-    document.addEventListener('DOMContentLoaded', () => {
+    function setLogMode(mode) {
+      currentLogMode = mode;
+      const btnInd = document.getElementById('modeBtnIndividual');
+      const btnGrp = document.getElementById('modeBtnGroup');
+      const addBtn = document.getElementById('addTraineeRowBtn');
+      const container = document.getElementById('traineeRowsContainer');
+
+      if (mode === 'Individual') {
+        if (btnInd) btnInd.className = 'py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all';
+        if (btnGrp) btnGrp.className = 'py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        addBtn?.classList.add('hidden');
+        if (container) {
+          container.innerHTML = '';
+          addTraineeRow();
+        }
+      } else {
+        if (btnGrp) btnGrp.className = 'py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all';
+        if (btnInd) btnInd.className = 'py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        addBtn?.classList.remove('hidden');
+        if (container && container.children.length === 1) {
+          addTraineeRow();
+        }
+      }
+      updateWorkerCountBadge();
+    }
+
+    function addTraineeRow() {
+      const container = document.getElementById('traineeRowsContainer');
+      if (!container) return;
+
+      const rowIndex = container.children.length;
+      const rowId = `trainee-row-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      
+      const row = document.createElement('div');
+      row.id = rowId;
+      row.className = 'trainee-row flex flex-wrap sm:flex-nowrap items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl transition-all';
+      
+      row.innerHTML = `
+        <input type="text" class="worker-code w-20 sm:w-24 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-primary uppercase" placeholder="P1732">
+        <input type="text" class="worker-name flex-1 min-w-[140px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs outline-none focus:border-primary" placeholder="Worker Full Name">
+        <select class="worker-gender w-16 px-1.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs outline-none cursor-pointer">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        
+        <input type="hidden" class="worker-sig-data" value="">
+
+        <button type="button" onclick="openWorkerSignatureModal('${rowId}')" class="worker-sig-btn shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer">
+          <span>✍️</span>
+          <span class="btn-text">Sign</span>
+        </button>
+
+        ${currentLogMode === 'Group' && rowIndex > 0 ? `
+          <button type="button" onclick="this.closest('.trainee-row').remove(); updateWorkerCountBadge();" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors" title="Remove Worker">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        ` : ''}
+      `;
+      container.appendChild(row);
+      updateWorkerCountBadge();
+    }
+
+    function updateWorkerCountBadge() {
+      const badge = document.getElementById('workerCountBadge');
+      const count = document.querySelectorAll('.trainee-row').length;
+      if (badge) badge.textContent = `${count} ${count === 1 ? 'Trainee' : 'Trainees'}`;
+    }
+
+    function openComplianceModal() {
+      const modal = document.getElementById('complianceModal');
+      const titleEl = document.getElementById('modalModuleTitle');
+      const dateEl = document.getElementById('modalCurrentDate');
+      const supInput = document.getElementById('modalSupervisorName');
+
+      if (titleEl) titleEl.textContent = window.currentVideoTitle || 'Training Module';
+      if (dateEl) {
+        dateEl.textContent = new Intl.DateTimeFormat('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date());
+      }
+      
+      const userName = document.getElementById('topbar-user-name')?.textContent;
+      if (supInput && userName && userName !== 'Loading...') {
+        supInput.value = userName;
+      }
+
+      setLogMode('Individual');
+      clearSignaturePad();
+      modal?.classList.remove('hidden');
+      setTimeout(initSignaturePad, 50);
+    }
+
+    function closeComplianceModal() {
+      document.getElementById('complianceModal')?.classList.add('hidden');
+    }
+
+    async function submitComplianceLog() {
+      const submitBtn = document.getElementById('submitComplianceBtn');
+      const supName = document.getElementById('modalSupervisorName')?.value?.trim();
+      const companyId = window.userCompanyId;
+
+      if (!companyId) {
+        alert('Unable to identify active company profile. Please refresh.');
+        return;
+      }
+
+      if (!supName) {
+        alert('Please enter the Supervising Officer name.');
+        return;
+      }
+
+      if (isSignatureBlank()) {
+        alert('Please provide the Supervisor digital signature on the pad before submitting.');
+        return;
+      }
+
+      const rows = document.querySelectorAll('.trainee-row');
+      const recordsToInsert = [];
+      const batchSessionId = crypto.randomUUID();
+      const supervisorSigData = sigCanvas.toDataURL('image/png');
+      const moduleTitle = window.currentVideoTitle || 'General Safety Module';
+
+      for (let i = 0; i < rows.length; i++) {
+        const code = rows[i].querySelector('.worker-code')?.value?.trim();
+        const name = rows[i].querySelector('.worker-name')?.value?.trim();
+        const gender = rows[i].querySelector('.worker-gender')?.value || 'Male';
+        const workerSigData = rows[i].querySelector('.worker-sig-data')?.value || null;
+
+        if (!name) {
+          alert(`Please enter a worker name for Row #${i + 1}.`);
+          return;
+        }
+
+        recordsToInsert.push({
+          company_id: companyId,
+          employee_name: name,
+          employee_number: code || null,
+          gender: gender,
+          module_title: moduleTitle,
+          training_type: currentLogMode,
+          supervisor_name: supName,
+          supervisor_signature_data: supervisorSigData,
+          employee_signature_data: workerSigData,
+          batch_session_id: currentLogMode === 'Group' ? batchSessionId : null,
+          status: 'Verified',
+          completed_at: new Date().toISOString().split('T')[0]
+        });
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
+        Syncing to Audit Trail...
+      `;
+
+      try {
+        const { error } = await window.dbClient
+          .from('training_records')
+          .insert(recordsToInsert);
+
+        if (error) throw error;
+
+        alert(`✓ Successfully logged ${recordsToInsert.length} verified training record(s) for ${moduleTitle}.`);
+        closeComplianceModal();
+
+      } catch (err) {
+        console.error('Failed submitting compliance log:', err);
+        alert(`Error saving records: ${err.message || 'Unknown database error'}`);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span>Confirm & Sync to Audit Records</span>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // PAGE BOOTSTRAP & PLAYER INITIALIZATION
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const videoId = urlParams.get('v');
+      const startTime = Math.max(0, Number(urlParams.get('t') || 0));
 
-      const videoData = videoDatabase[videoId] || videoDatabase['placeholder'];
-
-      const videoPlayer = document.getElementById('videoPlayer');
-      if (videoPlayer && videoData.videoUrl) {
-        videoPlayer.src = videoData.videoUrl;
+      if (!videoId) {
+        window.location.replace('vault.html');
+        return;
       }
+
+      const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+      const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+      window.dbClient = dbClient;
+
+      let { data: video } = await dbClient
+        .from('videos')
+        .select('*')
+        .eq('id', String(videoId))
+        .maybeSingle();
+
+      if (!video) {
+        video = {
+          id: String(videoId),
+          title: `Training Module (${videoId})`,
+          category: 'Agriculture Module',
+          description: 'Standard operational safety module.',
+          total_seconds: 0
+        };
+      }
+
+      const { data: { session } } = await dbClient.auth.getSession();
+      if (!session?.user?.id) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      const { data: profile } = await dbClient
+        .from('profiles')
+        .select('company_id')
+        .eq('id', session.user.id)
+        .single();
+
+      window.userCompanyId = profile?.company_id || null;
+
+      const totalSeconds = Number(video.total_seconds || 0);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const durationLabel = `Duration: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const categoryLabel = video.category || 'Agriculture Module';
+      const videoTitle = video.title || 'Training Module';
+
+      document.title = `${videoTitle} - The Vault`;
 
       const headerTitle = document.getElementById('headerTitle');
       const headerMeta = document.getElementById('headerMeta');
-      if (headerTitle) headerTitle.textContent = videoData.title;
-      if (headerMeta) {
-        const cleanDuration = videoData.duration ? videoData.duration.replace('Duration: ', '') : '';
-        headerMeta.textContent = `${videoData.module || 'Agriculture Module'} • ${cleanDuration}`;
-      }
+      const moduleTitle = document.getElementById('moduleTitle');
+      const moduleDescription = document.getElementById('moduleDescription');
+      const moduleDuration = document.getElementById('moduleDuration');
+      const moduleLanguage = document.getElementById('moduleLanguage');
+      const categoryBadge = document.querySelector('[data-module-category]');
 
-      const titleEl = document.getElementById('moduleTitle');
-      const descEl = document.getElementById('moduleDescription');
-      const durationEl = document.getElementById('moduleDuration');
-      const langEl = document.getElementById('moduleLanguage');
+      if (headerTitle) headerTitle.textContent = videoTitle;
+      if (headerMeta) headerMeta.textContent = `${categoryLabel} • ${minutes}:${String(seconds).padStart(2, '0')}`;
+      if (moduleTitle) moduleTitle.textContent = videoTitle;
+      if (moduleDescription) moduleDescription.textContent = video.description || '';
+      if (moduleDuration) moduleDuration.textContent = durationLabel;
+      if (moduleLanguage) moduleLanguage.textContent = video.language || '';
+      if (categoryBadge) categoryBadge.textContent = categoryLabel;
 
-      if (titleEl) titleEl.textContent = videoData.title;
-      if (descEl) descEl.textContent = videoData.description;
-      if (durationEl) durationEl.textContent = videoData.duration;
-      if (langEl) langEl.textContent = videoData.language;
+      window.currentVideoTitle = videoTitle;
 
       const objectivesList = document.getElementById('moduleObjectives');
-      if (objectivesList && videoData.objectives) {
+      if (objectivesList) {
         objectivesList.innerHTML = '';
-        videoData.objectives.forEach(obj => {
+        const objectives = Array.isArray(video.objectives) ? video.objectives : [];
+        objectives.forEach((obj) => {
           const li = document.createElement('li');
-          li.className = 'flex items-start gap-2 text-sm text-muted';
-          li.innerHTML = `<span class="text-green-500 mr-2">&#10003;</span>${obj}`;
+          li.className = 'flex items-start gap-2 text-sm text-slate-600';
+          li.innerHTML = `<span class="text-green-500 mr-2 font-bold">&#10003;</span>${obj}`;
           objectivesList.appendChild(li);
         });
+      }
+
+      // Tier Gate Lockout Interceptor
+      const { data: companyData } = await dbClient
+        .from('companies')
+        .select('tier')
+        .eq('id', profile?.company_id)
+        .maybeSingle();
+
+      const userTier = (companyData?.tier || 'basic').toLowerCase();
+      const subCategory = (video.sub_tag || 'General Safety').toLowerCase().trim();
+      const unlockedBasic = ['general safety', 'machinery & workshop'];
+
+      if (userTier === 'basic' && !unlockedBasic.includes(subCategory)) {
+        const playerContainer = document.querySelector('.aspect-video');
+        if (playerContainer) {
+          playerContainer.innerHTML = `
+            <div class="w-full h-full bg-slate-900 flex flex-col items-center justify-center p-8 text-center text-white">
+              <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-4 shadow-xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              </div>
+              <h2 class="text-2xl font-serif font-bold mb-2">Specialized Module Locked</h2>
+              <p class="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
+                <strong>${videoTitle}</strong> is part of the <em>${video.sub_tag || 'Specialized'}</em> catalog. Upgrade to the Essential tier (R220/mo) to unlock complete video streaming and digital compliance logs.
+              </p>
+              <div class="flex items-center gap-3">
+                <a href="vault.html" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium transition-colors">
+                  &larr; Back to Library
+                </a>
+                <button onclick="openProfileModal(); switchProfileTab('plans');" class="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs font-semibold shadow-lg transition-colors">
+                  Upgrade Plan &rarr;
+                </button>
+              </div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      const iframe = document.querySelector('#videoPlayer');
+      if (iframe) {
+        iframe.src = `https://player.vimeo.com/video/${encodeURIComponent(videoId)}?title=0&byline=0&portrait=0&badge=0&autoplay=1#t=${Math.floor(startTime)}s`;
+        const player = new Vimeo.Player(iframe);
+        await player.ready();
+
+        const saveProgress = async (data) => {
+          const progressSeconds = Math.floor(Number(data?.seconds || 0));
+          const durationSeconds = Math.floor(Number(data?.duration || 0));
+          const percentage = durationSeconds > 0 ? Math.round((progressSeconds / durationSeconds) * 100) : 0;
+
+          await dbClient.from('user_video_progress').upsert({
+            user_id: session.user.id,
+            video_id: String(videoId),
+            video_title: video.title,
+            progress_seconds: progressSeconds,
+            duration_seconds: durationSeconds,
+            percentage,
+            is_completed: percentage >= 90,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id, video_id' });
+        };
+
+        let lastSyncAt = 0;
+        let pendingTimer = null;
+
+        const flushProgress = (data, force = false) => {
+          if (force) {
+            if (pendingTimer) clearTimeout(pendingTimer);
+            saveProgress(data);
+            return;
+          }
+          const elapsed = Date.now() - lastSyncAt;
+          if (elapsed >= 5000) {
+            lastSyncAt = Date.now();
+            saveProgress(data);
+            return;
+          }
+          if (pendingTimer) return;
+          pendingTimer = setTimeout(() => {
+            pendingTimer = null;
+            lastSyncAt = Date.now();
+            saveProgress(data);
+          }, 5000 - elapsed);
+        };
+
+        player.on('timeupdate', (data) => flushProgress(data, false));
+        player.on('pause', (data) => flushProgress(data, true));
+        player.on('ended', (data) => flushProgress({ seconds: data?.duration || 0, duration: data?.duration || 0 }, true));
       }
     });
   </script>
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
 </body>
 </html>

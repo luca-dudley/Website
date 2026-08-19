@@ -9,7 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v2/inline.js"></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -49,742 +51,664 @@
 
     #sidebar,
     #mainContent {
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .vault-logo-icon {
-      transform: translateY(2px);
+    /* Collapsed Sidebar Rules */
+    #sidebar.collapsed {
+      width: 5rem !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
     }
-
-    @media (min-width: 1024px) {
-      #sidebar.collapsed {
-        width: 5rem;
-      }
-
-      #sidebar.collapsed #sidebarSpacer {
-        display: none;
-      }
-
-      #sidebar.collapsed .vault-title {
-        display: none;
-      }
-
-      #sidebar.collapsed .vault-logo-row {
-        justify-content: center;
-      }
-
-      #sidebar.collapsed .vault-logo-icon {
-        width: 3rem;
-        height: 3rem;
-        margin-right: 0;
-      }
-
-      #sidebar.collapsed nav {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-      }
-
-      #sidebar.collapsed nav a {
-        justify-content: center;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-      }
-
-      #sidebar.collapsed .nav-label {
-        display: none;
-      }
+    #sidebar.collapsed .sidebar-text,
+    #sidebar.collapsed .sidebar-category-header,
+    #sidebar.collapsed #sidebarToggle span {
+      display: none !important;
     }
-
+    #sidebar.collapsed .sidebar-nav-btn {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    #sidebar.collapsed .sidebar-nav-btn svg {
+      margin: 0;
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+    #sidebar.collapsed #sidebarToggle svg {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
-<body class="font-sans bg-gray-50 text-foreground antialiased">
-  <header class="lg:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800">
-    <div class="h-16 px-4 flex items-center justify-between">
-      <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="p-2 rounded-md hover:bg-slate-800 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
+
+  <!-- 1. FULL WIDTH TOP BAR (Spans 100% of viewport) -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+    <!-- Brand Logo on the Left -->
+    <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
+      <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
         </svg>
-      </button>
-      <a href="vault.html" class="flex items-center gap-2" aria-label="Go to Video Library">
-        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1 class="text-sm font-semibold tracking-wide">The Vault</h1>
-      </a>
-      <div class="flex items-center gap-2">
-        <button class="relative p-2 text-slate-200 hover:text-white transition-colors" aria-label="Notifications">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
-          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-        </button>
-        <button data-ms-modal="profile" class="h-10 w-10 flex items-center justify-center" aria-label="Open profile">
-          <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
-            <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-            <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
-          </div>
-        </button>
       </div>
+      <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
+    </a>
+
+    <!-- Right-Hand Controls -->
+    <div class="flex items-center gap-5 shrink-0">
+      <!-- Live Company Tier Pill -->
+      <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="topbar-company-name">Simple Solutions</span>
+        <span class="text-slate-300">|</span>
+        <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
+      </div>
+
+      <!-- Functional Notification Dropdown -->
+      <div class="relative">
+        <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
+          </div>
+          <div class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0 text-sm">🚀</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Workspace Active</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Your organization's Vault streaming modules are unlocked and ready.</p>
+              </div>
+            </div>
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 text-sm">🛡️</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Compliance Tracking Live</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Digital sign-off logging and team management are available.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-6 w-px bg-slate-300/80"></div>
+
+      <!-- Profile Trigger Button -->
+      <button onclick="openProfileModal()" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-white border border-transparent hover:border-slate-200 transition-all text-left group">
+        <div class="relative w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center overflow-hidden border border-slate-300 shadow-sm">
+          <span data-dynamic-initials>?</span>
+          <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Avatar">
+        </div>
+        <div class="hidden sm:block leading-tight">
+          <p id="topbar-user-name" class="text-sm font-bold text-foreground group-hover:text-primary transition-colors">Loading...</p>
+          <p id="topbar-user-role" class="text-xs text-muted">Primary Admin</p>
+        </div>
+        <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
     </div>
   </header>
 
-  <div class="flex min-h-screen">
-    
-    <!-- Left Sidebar -->
-    <aside id="sidebar" class="fixed top-16 inset-x-0 z-50 transform -translate-y-full opacity-0 pointer-events-none transition-all duration-300 ease-in-out bg-slate-50 border-b border-slate-200 lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto lg:fixed lg:inset-y-0 lg:left-0 lg:top-0 lg:z-50 lg:w-64 lg:border-b-0 lg:flex lg:flex-col lg:h-full lg:overflow-hidden lg:rounded-tr-xl lg:rounded-br-xl">
-      <div id="sidebarContent" class="flex flex-col h-full">
-      <!-- Logo -->
-      <div id="sidebarLogo" class="hidden lg:flex h-20 px-6 items-center">
-        <a href="vault.html" class="vault-logo-row flex items-center justify-center" aria-label="Go to Video Library">
-          <svg class="vault-logo-icon h-11 w-11 text-black mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 9v1m0 4v1m3-3h-1m-4 0H9" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M6 8v8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <h1 class="vault-title font-serif text-3xl font-semibold text-black tracking-tight">The Vault</h1>
-        </a>
-      </div>
-      
-      <!-- Main Navigation -->
-      <nav class="p-4 space-y-1">
-        <a href="vault.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg bg-black/5 text-black font-medium transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <span class="nav-label">Video Library</span>
-        </a>
-        <a href="records.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-          </svg>
-          <span class="nav-label">Training Records</span>
-        </a>
-        <a href="support.html" class="sidebar-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-black/5 hover:text-black transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <span class="nav-label">Support & Requests</span>
-        </a>
-      </nav>
-      
-      <!-- Spacer -->
-      <div id="sidebarSpacer" class="flex-1"></div>
-      
-      </div>
+  <!-- 2. SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+    <div class="space-y-6">
+      <div>
+        <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
+        <nav class="space-y-1.5">
+          <!-- Video Library (Active) -->
+          <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Video Library</span>
+          </a>
 
-      <div class="hidden lg:block p-3 border-t border-border mt-auto">
-        <button
-          id="sidebarToggle"
-          type="button"
-          aria-expanded="true"
-          aria-label="Collapse sidebar"
-          class="w-full rounded-lg border border-border py-2 text-sm font-semibold text-foreground hover:bg-gray-50 transition-colors"
-        >
-          &lt;&lt;
-        </button>
-      </div>
+          <!-- Training Records -->
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Training Records</span>
+          </a>
 
-    </aside>
-    
-    <!-- Main Content Area -->
-    <main id="mainContent" class="flex-1 ml-0 lg:ml-64 pt-16 lg:pt-0 bg-white">
-      
-      <!-- Top Navbar -->
-      <header class="hidden lg:block bg-slate-50 sticky top-0 z-10">
-        <div class="h-20 flex items-center justify-end px-8">
-          <!-- Right Side Actions -->
-          <div class="flex items-center gap-4">
-            <!-- Notifications -->
-            <button class="relative p-2 text-muted hover:text-foreground transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            
-            <!-- User Profile -->
-            <button data-ms-modal="profile" class="shrink-0 flex items-center gap-3 pl-4 border-l border-border hover:opacity-80 transition-opacity text-left">
-              <div class="text-right hidden sm:block">
-                <p class="text-sm font-medium text-foreground"><span data-ms-member="first-name">Client</span> <span data-ms-member="last-name">Name</span></p>
-                <p class="text-xs text-muted" data-ms-member="job-title">Job Title</p>
-              </div>
-              <div class="relative w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-slate-200">
-                <span class="uppercase tracking-widest text-xs" data-dynamic-initials></span>
-                <img data-ms-member="profile-image" data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
-              </div>
-            </button>
-          </div>
-        </div>
-      </header>
-      
-      <!-- Page Content -->
-      <div class="p-8">
-        
-        <!-- Featured Training Banner -->
-        <div id="continue-watching-block">
+          <!-- Help & Support -->
+          <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Help & Support</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Collapse Trigger Button -->
+    <div class="pt-3 border-t border-slate-200/80">
+      <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm" title="Toggle Sidebar">
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+        <span class="truncate">Collapse View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+    <div>
+      <!-- Featured Training Banner -->
+      <div id="continue-watching-block" class="hidden">
         <section class="mb-10">
           <div class="relative bg-gradient-to-r from-primary to-[#2a5285] rounded-2xl overflow-hidden shadow-lg border border-primary/20">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
             <div class="relative p-6 md:p-8">
               <div class="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
-              <!-- Video Thumbnail -->
-              <a id="continueWatchingVisualLink" href="module.html?v=1179583326&t=120" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
-                <img id="bannerThumbnail" src="assets/thumbnails/Chemical_Spraying.svg" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
-              </a>
-              
-              <!-- Content -->
-              <div class="text-white flex flex-col w-full md:w-1/2">
-                <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
-                <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Chemical Spraying</h2>
-                <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
-                <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span id="bannerTimeRemaining">3:50 remaining</span>
-                  </span>
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                    </svg>
-                    <span id="continueWatchingModule">Agriculture</span>
-                  </span>
+                <!-- Video Thumbnail -->
+                <a id="continueWatchingVisualLink" href="#" class="w-full md:w-1/2 aspect-video rounded-md mb-4 md:mb-0 overflow-hidden border border-white/10 bg-black block" aria-label="Resume video from where you left off">
+                  <img id="bannerThumbnail" src="" alt="Continue watching thumbnail" class="w-full h-full object-contain p-4 bg-white">
+                </a>
+                
+                <!-- Content -->
+                <div class="text-white flex flex-col w-full md:w-1/2">
+                  <span class="inline-flex self-start w-fit px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-xs font-medium mb-4">Continue Watching</span>
+                  <h2 id="bannerTitle" class="w-full text-2xl md:text-3xl font-serif font-semibold mb-2">Loading...</h2>
+                  <p id="bannerDescription" class="text-blue-100/80 text-sm mt-2 mb-6 line-clamp-2"></p>
+                  <div class="flex items-center justify-between w-full text-xs md:text-sm text-slate-300 mb-6">
+                    <span class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <span id="bannerTimeRemaining">--:-- remaining</span>
+                    </span>
+                    <span class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                      </svg>
+                      <span id="continueWatchingModule">Training</span>
+                    </span>
+                  </div>
+                  <a id="bannerResumeBtn" href="#" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
                 </div>
-                <a id="bannerResumeBtn" href="module.html?v=1179583326&t=120" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
-              </div>
               </div>
             </div>
           </div>
         </section>
-        </div>
-        
-        <!-- Video Library Section -->
-        <section>
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
-            <h2 class="text-2xl font-serif text-slate-800 font-medium">Training Library</h2>
-            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-              <div class="relative w-full sm:w-64">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                </div>
-                <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
-              </div>
-              <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
-                <option value="all">All Topics</option>
-                <option value="agriculture">Agriculture</option>
-              </select>
-              <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
-                <option value="all">All Languages</option>
-                <option value="zu">English &amp; Zulu</option>
-              </select>
-            </div>
-          </div>
-          
-          <!-- Video Cards Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-            <a href="module.html?v=1179583326" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="chemical spraying" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Chemical_Spraying.svg" alt="Chemical Spraying thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
-                  5:50
-                </div>
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Chemical Spraying</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1179583326" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1179583326" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071672" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="oxy acetlyne" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Oxy_Acetlyene.svg" alt="Oxy Acetlyne thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Oxy Acetlyne</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071672" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071672" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071582" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="chainsaw" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Chainsaw.svg" alt="Chainsaw thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Chainsaw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071582" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071582" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071549" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="band prop saw" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Band_Prop_Saw.svg" alt="Band/Prop Saw thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Band/Prop Saw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071549" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071549" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071612" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="farm saw" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Farm_Saw.svg" alt="Farm Saw thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Farm Saw</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071612" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071612" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071628" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="general farm employees" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/General_Farm_Employees.svg" alt="General Farm Employees thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">General Farm Employees</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071628" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071628" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071597" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="farm noise" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Farm_Noise.svg" alt="Farm Noise thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Farm Noise</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071597" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071597" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071647" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="irrigation pump house" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Irrigation_Pump_House.svg" alt="Irrigation Pump House thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Irrigation Pump House</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071647" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071647" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071561" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="brush cutter" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Brush_Cutter.svg" alt="Brush Cutter thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Brush Cutter</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071561" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071561" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071529" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="angle grinder" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Angle_Grinder.svg" alt="Angle Grinder thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Angle Grinder</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071529" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071529" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-            <a href="module.html?v=1187071697" class="video-card group block bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20" data-title="welding" data-category="agriculture" data-language="zu">
-              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
-                <img src="assets/thumbnails/Welding.svg" alt="Welding thumbnail" class="absolute inset-0 w-full h-full object-contain p-1">
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">Welding</h3>
-                  <p class="text-xs text-muted mb-3">Agriculture</p>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                  <span id="status-1187071697" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
-                  <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
-                    <div id="progress-1187071697" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-
-          </div>
-        </section>
-
-        <footer class="mt-12 rounded-2xl bg-[#1e3a5f] px-6 py-8 text-white md:px-8">
-          <div class="flex flex-col gap-6 md:flex-row md:justify-between">
-            <div class="max-w-sm space-y-3">
-              <div class="flex items-center gap-3">
-                <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
-                  <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
-                </div>
-                <div>
-                  <p class="text-lg font-semibold">Simple Solutions</p>
-                  <p class="text-xs uppercase tracking-[0.28em] text-slate-300">Safety and compliance</p>
-                </div>
-              </div>
-              <p class="text-sm leading-6 text-slate-300">Streamlining operational architectures for modern business safety and compliance.</p>
-            </div>
-
-            <div class="space-y-3">
-              <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white">Quick Links</h3>
-              <nav class="grid gap-2 text-sm text-slate-300">
-                <a href="vault.html" class="transition-colors hover:text-white">The Vault</a>
-                <a href="support.html" class="transition-colors hover:text-white">Support</a>
-                <a href="records.html" class="transition-colors hover:text-white">Training Records</a>
-                <a href="request.html" class="transition-colors hover:text-white">Request Certificate</a>
-              </nav>
-            </div>
-
-            <div class="max-w-md space-y-3">
-              <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white">Subscription Management</h3>
-              <p class="text-sm leading-6 text-slate-300">To update your payment details or cancel your active R220/mo subscription, please contact support directly at simple.lucadudley@gmail.com</p>
-              <p class="text-sm leading-6 text-slate-300">(PLEASE NOTE: Removing your plan in your profile modal stops access but does not automatically cancel your bank mandate)</p>
-            </div>
-          </div>
-
-          <div class="mt-8 border-t border-blue-800 pt-4 text-xs text-slate-300">
-            © 2026 Simple Solutions. All rights reserved.
-          </div>
-        </footer>
-        
       </div>
-    </main>
-    
-  </div>
+      
+      <!-- Video Library Section -->
+      <section>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
+          <h2 class="text-2xl font-serif text-slate-800 font-medium">Training Library</h2>
+          <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+            <div class="relative w-full sm:w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </div>
+              <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
+            </div>
+            <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+              <option value="all">All Sub-Categories</option>
+              <option value="General Safety">General Safety</option>
+              <option value="Machinery & Workshop">Machinery & Workshop</option>
+              <option value="Macadamia Processing">Macadamia Processing</option>
+              <option value="Pumping & Irrigation">Pumping & Irrigation</option>
+            </select>
+            <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+              <option value="all">All Languages</option>
+              <option value="zu">English &amp; Zulu</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Video Cards Grid -->
+        <div id="videoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+      </section>
+    </div>
+
+    <!-- ANCHORED ROUNDED FOOTER -->
+    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+      <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+        <!-- Brand Summary -->
+        <div class="max-w-sm space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+              <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
+            </div>
+            <div>
+              <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+              <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+            </div>
+          </div>
+          <p class="text-xs leading-relaxed text-slate-300">
+            Streamlining operational architectures for modern business safety and workplace compliance.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+          <nav class="grid gap-2 text-xs text-slate-300">
+            <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+            <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+            <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+          </nav>
+        </div>
+
+        <!-- Subscription Management -->
+        <div class="max-w-xs sm:max-w-sm space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
+          <p class="text-xs leading-relaxed text-slate-300">
+            To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
+          </p>
+        </div>
+      </div>
+
+      <!-- Legal Sub-bar -->
+      <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+        <p>© 2026 Simple Solutions. All rights reserved.</p>
+        <p class="text-slate-400">Internal Operational Compliance Portal</p>
+      </div>
+    </footer>
+
+  </main>
 
   <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
 
   <script>
-    const videoLibrary = {
-      '1179583326': {
-        title: 'Chemical Spraying',
-        module: 'Agriculture',
-        description: 'Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application.',
-        totalSeconds: 350,
-        thumbnail: 'assets/thumbnails/Chemical_Spraying.svg'
-      },
-      '1187071672': {
-        title: 'Oxy Acetlyne',
-        module: 'Agriculture',
-        description: 'Learn the critical safety protocols for operating oxy-acetylene cutting torches, including pre-use inspections and safe lighting procedures.',
-        totalSeconds: 346, 
-        thumbnail: 'assets/thumbnails/Oxy_Acetlyene.svg'
-      },
-      '1187071582': {
-        title: 'Chainsaw',
-        module: 'Agriculture',
-        description: 'Master the fundamentals of safe chainsaw operation, maintenance, and timber cutting to prevent kickback and injury.',
-        totalSeconds: 375,
-        thumbnail: 'assets/thumbnails/Chainsaw.svg'
-      },
-      '1187071549': {
-        title: 'Band/Prop Saw',
-        module: 'Agriculture',
-        description: 'Understand the specific risks and operational guidelines for using stationary band and prop saws safely.',
-        totalSeconds: 290,
-        thumbnail: 'assets/thumbnails/Band_Prop_Saw.svg'
-      },
-      '1187071612': {
-        title: 'Farm Saw',
-        module: 'Agriculture',
-        description: 'Essential safety training for operating general-purpose farm saws. Focuses on preventing blade binding and managing kickback.',
-        totalSeconds: 353,
-        thumbnail: 'assets/thumbnails/Farm_Saw.svg'
-      },
-      '1187071628': {
-        title: 'General Farm Employees',
-        module: 'Agriculture',
-        description: 'A comprehensive safety overview for all general farm laborers covering hazard identification and standard PPE requirements.',
-        totalSeconds: 424,
-        thumbnail: 'assets/thumbnails/General_Farm_Employees.svg'
-      },
-      '1187071597': {
-        title: 'Farm Noise',
-        module: 'Agriculture',
-        description: 'Learn about the dangers of prolonged exposure to high decibel levels from farm machinery and the mandatory use of hearing protection.',
-        totalSeconds: 338,
-        thumbnail: 'assets/thumbnails/Farm_Noise.svg'
-      },
-      '1187071647': {
-        title: 'Irrigation Pump House',
-        module: 'Agriculture',
-        description: 'Safety protocols for operating and maintaining farm irrigation systems, including handling high-pressure lines and electrical hazards.',
-        totalSeconds: 303,
-        thumbnail: 'assets/thumbnails/Irrigation_Pump_House.svg'
-      },
-      '1187071561': {
-        title: 'Brush Cutter',
-        module: 'Agriculture',
-        description: 'Guidelines for the safe operation of motorized brush cutters, highlighting the dangers of flying debris and proper harness adjustment.',
-        totalSeconds: 346,
-        thumbnail: 'assets/thumbnails/Brush_Cutter.svg'
-      },
-      '1187071529': {
-        title: 'Angle Grinder',
-        module: 'Agriculture',
-        description: 'Crucial safety instructions for using angle grinders in farm workshops, emphasizing guards, securing workpieces, and spark protection.',
-        totalSeconds: 316,
-        thumbnail: 'assets/thumbnails/Angle_Grinder.svg'
-      },
-      '1187071697': {
-        title: 'Welding',
-        module: 'Agriculture',
-        description: 'Essential health and safety training for arc and MIG welding operations to prevent flash burns, electrical shocks, and fires.',
-        totalSeconds: 293,
-        thumbnail: 'assets/thumbnails/Welding.svg'
-      }
-    };
+    // 1. RUNTIME CONFIGURATION
+    let videoLibrary = {}; 
+    let currentContinueWatchingProgress = null;
 
-    const updateFeaturedBanner = () => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      if (!rawProgress) return;
+    function formatDuration(totalSeconds) {
+      if (!totalSeconds) return '--:--';
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
 
-      try {
-        const progress = JSON.parse(rawProgress);
-        let lastWatchedId = null;
-        let latestTime = 0;
+    function formatRemainingTime(totalSeconds, watchedSeconds) {
+      const remainingSeconds = Math.max(0, Number(totalSeconds || 0) - Number(watchedSeconds || 0));
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = Math.floor(remainingSeconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs} remaining`;
+    }
 
-        for (const [id, data] of Object.entries(progress)) {
-          if (data.lastWatchedAt > latestTime && data.watchedSeconds < data.totalSeconds) {
-            latestTime = data.lastWatchedAt;
-            lastWatchedId = id;
-          }
-        }
+    async function getCurrentSession() {
+      const { data: { session } } = await window.dbClient.auth.getSession();
+      return session || null;
+    }
 
-        if (lastWatchedId && videoLibrary[lastWatchedId]) {
-          const videoData = videoLibrary[lastWatchedId];
-          const savedData = progress[lastWatchedId];
-
-          const bannerTitle = document.getElementById('bannerTitle');
-          const bannerDesc = document.getElementById('bannerDescription');
-          const bannerThumb = document.getElementById('bannerThumbnail');
-          const bannerBtn = document.getElementById('bannerResumeBtn');
-
-          if (bannerTitle) bannerTitle.textContent = videoData.title;
-          if (bannerDesc) bannerDesc.textContent = videoData.description;
-          if (bannerThumb) bannerThumb.src = videoData.thumbnail;
-          if (bannerBtn) bannerBtn.href = `module.html?v=${lastWatchedId}`;
-
-          const timeRemainingEl = document.getElementById('bannerTimeRemaining');
-          if (timeRemainingEl) {
-            const secondsLeft = Math.max(0, videoData.totalSeconds - savedData.watchedSeconds);
-            const mins = Math.floor(secondsLeft / 60);
-            const secs = Math.floor(secondsLeft % 60).toString().padStart(2, '0');
-            timeRemainingEl.textContent = `${mins}:${secs} remaining`;
-          }
-        }
-      } catch (error) {
-        console.error("Error updating banner:", error);
-      }
-    };
-
-    const getSavedProgress = (videoId) => {
-      const rawProgress = localStorage.getItem('vaultVideoProgress');
-      if (!rawProgress) {
-        return null;
+    async function fetchVideoLibraryMap() {
+      if (Object.keys(videoLibrary).length > 0) {
+        return videoLibrary;
       }
 
-      try {
-        const progressByVideo = JSON.parse(rawProgress);
-        return progressByVideo && typeof progressByVideo === 'object' ? progressByVideo[videoId] || null : null;
-      } catch (error) {
-        return null;
-      }
-    };
+      const { data: databaseVideos, error } = await window.dbClient
+        .from('videos')
+        .select('id, title, description, category, language, thumbnail_url, total_seconds')
+        .order('title', { ascending: true });
 
-    const renderAllVideoProgress = () => {
-      Object.keys(videoLibrary).forEach(videoId => {
-        const progressFill = document.getElementById(`progress-${videoId}`);
-        const statusText = document.getElementById(`status-${videoId}`);
+      if (error) throw error;
 
-        if (progressFill) {
-          const saved = getSavedProgress(videoId);
-          const watched = Math.max(0, Number(saved?.watchedSeconds || 0));
-          const total = Math.max(1, Number(saved?.totalSeconds || videoLibrary[videoId].totalSeconds));
-          const percent = Math.min(100, Math.round((watched / total) * 100));
-
-          progressFill.style.width = `${percent}%`;
-
-          if (statusText) {
-            if (percent >= 100) statusText.textContent = 'Completed';
-            else if (percent > 0) statusText.textContent = 'In Progress';
-            else statusText.textContent = 'Not Started';
-          }
-        }
+      (databaseVideos || []).forEach((video) => {
+        videoLibrary[video.id] = {
+          title: video.title,
+          module: video.category || 'Agriculture',
+          description: video.description || '',
+          totalSeconds: video.total_seconds || 300,
+          thumbnail: video.thumbnail_url || 'assets/thumbnails/Simple/Chemical_Spraying.svg'
+        };
       });
+
+      return videoLibrary;
+    }
+
+    async function fetchContinueWatchingProgress() {
+      const session = await getCurrentSession();
+      if (!session) return null;
+
+      const { data, error } = await window.dbClient
+        .from('user_video_progress')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_completed', false)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    }
+
+    async function renderContinueWatchingBanner() {
+      const bannerBlock = document.getElementById('continue-watching-block');
+      const bannerTitle = document.getElementById('bannerTitle');
+      const bannerDesc = document.getElementById('bannerDescription');
+      const bannerThumb = document.getElementById('bannerThumbnail');
+      const bannerBtn = document.getElementById('bannerResumeBtn');
+      const visualLink = document.getElementById('continueWatchingVisualLink');
+      const bannerTimeRemaining = document.getElementById('bannerTimeRemaining');
+      const bannerModule = document.getElementById('continueWatchingModule');
+
+      if (!bannerBlock || !bannerTitle || !bannerDesc || !bannerThumb || !bannerBtn || !visualLink || !bannerTimeRemaining || !bannerModule) {
+        return;
+      }
+
+      try {
+        await fetchVideoLibraryMap();
+        currentContinueWatchingProgress = await fetchContinueWatchingProgress();
+
+        if (!currentContinueWatchingProgress) {
+          bannerBlock.classList.add('hidden');
+          return;
+        }
+
+        const videoData = videoLibrary[currentContinueWatchingProgress.video_id] || {};
+        const progressSeconds = Number(currentContinueWatchingProgress.progress_seconds || 0);
+        const durationSeconds = Number(currentContinueWatchingProgress.duration_seconds || videoData.totalSeconds || 0);
+        const percentage = Math.min(100, Number(currentContinueWatchingProgress.percentage || 0));
+        const resumeUrl = `module.html?v=${encodeURIComponent(currentContinueWatchingProgress.video_id)}&t=${Math.floor(progressSeconds)}`;
+
+        bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
+        bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
+        bannerThumb.src = videoData.thumbnail || 'assets/thumbnails/Simple/Chemical_Spraying.svg';
+        bannerThumb.alt = `${bannerTitle.textContent} thumbnail`;
+        bannerBtn.href = resumeUrl;
+        visualLink.href = resumeUrl;
+        bannerTimeRemaining.textContent = formatRemainingTime(durationSeconds, progressSeconds);
+        bannerModule.textContent = `${Math.max(0, Math.round(percentage))}% complete`;
+        bannerBlock.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error rendering continue watching banner:', error);
+        bannerBlock.classList.add('hidden');
+      }
+    }
+
+    // 2. DYNAMIC SUPABASE FETCH & INJECTION ENGINE (WITH TENANT ISOLATION)
+    async function fetchAndRenderVault() {
+      try {
+        const gridTarget = document.getElementById('videoCardsGrid');
+        if (!gridTarget) return;
+
+        // 1. Get logged-in user session and their company_id
+        const session = await getCurrentSession();
+        let userCompanyId = null;
+
+        if (session?.user?.id) {
+          const { data: profile } = await window.dbClient
+            .from('profiles')
+            .select('company_id')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          userCompanyId = profile?.company_id || null;
+        }
+
+        // 2. Query Videos:
+        // - If user belongs to Elliott Farm (or any custom company): fetch their branded videos (company_id = userCompanyId)
+        // - For all other users / unlinked / generic accounts: ONLY fetch generic videos (company_id IS NULL)
+        let query = window.dbClient
+          .from('videos')
+          .select('id, title, description, category, sub_tag, language, thumbnail_url, total_seconds, company_id')
+          .order('title', { ascending: true });
+
+        if (userCompanyId) {
+          // Check if this company actually has custom branded videos
+          const { data: customVideos } = await window.dbClient
+            .from('videos')
+            .select('id')
+            .eq('company_id', userCompanyId)
+            .limit(1);
+
+          if (customVideos && customVideos.length > 0) {
+            // Company has custom branded videos: Show ONLY their custom library
+            query = query.eq('company_id', userCompanyId);
+          } else {
+            // Regular company without custom branding: Show default catalog
+            query = query.is('company_id', null);
+          }
+        } else {
+          // Default public catalog
+          query = query.is('company_id', null);
+        }
+
+        const { data: databaseVideos, error } = await query;
+        if (error) throw error;
+
+        gridTarget.innerHTML = '';
+
+        if (!databaseVideos || databaseVideos.length === 0) {
+          gridTarget.innerHTML = `<p class="text-sm text-muted col-span-full text-center py-8">No active safety modules found for your organization.</p>`;
+          return;
+        }
+
+        const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+        const unlockedBasicCategories = ['general safety', 'machinery & workshop'];
+
+        databaseVideos.forEach(video => {
+          const fallbackThumb = 'assets/thumbnails/Simple/General_Farm_Employees.svg';
+          const validThumbnail = (video.thumbnail_url && video.thumbnail_url.trim() !== '') 
+            ? video.thumbnail_url 
+            : fallbackThumb;
+
+          const subTag = video.sub_tag || 'General Safety';
+          const subTagLower = subTag.toLowerCase().trim();
+
+          // Tier Gating Logic: Lock specialized modules on Basic
+          const isLocked = (currentTier === 'basic') && (!unlockedBasicCategories.includes(subTagLower));
+
+          videoLibrary[video.id] = {
+            title: video.title,
+            module: video.category || 'Agriculture',
+            subCategory: subTag,
+            description: video.description || '',
+            totalSeconds: video.total_seconds || 300,
+            thumbnail: validThumbnail,
+            isLocked: isLocked
+          };
+
+          // Sub-category badge styling
+          let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
+          if (subTag === 'Macadamia Processing') {
+            badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/60';
+          } else if (subTag === 'Machinery & Workshop') {
+            badgeClass = 'bg-blue-50 text-blue-700 border-blue-200/60';
+          } else if (subTag === 'Pumping & Irrigation') {
+            badgeClass = 'bg-cyan-50 text-cyan-700 border-cyan-200/60';
+          }
+
+          const targetHref = isLocked 
+            ? `javascript:handleLockedModuleClick('${video.title.replace(/'/g, "\\'")}', '${subTag}')` 
+            : `module.html?v=${video.id}`;
+
+          const cardHTML = `
+            <a href="${targetHref}" 
+               class="video-card group block bg-white rounded-xl border ${isLocked ? 'border-amber-200/80 bg-slate-50/40' : 'border-slate-200'} overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative" 
+               data-title="${video.title.toLowerCase()}" 
+               data-category="${(video.category || 'agriculture').toLowerCase()}" 
+               data-subcategory="${subTagLower}" 
+               data-language="${(video.language || 'zu').toLowerCase()}">
+              
+              <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
+                <img src="${validThumbnail}" 
+                     onerror="this.onerror=null; this.src='${fallbackThumb}';" 
+                     alt="${video.title} thumbnail" 
+                     class="absolute inset-0 w-full h-full object-contain p-1 ${isLocked ? 'grayscale opacity-30 blur-[1px]' : ''}">
+                
+                ${isLocked ? `
+                  <!-- Locked Badge Overlay -->
+                  <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center p-3 text-center">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 mb-1.5 shadow-lg">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-bold tracking-wide uppercase text-amber-300">Essential Module</span>
+                  </div>
+                ` : `
+                  <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
+                    ${formatDuration(video.total_seconds)}
+                  </div>
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
+                      <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                  </div>
+                `}
+              </div>
+
+              <div class="p-4 flex flex-col justify-between">
+                <div>
+                  <h3 class="font-serif text-foreground font-medium mb-1 line-clamp-2 text-lg">${video.title}</h3>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xs text-muted">${video.category || 'Agriculture'}</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="px-2 py-0.5 rounded-md ${badgeClass} text-[10px] font-semibold tracking-wide border">${subTag}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-2">
+                  ${isLocked ? `
+                    <span class="text-xs font-semibold text-amber-700 flex items-center gap-1">
+                      🔒 Locked on Basic
+                    </span>
+                    <span class="text-[11px] text-primary underline font-medium">Upgrade &rarr;</span>
+                  ` : `
+                    <span id="status-${video.id}" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Not Started</span>
+                    <div class="w-1/2 bg-slate-200 rounded-full h-1.5">
+                      <div id="progress-${video.id}" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  `}
+                </div>
+              </div>
+            </a>
+          `;
+          gridTarget.insertAdjacentHTML('beforeend', cardHTML);
+        });
+
+        renderContinueWatchingBanner();
+        renderAllVideoProgress();
+        setupSearchAndFilters();
+
+      } catch (err) {
+        console.error('CRITICAL SYSTEM ERROR: Failed rendering Vault modules:', err.message);
+      }
+    }
+
+    const renderAllVideoProgress = async () => {
+      try {
+        const session = await getCurrentSession();
+        if (!session?.user?.id) return;
+
+        const { data: progressList, error } = await window.dbClient
+          .from('user_video_progress')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        if (error) {
+          console.error("Error fetching progress from Supabase:", error);
+          return;
+        }
+
+        const progressMap = {};
+        (progressList || []).forEach(row => {
+          progressMap[String(row.video_id)] = row;
+        });
+
+        Object.keys(videoLibrary).forEach(videoId => {
+          const progressFill = document.getElementById(`progress-${videoId}`);
+          const statusText = document.getElementById(`status-${videoId}`);
+          const cardLink = document.querySelector(`a[href*="v=${videoId}"]`);
+          const userProgress = progressMap[String(videoId)];
+
+          if (!userProgress) {
+            if (progressFill) progressFill.style.width = '0%';
+            if (statusText) {
+              statusText.textContent = 'Not Started';
+              statusText.className = 'inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800';
+            }
+            return;
+          }
+
+          if (userProgress.is_completed) {
+            if (progressFill) {
+              progressFill.style.width = '100%';
+              progressFill.className = 'bg-green-500 h-1.5 rounded-full';
+            }
+            if (statusText) {
+              statusText.textContent = 'Completed';
+              statusText.className = 'inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700';
+            }
+            if (cardLink) {
+              cardLink.href = `module.html?v=${encodeURIComponent(videoId)}&t=0`;
+            }
+          } else if (userProgress.percentage > 0) {
+            const pct = Math.min(99, Math.max(1, Math.round(userProgress.percentage)));
+            const progressSecs = Math.floor(userProgress.progress_seconds || 0);
+
+            if (progressFill) {
+              progressFill.style.width = `${pct}%`;
+              progressFill.className = 'bg-primary h-1.5 rounded-full';
+            }
+            if (statusText) {
+              statusText.textContent = `${pct}% Complete`;
+              statusText.className = 'inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700';
+            }
+            if (cardLink) {
+              cardLink.href = `module.html?v=${encodeURIComponent(videoId)}&t=${progressSecs}`;
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Failed rendering video card progress:", err);
+      }
     };
 
-    updateFeaturedBanner();
-    renderAllVideoProgress();
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function setupSearchAndFilters() {
       const searchInput = document.getElementById('searchInput');
       const categoryFilter = document.getElementById('categoryFilter');
       const languageFilter = document.getElementById('languageFilter');
-      const videoCards = document.querySelectorAll('.video-card');
 
-      function filterLibrary() {
-        const searchTerm = searchInput?.value.toLowerCase() || "";
-        const selectedCategory = categoryFilter?.value || "all";
-        const selectedLanguage = languageFilter?.value || "all";
+      function filterHandler() {
+        const query = (searchInput?.value || '').toLowerCase().trim();
+        const selectedSub = (categoryFilter?.value || 'all').toLowerCase().trim();
+        const selectedLang = (languageFilter?.value || 'all').toLowerCase().trim();
+        const cards = document.querySelectorAll('.video-card');
 
-        videoCards.forEach(card => {
-          const title = card.getAttribute('data-title') || "";
-          const category = card.getAttribute('data-category') || "";
-          const language = card.getAttribute('data-language') || "";
+        cards.forEach(card => {
+          const title = (card.getAttribute('data-title') || '').toLowerCase();
+          const subCat = (card.getAttribute('data-subcategory') || '').toLowerCase();
+          const lang = (card.getAttribute('data-language') || '').toLowerCase();
 
-          const matchesSearch = title.includes(searchTerm);
-          const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
-          const matchesLanguage = selectedLanguage === 'all' || language.includes(selectedLanguage);
+          const matchSearch = !query || title.includes(query);
+          const matchSub = (selectedSub === 'all') || (subCat === selectedSub);
+          const matchLang = (selectedLang === 'all') || (lang === selectedLang);
 
-          card.style.display = (matchesSearch && matchesCategory && matchesLanguage) ? 'block' : 'none';
+          if (matchSearch && matchSub && matchLang) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
         });
       }
 
-      if (searchInput) searchInput.addEventListener('input', filterLibrary);
-      if (categoryFilter) categoryFilter.addEventListener('change', filterLibrary);
-      if (languageFilter) languageFilter.addEventListener('change', filterLibrary);
+      if (searchInput) searchInput.addEventListener('input', filterHandler);
+      if (categoryFilter) categoryFilter.addEventListener('change', filterHandler);
+      if (languageFilter) languageFilter.addEventListener('change', filterHandler);
+    }
+
+    window.addEventListener('load', async () => {
+      await renderContinueWatchingBanner();
+      fetchAndRenderVault();
     });
+
+    function handleLockedModuleClick(title, subTag) {
+      openProfileModal();
+      switchProfileTab('plans');
+      alert(`"${title}" (${subTag}) is part of our specialized agricultural processing library.\n\nUpgrade to Essential (R220/mo) to unlock full streaming access and employee compliance tracking.`);
+    }
   </script>
 
 </body>

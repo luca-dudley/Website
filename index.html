@@ -3,14 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0HP7V44GT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-L0HP7V44GT');
+  </script>
+
   <title>Simple Solutions | Corporate Consulting & Software</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <meta name="description" content="Let's keep things simple. Safety compliance, automated & tracked. AI-powered solutions for modern businesses.">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script data-memberstack-app="app_cmnbvd53800750syd4jief980" src="https://static.memberstack.com/scripts/v2/memberstack.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Paystack Inline JS -->
+  <script src="https://js.paystack.co/v2/inline.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -49,7 +62,7 @@
     <header class="sticky top-0 z-50 w-full border-b border-gray-200/40 bg-white/95 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <!-- Logo -->
-        <a href="#" class="flex items-center gap-1">
+        <a href="index.html" class="flex items-center gap-1">
           <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Logo" class="h-12 w-auto object-contain">
           <span class="font-serif text-xl font-semibold tracking-tight text-foreground">
             Solutions
@@ -58,15 +71,17 @@
 
         <!-- Desktop Navigation -->
         <nav class="hidden items-center gap-8 md:flex">
-          <a href="#services" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Services</a>
+          <a href="#vault-info" class="text-sm font-medium text-muted transition-colors hover:text-foreground">The Vault</a>
+          <a href="systems.html" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Workflow Systems</a>
           <a href="#pricing" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Pricing</a>
+          <a href="#reviews" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Reviews</a>
           <a href="#faq" class="text-sm font-medium text-muted transition-colors hover:text-foreground">FAQ</a>
           <a href="#contact" class="text-sm font-medium text-muted transition-colors hover:text-foreground">Contact</a>
         </nav>
 
         <!-- Desktop CTA -->
         <div class="hidden md:block">
-          <button data-ms-modal="login" data-ms-redirect="/vault.html" class="bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90 transition-colors">
+          <button type="button" onclick="openLoginModal()" class="bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90 transition-colors">
             Client Login
           </button>
         </div>
@@ -82,12 +97,14 @@
       <!-- Mobile Menu -->
       <div id="mobile-menu" class="hidden border-t border-gray-200 md:hidden">
         <div class="space-y-1 px-4 py-4">
-          <a href="#services" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Services</a>
+          <a href="#vault-info" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">The Vault</a>
+          <a href="systems.html" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Workflow Systems</a>
           <a href="#pricing" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Pricing</a>
+          <a href="#reviews" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Reviews</a>
           <a href="#faq" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">FAQ</a>
           <a href="#contact" class="block rounded-md px-3 py-2 text-base font-medium text-muted hover:bg-gray-100 hover:text-foreground">Contact</a>
           <div class="pt-4">
-            <button data-ms-modal="login" data-ms-redirect="/vault.html" class="w-full bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90">Client Login</button>
+            <button type="button" onclick="openLoginModal()" class="w-full bg-primary px-6 py-2 rounded-md font-medium text-white hover:bg-primary/90">Client Login</button>
           </div>
         </div>
       </div>
@@ -95,14 +112,12 @@
 
     <!-- HERO SECTION -->
     <section class="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-28">
-      <!-- Subtle background pattern -->
       <div class="absolute inset-0 -z-10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem]" style="mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);-webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);"></div>
       </div>
 
       <div class="mx-auto max-w-7xl px-4 md:px-8 lg:px-8">
         <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <!-- Left Column - Content -->
           <div class="max-w-xl">
             <p class="mb-4 text-sm font-medium uppercase tracking-widest text-muted">
               Let's keep things simple.
@@ -110,29 +125,33 @@
             <h1 class="font-serif text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               <span class="text-balance">Complex Operations. Simple Systems.</span>
             </h1>
-            <p class="mt-6 text-lg leading-relaxed text-muted">
-              We design and deploy custom operational architectures. From intelligent ClickUp workspaces to AI-driven safety compliance, we build the digital infrastructure that scales your business.
-            </p>
+            <div class="mt-6 text-lg leading-relaxed text-muted">
+              <p class="mb-3">We run two specialized divisions under one roof:</p>
+              <ul class="space-y-2.5">
+                <li class="flex items-start gap-2">
+                  <span class="text-primary font-bold shrink-0">&rarr;</span>
+                  <span><strong class="text-foreground">The Safety Vault</strong> &mdash; A self-serve AI streaming catalog with digital compliance tracking.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-primary font-bold shrink-0">&rarr;</span>
+                  <span><strong class="text-foreground">Workflow Optimization</strong> &mdash; Bespoke operational systems built around how your business actually runs.</span>
+                </li>
+              </ul>
+            </div>
 
             <div class="mt-10 flex flex-col gap-4 sm:flex-row">
-              <a href="https://paystack.shop/pay/k99-28s6xz" class="inline-flex items-center justify-center bg-primary px-8 py-3 text-base font-medium text-white rounded-md hover:bg-primary/90 transition-colors">
-                <!-- Lock Icon -->
+              <a href="#pricing" class="inline-flex items-center justify-center bg-primary px-8 py-3 text-base font-medium text-white rounded-md hover:bg-primary/90 transition-colors">
                 <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
                 Unlock the Vault
               </a>
-              <button onclick="openSampleModal()" class="inline-flex items-center justify-center border border-gray-200 bg-white px-8 py-3 text-base font-medium text-foreground rounded-md hover:bg-gray-50 transition-colors">
-                <!-- Play Icon -->
-                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <polygon points="6 3 20 12 6 21 6 3"/>
-                </svg>
-                View Sample
-              </button>
+              <a href="systems.html" class="inline-flex items-center justify-center border border-gray-200 bg-white px-8 py-3 text-base font-medium text-foreground rounded-md hover:bg-gray-50 transition-colors">
+                Workflow Systems &rarr;
+              </a>
             </div>
 
-            <!-- Trust indicators -->
             <div class="mt-12 flex flex-col md:flex-row md:items-center gap-6 md:gap-8 border-t border-gray-200 pt-8">
               <div>
                 <p class="text-2xl font-semibold text-foreground">100%</p>
@@ -151,15 +170,10 @@
             </div>
           </div>
 
-<!-- Right Column - Hero Image -->
           <div class="relative lg:pl-8 flex items-center justify-center">
-            <!-- Changed shape to aspect-[2/3] (taller/slimmer) and reduced max width slightly -->
             <div class="relative w-full max-w-sm mx-auto aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-slate-200 z-10 bg-white">
-              <!-- Back to object-cover so it fills the new slim box perfectly -->
               <img src="assets/landing_page_image.jpg" alt="Safety and Compliance Management" class="w-full h-full object-cover object-center">
             </div>
-            
-            <!-- Decorative Background Glow -->
             <div class="absolute -right-4 -top-4 h-40 w-40 rounded-full bg-primary/10 blur-3xl z-0"></div>
             <div class="absolute -bottom-4 -left-4 h-40 w-40 rounded-full bg-primary/10 blur-3xl z-0"></div>
           </div>
@@ -167,240 +181,265 @@
       </div>
     </section>
 
-    <!-- SERVICES SECTION -->
-    <section id="services" class="bg-gray-50/50 py-20 sm:py-24 lg:py-32">
+    <!-- DUAL PILLAR OVERVIEW CARDS -->
+    <section id="vault-info" class="bg-gray-50/50 py-20 sm:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <!-- Section header -->
-        <div class="mx-auto max-w-2xl text-center">
-          <p class="text-sm font-medium uppercase tracking-widest text-muted">
-            What we do
-          </p>
-          <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            <span class="text-balance">Our collection of tech services spans every element of your business.</span>
+        <div class="mx-auto max-w-2xl text-center mb-16">
+          <p class="text-sm font-medium uppercase tracking-widest text-muted">Core Disciplines</p>
+          <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Built for Heavy Industry &amp; Commercial Agriculture
           </h2>
-          <p class="mt-4 text-lg text-muted">
-            Explore how we help businesses transform.
-          </p>
         </div>
-
-        <!-- Services grid -->
-        <div class="mt-16 grid gap-8 lg:grid-cols-3">
-          <!-- AI Safety Videos -->
-          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
-            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <!-- Video Icon -->
-              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
-                <rect x="2" y="6" width="14" height="12" rx="2"/>
-              </svg>
+        <div class="grid gap-8 lg:grid-cols-2">
+          
+          <!-- Vault Block -->
+          <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-4">SaaS Platform</span>
+              <h3 class="font-serif text-2xl font-semibold text-foreground mb-3">The Safety Vault</h3>
+              <p class="text-sm text-muted leading-relaxed mb-6">
+                On-demand AI safety training library. Workers stream videos in their preferred language while supervisors capture digital compliance registrations on site.
+              </p>
+              <ul class="space-y-2 mb-8 text-sm text-muted">
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Self-serve month-to-month streaming</li>
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Worker registration &amp; group sign-offs</li>
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Instant digital employee audit directory</li>
+              </ul>
             </div>
-            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Automated Compliance</p>
-            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">AI Safety Videos</h3>
-            <p class="mb-6 leading-relaxed text-muted">
-              Choose from a variety of industry related short safety clips or request bespoke, application specific builds to cover you and your employees in the work place.
-            </p>
-            <ul class="mb-8 space-y-2">
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Auto-generated scripts</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Multi-language support</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Progress tracking</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Certification management</li>
-            </ul>
+            <div class="flex flex-col gap-2">
+              <button type="button" onclick="openVaultDemoModal()" class="w-full inline-flex items-center justify-center gap-2 bg-primary text-white py-3 px-6 rounded-md font-medium hover:bg-primary/90 transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Watch Vault Demo
+              </button>
+              <a href="#pricing" class="text-xs text-center text-muted hover:text-primary underline py-1">View Vault Pricing Tiers &rarr;</a>
+            </div>
           </div>
 
-          <!-- ClickUp Workflow -->
-          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
-            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <!-- Workflow Icon -->
-              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <rect width="8" height="8" x="3" y="3" rx="2"/>
-                <path d="M7 11v4a2 2 0 0 0 2 2h4"/>
-                <rect width="8" height="8" x="13" y="13" rx="2"/>
-              </svg>
+          <!-- Systems Block (Consulting) -->
+          <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 mb-4">Custom Consulting</span>
+              <h3 class="font-serif text-2xl font-semibold text-foreground mb-3">Workflow Optimization</h3>
+              <p class="text-sm text-muted leading-relaxed mb-6">
+                Bespoke operational engineering. We build ClickUp workspaces, Power BI executive dashboards, and automated data pipelines tailored to your operations.
+              </p>
+              <ul class="space-y-2 mb-8 text-sm text-muted">
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Complete ClickUp workspace architecture</li>
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Live Power BI dashboards &amp; Supabase data sync</li>
+                <li class="flex items-center"><span class="mr-2 h-1.5 w-1.5 rounded-full bg-primary"></span>Fixed-scope project pricing &amp; team onboarding</li>
+              </ul>
             </div>
-            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Operational Efficiency</p>
-            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">Workflow Optimization</h3>
-            <p class="mb-6 leading-relaxed text-muted">
-              We design workflows that eliminate bottlenecks and accelerate workspace productivity.
-            </p>
-            <ul class="mb-8 space-y-2">
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Custom automations</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Dashboard design</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Team training</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Continued refinement</li>
-            </ul>
-          </div>
-
-          <!-- AI Integration -->
-          <div class="group relative rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-primary/20 hover:shadow-lg">
-            <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <!-- Bot Icon -->
-              <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M12 8V4H8"/>
-                <rect width="16" height="12" x="4" y="8" rx="2"/>
-                <path d="M2 14h2"/>
-                <path d="M20 14h2"/>
-                <path d="M15 13v2"/>
-                <path d="M9 13v2"/>
-              </svg>
+            <div class="flex flex-col gap-2">
+              <a href="systems.html" class="w-full inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm">
+                Explore Workflow Systems &rarr;
+              </a>
+              <a href="https://calendly.com/simple-lucadudley/30min" target="_blank" rel="noopener noreferrer" class="text-xs text-center text-muted hover:text-primary underline py-1">Book a 30-Min Scoping Call &rarr;</a>
             </div>
-            <p class="mb-1 text-sm font-medium uppercase tracking-wider text-muted">Future-Proofing Operations</p>
-            <h3 class="mb-3 font-serif text-xl font-semibold text-foreground">AI Integration <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700 ml-3 align-middle absolute top-4 right-4 z-10">Coming Soon</span></h3>
-            <p class="mb-6 leading-relaxed text-muted">
-              Integrate cutting-edge AI tools seamlessly into your existing infrastructure. From chatbots to document processing, we build solutions that scale.
-            </p>
-            <ul class="mb-8 space-y-2">
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Custom AI agents</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Process automation</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>Data analytics</li>
-              <li class="flex items-center text-sm text-muted"><span class="mr-2 h-1 w-1 rounded-full bg-primary"></span>API integrations</li>
-            </ul>
           </div>
         </div>
-        <div class="group relative col-span-1 rounded-lg border border-gray-200 bg-white p-8 text-center transition-all duration-300 hover:border-primary/20 hover:shadow-lg lg:col-span-3 mt-4">
-          <p class="mb-4 text-lg leading-relaxed text-muted">
-            Don't see exactly what your operation needs? Let's map out a custom solution.
-          </p>
-          <div class="flex justify-center">
-            <a href="#contact" class="inline-flex items-center text-base font-medium text-foreground transition-colors hover:text-primary">
-              Contact Us
-              <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
-        </div>
+      </div>
     </section>
 
-    <!-- PRICING SECTION -->
+    <!-- PRICING SECTION (VAULT ONLY) -->
     <section id="pricing" class="relative">
-      <!-- Light background top -->
       <div class="bg-white pb-48 pt-20 sm:pt-24 lg:pb-56 lg:pt-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-2xl text-center">
-            <p class="text-sm font-medium uppercase tracking-widest text-muted">Pricing</p>
+            <p class="text-sm font-medium uppercase tracking-widest text-muted">The Safety Vault</p>
             <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              <span class="text-balance">Transparent pricing for every scale</span>
+              <span class="text-balance">Transparent Self-Serve Pricing</span>
             </h2>
-            <p class="mt-4 text-lg text-muted">Choose the plan that fits your organization. No hidden fees.</p>
+            <p class="mt-4 text-lg text-muted">Stream safety training videos immediately. No long-term contracts.</p>
           </div>
         </div>
       </div>
 
-      <!-- Dark background bottom -->
       <div class="bg-dark-bg pb-20 pt-32 sm:pb-24 lg:pb-32">
-        <!-- Pricing cards container - positioned to overlap -->
         <div class="relative z-10 -mt-32 sm:-mt-48 lg:-mt-56">
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid gap-6 lg:grid-cols-3 lg:gap-8">
+            <div class="grid gap-6 lg:grid-cols-3 lg:gap-8 items-stretch">
               
-              <!-- The Safety Vault -->
-              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-8">
-                <div class="mb-6 text-center">
-                  <h3 class="font-serif text-xl font-semibold text-foreground">The Safety Vault</h3>
-                  <p class="mt-1 text-sm text-muted">Essential compliance tools for growing teams.</p>
+              <!-- Basic Vault -->
+              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:scale-[1.02] sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div class="mb-6 text-center">
+                    <h3 class="font-serif text-xl font-semibold text-foreground">Basic Vault</h3>
+                    <p class="mt-1 text-sm text-muted">On-demand streaming for lean teams.</p>
+                  </div>
+                  <div class="mb-6 text-center">
+                    <span class="text-4xl font-semibold text-foreground">R180</span>
+                    <span class="text-lg text-slate-500 font-normal">/mo</span>
+                  </div>
+                  <ul class="mb-8 space-y-3">
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Full Video Streaming Library</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Multi-Language Audio Tracks</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">1 Admin Seat</span>
+                    </li>
+                    <li class="flex items-start gap-3 opacity-50">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      <span class="text-sm text-muted">No Training Records Dashboard</span>
+                    </li>
+                    <li class="flex items-start gap-3 opacity-50">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      <span class="text-sm text-muted">No Digital Sign-Offs or Registrations</span>
+                    </li>
+                  </ul>
                 </div>
-                <div class="mb-6 text-center">
-                  <span class="text-4xl font-semibold text-foreground">R220</span>
-                  <span class="text-lg text-slate-500 font-normal">/mo</span>
-                </div>
-                <ul class="mb-8 space-y-3">
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">1 Admin Seat</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Full AI video library</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Standard compliance reporting</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Email support</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted"><strong>Optional:</strong> HR compliance integration</span>
-                  </li>
-                </ul>
-                <a href="https://paystack.shop/pay/k99-28s6xz" class="block w-full text-center bg-gray-100 text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-200 transition-colors mt-6">Get Started</a>
+                <button type="button" 
+                        onclick="openCheckoutModal('PLN_q37eti0fct6aazv', 18000, 'Basic Vault', 'R180 /mo', '1 Admin Seat • Full Streaming Library • Multi-Language')" 
+                        class="w-full text-center bg-gray-100 text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-200 transition-colors">
+                  Select Basic
+                </button>
               </div>
 
-              <!-- ClickUp Implementation -->
-              <div class="relative z-20 scale-105 rounded-xl border-2 border-primary bg-white p-6 shadow-2xl transition-all duration-300 hover:scale-[1.07] lg:-mt-4 sm:p-8">
-                <!-- Featured badge -->
+              <!-- Essential Vault (Featured) -->
+              <div class="relative z-20 scale-105 rounded-xl border-2 border-primary bg-white p-6 shadow-2xl transition-all duration-300 hover:scale-[1.07] lg:-mt-4 sm:p-8 flex flex-col justify-between">
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div class="flex items-center gap-1 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white">
+                  <div class="flex items-center gap-1 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white shadow-sm">
                     <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     Most Popular
                   </div>
                 </div>
-                <div class="mb-6 text-center">
-                  <h3 class="font-serif text-xl font-semibold text-foreground">ClickUp Implementation</h3>
-                  <p class="mt-1 text-sm text-muted">Bespoke operational, project, and HR workflows tailor built for you.</p>
+                <div>
+                  <div class="mb-6 text-center">
+                    <h3 class="font-serif text-xl font-semibold text-foreground">Essential Vault</h3>
+                    <p class="mt-1 text-sm text-muted">Complete digital compliance platform.</p>
+                  </div>
+                  <div class="mb-6 text-center">
+                    <span class="text-4xl font-semibold text-foreground">R220</span>
+                    <span class="text-lg text-slate-500 font-normal">/mo</span>
+                  </div>
+                  <ul class="mb-8 space-y-3">
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Everything in Basic</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Training Records Dashboard</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Digital Employee Registration (Group & Individual)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Instant Worker Certificate Generation (10/month)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">4 Total Seats (1 Admin + 3 Managers)</span>
+                    </li>
+                  </ul>
                 </div>
-                <div class="mb-6 text-center">
-                  <span class="text-4xl font-semibold text-foreground">Custom</span>
-                  <span class="text-muted">pricing</span>
-                </div>
-                <ul class="mb-8 space-y-3">
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Complete workspace architecture</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Automated incident reporting</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Interactive management dashboards</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Digital permit to work systems</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Live team handover & training</span>
-                  </li>
-                </ul>
-                <a href="https://calendly.com/simple-lucadudley/30min" target="_blank" rel="noopener noreferrer" class="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center">Book a Scoping Call</a>
+                <button type="button" 
+                        onclick="openCheckoutModal('PLN_glbt6ice9adjj45', 22000, 'Essential Vault', 'R220 /mo', '4 Seats • Records Dashboard • Worker Compliance Tracking')" 
+                        class="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-primary/90 transition-colors text-center">
+                  Select Essential
+                </button>
               </div>
 
               <!-- Enterprise -->
-              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-8">
-                <div class="mb-6 text-center">
-                  <h3 class="font-serif text-xl font-semibold text-foreground">Enterprise Solution <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700 ml-3 align-middle absolute top-4 right-4 z-10">Coming Soon</span></h3>
-                  <p class="mt-1 text-sm text-muted">Bespoke AI agents and deep system integrations for large-scale operations.</p>
+              <div class="relative rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:scale-[1.02] sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div class="mb-6 text-center">
+                    <h3 class="font-serif text-xl font-semibold text-foreground">Enterprise Solution</h3>
+                    <p class="mt-1 text-sm text-muted">Scaled operations &amp; custom workflows.</p>
+                  </div>
+                  <div class="mb-6 text-center">
+                    <span class="text-4xl font-semibold text-foreground">R450</span>
+                    <span class="text-muted"> /mo</span>
+                  </div>
+                  <ul class="mb-8 space-y-3">
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Everything in Essential</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Custom Proprietary Video Hosting</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">ClickUp HR Live Sync & Automation</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Unlimited Worker PDF Certificates</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">Priority Support</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                      <span class="text-sm text-muted">8 Total Seats (1 Admin + 7 Managers)</span>
+                    </li>
+                  </ul>
                 </div>
-                <div class="mb-6 text-center">
-                  <span class="text-4xl font-semibold text-foreground">Custom</span>
-                  <span class="text-muted"> pricing</span>
-                </div>
-                <ul class="mb-8 space-y-3">
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Custom AI bots</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Bespoke data pipeline architecture</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Advanced API system integrations</span>
-                  </li>
-                  <li class="flex items-start gap-3">
-                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                    <span class="text-sm text-muted">Ongoing SLA support retainer</span>
-                  </li>
-                </ul>
-                <button disabled class="w-full text-center bg-slate-200 text-slate-500 font-sans py-3 px-6 rounded-md cursor-not-allowed mt-6">Not Yet Available</button>
+                <button type="button" 
+                        onclick="openCheckoutModal('PLN_xx7w3l93tke10kh', 45000, 'Enterprise Solution', 'R450 /mo', '8 Seats • Priority Support • ClickUp HR Live Sync')" 
+                        class="w-full text-center bg-gray-100 text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-200 transition-colors">
+                  Select Enterprise
+                </button>
               </div>
 
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+<!-- REVIEWS SECTION -->
+    <section id="reviews" class="bg-dark-bg pb-20 pt-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center mb-12">
+          <p class="text-sm font-medium uppercase tracking-widest text-slate-400">Field Feedback</p>
+          <h2 class="mt-2 font-serif text-3xl font-semibold text-white">Trusted by Industry Leaders</h2>
+        </div>
+
+        <div class="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+          <!-- Review 1: Doveton Farms -->
+          <div class="rounded-2xl border border-slate-200 !bg-white p-8 flex flex-col justify-between items-center text-center shadow-2xl transition-transform duration-300 hover:-translate-y-1" style="background-color: #ffffff !important;">
+            <div>
+              <div class="mb-6 flex justify-center">
+                <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
+                  <img src="assets/logos/doveton_farms_logo.png" alt="Doveton Farms Logo" class="h-full w-full object-contain scale-110">
+                </div>
+              </div>
+              <blockquote class="text-lg text-slate-800 italic font-normal leading-relaxed">
+                "Easy to present to staff and simple to understand"
+              </blockquote>
+            </div>
+            <div class="mt-8 pt-4 border-t border-slate-100 w-full">
+              <p class="text-sm font-bold text-slate-900">Sean Doveton</p>
+              <p class="text-xs text-slate-500 mt-0.5">Doveton Farms Pty Ltd</p>
+            </div>
+          </div>
+
+          <!-- Review 2: GG & QG Elliott Farm -->
+          <div class="rounded-2xl border border-slate-200 !bg-white p-8 flex flex-col justify-between items-center text-center shadow-2xl transition-transform duration-300 hover:-translate-y-1" style="background-color: #ffffff !important;">
+            <div>
+              <div class="mb-6 flex justify-center">
+                <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
+                  <img src="assets/logos/elliott_farms_logo.png" alt="GG & QG Elliott Farm CC Logo" class="h-full w-full object-contain scale-110">
+                </div>
+              </div>
+              <blockquote class="text-lg text-slate-800 italic font-normal leading-relaxed">
+                "Very practical with high efficiency implementation"
+              </blockquote>
+            </div>
+            <div class="mt-8 pt-4 border-t border-slate-100 w-full">
+              <p class="text-sm font-bold text-slate-900">Quentin Elliott</p>
+              <p class="text-xs text-slate-500 mt-0.5">GG & QG Elliott Farm CC</p>
             </div>
           </div>
         </div>
@@ -408,84 +447,63 @@
     </section>
 
     <!-- FAQ SECTION -->
-    <section id="faq" class="bg-dark-bg py-20 sm:py-24 lg:py-32">
+    <section id="faq" class="bg-dark-bg py-20 border-t border-gray-800">
       <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="mb-12 text-center">
           <p class="text-sm font-medium uppercase tracking-widest text-gray-400">FAQ</p>
           <h2 class="mt-3 font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Frequently Asked Questions
           </h2>
-          <p class="mt-4 text-gray-400">Everything you need to know about our services.</p>
         </div>
 
-        <!-- FAQ Accordion using details/summary -->
         <div class="space-y-4">
           <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
             <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              How quickly can we get started with the Standard Vault?
+              How does the video streaming library work?
               <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
-            <p class="pb-4 text-gray-400">
-              You can be up and running in minutes. Because our platform is entirely cloud-based, there is no complex software to install or hardware to configure. Once you register, your team gets instant access to the training vault.
+            <p class="pb-4 text-gray-400 text-sm">
+              Every plan streams our full catalog of AI-generated safety training videos directly in the browser. Videos include multiple language audio tracks so each worker can watch in their preferred language during training sessions.
             </p>
           </details>
 
           <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
             <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              Can I upgrade my plan at any time?
+              What is the difference between Basic and Essential plans?
               <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
-            <p class="pb-4 text-gray-400">
-              Absolutely. As your operations scale, you can easily transition from the Standard Vault to our Integrated System. We will seamlessly migrate your data into a live ClickUp dashboard without any downtime.
+            <p class="pb-4 text-gray-400 text-sm">
+              The Basic plan gives you full access to the streaming video catalog and 1 admin seat. Whereas, the Essential plan adds the Training Records Directory & Dashboard, worker compliance logging via single or group sign-off mode, and 3 additional management sub-accounts.
             </p>
           </details>
 
           <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
             <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              How does the AI video generation work?
+              How do group training session sign-offs work?
               <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
-            <p class="pb-4 text-gray-400">
-              We leverage AI to generate and format industry-standard safety training and toolbox talks. This ensures your workforce receives consistent, highly accurate, and engaging compliance information tailored specifically to heavy industry environments.
+            <p class="pb-4 text-gray-400 text-sm">
+              On the Essential tier and above, you play a training video for the crew, then capture a single group sign-off via an online form. Each attendee's name and ID number is logged for the session and the record lands in your Training Records Dashboard instantly apon submission of the form.
             </p>
           </details>
 
           <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
             <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              Is my data secure?
+              What if my business needs custom videos or bespoke operational tools?
               <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
-            <p class="pb-4 text-gray-400">
-              Yes. We use enterprise-grade authentication to ensure your company's training logs, staff profiles, and compliance data are locked down. Access is strictly controlled and only visible to authorized management and personnel.
-            </p>
-          </details>
-
-          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
-            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              Do you offer implementation support?
-              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-            </summary>
-            <p class="pb-4 text-gray-400">
-              Yes. All tiers come with onboarding resources to get you started immediately. For our Integrated System and Enterprise clients, we provide hands-on configuration to ensure your specific operational workflows are perfectly mapped to your new dashboard.
-            </p>
-          </details>
-
-          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
-            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              What integrations are available?
-              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-            </summary>
-            <p class="pb-4 text-gray-400">
-              Our core operational workflows are built to integrate seamlessly with ClickUp for ultimate project visibility. For Enterprise clients, we can deploy custom API connections via Zapier to link with your existing HR or ERP systems.
+            <p class="pb-4 text-gray-400 text-sm">
+              We can build a solution for virtually any operational challenge. If you require custom, site-specific safety videos, we can produce them for your farm or facility and host them directly inside your private Vault catalog. For broader workflow bottlenecks, custom automations, or specialized software, simply contact us to map out a tailored project plan—there is no operational task we can't attempt to solve.
             </p>
           </details>
         </div>
 
-        <div class="mt-12 text-center">
-          <p class="text-gray-400">
-            Still have questions? 
-            <a href="#contact" class="font-medium text-white underline-offset-4 hover:underline">Contact our team</a>
-          </p>
+        <div class="mt-12 rounded-xl border border-gray-800 bg-dark-card p-8 text-center">
+          <h3 class="font-serif text-xl font-semibold text-white">Need Custom Workflow Consultancy?</h3>
+          <p class="mt-2 text-sm text-gray-400">We design custom ClickUp workspaces, Power BI dashboards, and automated pipelines specifically tailored to your operations.</p>
+          <a href="systems.html" class="mt-6 inline-flex items-center justify-center bg-primary px-6 py-3 rounded-md text-sm font-medium text-white hover:bg-primary/90 transition-colors">
+            Explore Workflow Engineering &rarr;
+          </a>
         </div>
       </div>
     </section>
@@ -494,62 +512,35 @@
     <footer id="contact" class="border-t border-gray-800 bg-dark-bg">
       <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-4">
-          <!-- Brand column -->
           <div class="lg:col-span-1">
-            <a href="#" class="inline-block">
+            <a href="index.html" class="inline-block">
               <span class="font-serif text-xl font-semibold tracking-tight text-white">Simple Solutions</span>
             </a>
             <p class="mt-4 text-sm leading-relaxed text-gray-400">
               Enterprise compliance automation and AI integration solutions for modern businesses.
             </p>
 
-            <!-- Contact info -->
             <h3 class="mt-6 text-sm font-semibold uppercase tracking-wider text-white">Contact Us</h3>
-            <div class="mt-6 space-y-3">
+            <div class="mt-4 space-y-3">
               <a href="mailto:simple.lucadudley@gmail.com" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
-                <!-- Mail Icon -->
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <rect width="20" height="16" x="2" y="4" rx="2"/>
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                </svg>
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                 simple.lucadudley@gmail.com
               </a>
               <div class="flex items-start gap-2 text-sm text-gray-400">
-                <!-- MapPin Icon -->
-                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
+                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 <span>Stellenbosch & Durban<br>South Africa</span>
               </div>
             </div>
-
-            <!-- Social links -->
-            <div class="mt-6 flex gap-4">
-              <a href="#" class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white" aria-label="LinkedIn">
-                <!-- LinkedIn Icon -->
-                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
-                </svg>
-              </a>
-              <a href="#" class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white" aria-label="Twitter">
-                <!-- Twitter Icon -->
-                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
-                </svg>
-              </a>
-            </div>
           </div>
 
-          <!-- Links columns -->
           <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:col-span-3">
             <div>
               <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Services</h3>
               <ul class="mt-4 space-y-3">
-                <li><a href="#services" class="text-sm text-gray-400 transition-colors hover:text-white">AI Safety Videos</a></li>
-                <li><a href="#services" class="text-sm text-gray-400 transition-colors hover:text-white">ClickUp Optimization</a></li>
-                <li><a href="#services" class="text-sm text-gray-400 transition-colors hover:text-white">AI Integration</a></li>
-                <li><a href="#services" class="text-sm text-gray-400 transition-colors hover:text-white">Custom Solutions</a></li>
+                <li><a href="#vault-info" class="text-sm text-gray-400 transition-colors hover:text-white">The Vault</a></li>
+                <li><a href="systems.html" class="text-sm text-gray-400 transition-colors hover:text-white">Workflow Optimization</a></li>
+                <li><a href="systems.html#capabilities" class="text-sm text-gray-400 transition-colors hover:text-white">Web Portal & App Development</a></li>
+                <li><a href="systems.html#capabilities" class="text-sm text-gray-400 transition-colors hover:text-white">AI Integration</a></li>
               </ul>
             </div>
 
@@ -559,55 +550,292 @@
                 <li><a href="docs/POPIA%20PRIVACY%20POLICY.pdf" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 transition-colors hover:text-white">Privacy Policy</a></li>
                 <li><a href="docs/TERMS%20OF%20SERVICE.pdf" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 transition-colors hover:text-white">Terms of Service</a></li>
                 <li><a href="docs/SIMPLE%20SOLUTIONS%20COOKIE%20POLICY.pdf" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 transition-colors hover:text-white">Cookie Policy</a></li>
-                <li><a href="docs/LEGAL%20AND%20LIABILITY%20DISCLAIMER.pdf" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 transition-colors hover:text-white">Legal & Liability Disclaimer</a></li>
+                <li><a href="docs/LEGAL%20AND%20LIABILITY%20DISCLAIMER.pdf" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 transition-colors hover:text-white">Legal &amp; Liability Disclaimer</a></li>
               </ul>
             </div>
 
             <div class="w-full sm:col-span-2 lg:col-span-1 text-center lg:text-left">
               <h3 class="text-sm font-semibold uppercase tracking-wider text-white">Disclaimer</h3>
-              <p class="mt-4 text-sm md:text-base leading-relaxed text-gray-400">
-                Simple Solutions provides digital workflow, tracking, and training management software. We are not a regulatory authority and do not issue accredited health and safety certifications. Our platforms are an administrative tool designed to assist organizations in building a digital audit trail. Clients remain solely responsible for ensuring their operations meet all statutory requirements under the OHS Act and the Department of Employment and Labour.
+              <p class="mt-4 text-xs leading-relaxed text-gray-400">
+                Simple Solutions provides digital workflow, tracking, and training management software. We are not a regulatory authority and do not issue accredited health and safety certifications. Our platforms are administrative tools to assist organizations in building a digital audit trail.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Bottom bar -->
         <div class="mt-12 border-t border-gray-800 pt-8">
           <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p class="text-sm text-gray-500">&copy; 2026 Simple Solutions. All rights reserved.</p>
-            <p class="text-sm text-gray-500">Powered by <span class="text-gray-400">Simple Solutions</span></p>
           </div>
         </div>
       </div>
     </footer>
 
   </main>
-  <div id="sampleModal" onclick="closeSampleModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" onclick="closeLoginModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div onclick="event.stopPropagation()" class="relative w-full max-w-md mx-4 rounded-2xl border border-white/10 bg-dark-card p-8 shadow-2xl">
+      <button type="button" onclick="closeLoginModal()" class="absolute right-4 top-4 rounded-full p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white" aria-label="Close login modal">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+      <div class="mb-6">
+        <p class="text-sm font-medium uppercase tracking-widest text-gray-400">Client Access</p>
+        <h2 class="mt-2 font-serif text-3xl font-semibold text-white">Sign in to the Vault</h2>
+      </div>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="email" class="mb-2 block text-sm font-medium text-white">Email</label>
+          <input id="email" type="email" autocomplete="email" required class="w-full rounded-md border border-gray-700 bg-dark-bg px-4 py-3 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary" placeholder="you@example.com">
+        </div>
+        <div>
+          <label for="password" class="mb-2 block text-sm font-medium text-white">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required class="w-full rounded-md border border-gray-700 bg-dark-bg px-4 py-3 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary" placeholder="Enter your password">
+        </div>
+        <button type="button" id="login-btn" class="w-full rounded-md bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary/90">Sign In</button>
+        <div class="relative mt-6 mb-4">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-700"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="bg-dark-card px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-700 bg-dark-bg rounded-md text-sm font-medium text-white hover:bg-gray-800 transition-colors shadow-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SECURE ORDER REVIEW & CHECKOUT MODAL -->
+  <div id="checkoutModal" onclick="closeCheckoutModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+    <div onclick="event.stopPropagation()" class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-foreground">Secure Subscription Checkout</h3>
+            <p class="text-xs text-muted">Review plan details and proceed to payment.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCheckoutModal()" class="p-1 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Plan Summary Card -->
+      <div class="p-6">
+        <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 mb-5 flex items-center justify-between">
+          <div>
+            <span id="checkout-plan-tag" class="inline-block text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mb-1">Selected Plan</span>
+            <h4 id="checkout-plan-name" class="font-semibold text-foreground text-base">Essential Vault</h4>
+            <p id="checkout-plan-desc" class="text-xs text-muted mt-0.5">4 Seats • Records Dashboard • Compliance Sign-offs</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-muted block">Billed Monthly</span>
+            <span id="checkout-plan-price" class="text-xl font-bold text-primary">R220</span>
+          </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <form id="checkout-form" onsubmit="handleProceedToPaystack(event)" class="space-y-3.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Full Name</label>
+              <input type="text" id="checkout-name" required placeholder="Luca Dudley" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Company / Organization</label>
+              <input type="text" id="checkout-company" required placeholder="Simple Solutions" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Billing Work Email</label>
+            <input type="email" id="checkout-email" required placeholder="you@company.com" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+          </div>
+
+          <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Proceed to Secure Payment
+          </button>
+        </form>
+
+        <!-- Trust & Security Assurance Footnote -->
+        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-400">
+          <div class="flex items-center gap-2 text-xs">
+            <svg class="w-4 h-4 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
+            <span class="text-slate-500 font-medium">256-Bit SSL • PCI-DSS Level 1</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+            <span>Powered by</span>
+            <span class="text-slate-700 font-bold tracking-tight">paystack</span>
+            <span class="text-slate-300">|</span>
+            <span>Visa • Mastercard • EFT</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- VAULT DEMO MODAL -->
+  <div id="vaultDemoModal" onclick="closeVaultDemoModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
     <div onclick="event.stopPropagation()" class="relative w-full max-w-4xl mx-4 bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10">
-      <button onclick="closeSampleModal()" class="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors">
+      <button onclick="closeVaultDemoModal()" class="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
       <div class="aspect-video w-full">
-        <iframe src="https://player.vimeo.com/video/1179583326?title=0&byline=0&portrait=0" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="modalVaultIframe" src="https://player.vimeo.com/video/1219493264?title=0&byline=0&portrait=0&autoplay=1" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
       </div>
     </div>
   </div>
 
   <script>
-    function openSampleModal() {
-      const modal = document.getElementById('sampleModal');
+    function openLoginModal() {
+      const modal = document.getElementById('loginModal');
       modal.classList.remove('hidden');
-      // Small timeout to allow display:block to apply before fading in
       setTimeout(() => modal.classList.remove('opacity-0'), 10);
     }
 
-    function closeSampleModal() {
-      const modal = document.getElementById('sampleModal');
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
       modal.classList.add('opacity-0');
-      // Wait for fade out animation to finish before hiding
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
+
+    function openVaultDemoModal() {
+      const modal = document.getElementById('vaultDemoModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeVaultDemoModal() {
+      const modal = document.getElementById('vaultDemoModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // Global variable tracking active checkout selection
+    let activeCheckoutPlan = {
+      planCode: 'PLN_glbt6ice9adjj45',
+      amountInCents: 22000,
+      tierName: 'Essential Vault',
+      priceDisplay: 'R220 /mo',
+      desc: '4 Seats • Records Dashboard • Compliance Sign-offs'
+    };
+
+    function openCheckoutModal(planCode, amountInCents, tierName, priceDisplay, desc) {
+      activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
+      
+      document.getElementById('checkout-plan-name').textContent = tierName;
+      document.getElementById('checkout-plan-price').textContent = priceDisplay;
+      document.getElementById('checkout-plan-desc').textContent = desc;
+
+      const modal = document.getElementById('checkoutModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById('checkoutModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function handleProceedToPaystack(e) {
+      e.preventDefault();
+      
+      const userEmail = document.getElementById('checkout-email').value.trim();
+      const userName = document.getElementById('checkout-name').value.trim();
+      const userCompany = document.getElementById('checkout-company').value.trim();
+
+      if (!userEmail || !userEmail.includes('@')) {
+        alert('Please enter a valid billing email.');
+        return;
+      }
+
+      // Close the review modal
+      closeCheckoutModal();
+
+      // Launch Paystack's official secure card drawer
+      const popup = new PaystackPop();
+      popup.newTransaction({
+        key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
+        email: userEmail,
+        amount: activeCheckoutPlan.amountInCents,
+        plan: activeCheckoutPlan.planCode,
+        currency: 'ZAR',
+        metadata: {
+          custom_fields: [
+            { display_name: "Customer Name", variable_name: "customer_name", value: userName },
+            { display_name: "Company Name", variable_name: "company_name", value: userCompany },
+            { display_name: "Tier Selected", variable_name: "tier_selected", value: activeCheckoutPlan.tierName }
+          ]
+        },
+        onSuccess: (transaction) => {
+          alert(`Payment successful! Reference: ${transaction.reference}`);
+          window.location.href = 'vault.html?subscribed=true&ref=' + transaction.reference;
+        },
+        onCancel: () => {
+          console.log('Customer dismissed payment window.');
+        }
+      });
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+      const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+      window.signInWithGoogle = async () => {
+        try {
+          const { error } = await dbClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + '/vault.html' }
+          });
+          if (error) throw error;
+        } catch (err) {
+          console.error("Google login error:", err);
+          alert("Failed to connect to Google.");
+        }
+      };
+
+      const loginBtn = document.getElementById('login-btn');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', async (event) => {
+          event.preventDefault();
+          loginBtn.innerText = "Authenticating...";
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+
+          try {
+            const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+            if (error) {
+              alert("Login failed: " + error.message);
+              loginBtn.innerText = "Sign In";
+            } else {
+              window.location.href = 'vault.html';
+            }
+          } catch (err) {
+            console.error("Unexpected error:", err);
+            loginBtn.innerText = "Sign In";
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>

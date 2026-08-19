@@ -6,21 +6,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const sidebarNavButtons = document.querySelectorAll('.sidebar-nav-btn');
   const sidebarFilterButtons = document.querySelectorAll('.sidebar-filter-btn');
 
-  const setActiveSidebarButton = (buttons, activeButton) => {
+const setActiveSidebarButton = (buttons, activeButton) => {
     buttons.forEach((button) => {
-      button.classList.remove('bg-black/5', 'text-black', 'font-medium');
-      button.classList.add('text-muted');
+      button.classList.remove('bg-primary', 'text-white', 'shadow-sm', 'font-semibold');
+      button.classList.add('text-slate-600', 'font-medium', 'hover:bg-slate-200/60');
+      // Dim inactive icons
+      const svg = button.querySelector('svg');
+      if (svg) svg.classList.add('text-slate-400');
     });
 
-    activeButton.classList.add('bg-black/5', 'text-black', 'font-medium');
-    activeButton.classList.remove('text-muted');
+    activeButton.classList.add('bg-primary', 'text-white', 'shadow-sm', 'font-semibold');
+    activeButton.classList.remove('text-slate-600', 'hover:bg-slate-200/60');
+    // Highlight active icon
+    const activeSvg = activeButton.querySelector('svg');
+    if (activeSvg) activeSvg.classList.remove('text-slate-400');
   };
 
-  const currentPage = window.location.pathname.split('/').pop();
+  const currentPage = window.location.pathname.split('/').pop() || 'vault.html';
   if (sidebarNavButtons.length > 0) {
     sidebarNavButtons.forEach((button) => {
       const href = button.getAttribute('href');
-      if (href && href !== '#' && href === currentPage) {
+      if (href && href === currentPage) {
         setActiveSidebarButton(sidebarNavButtons, button);
       }
     });
@@ -67,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (sidebarToggle && sidebar && mainContent) {
+if (sidebarToggle && sidebar && mainContent) {
     sidebarToggle.addEventListener('click', () => {
       if (window.innerWidth < 1024) {
         return;
@@ -75,42 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const isCollapsed = sidebar.classList.toggle('collapsed');
       mainContent.style.marginLeft = isCollapsed ? '5rem' : '16rem';
-      sidebarToggle.textContent = isCollapsed ? '>>' : '<<';
       sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
       sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
     });
   }
-
-  const hydrateMemberProfile = async () => {
-    try {
-      const memberstack = window.$memberstackDom;
-      if (!memberstack) {
-        return;
-      }
-
-      const { data: member } = await memberstack.getCurrentMember();
-      if (!member) {
-        return;
-      }
-
-      const fName = member.customFields?.['first-name'] || '';
-      const lName = member.customFields?.['last-name'] || '';
-      const initials = `${fName.charAt(0)}${lName.charAt(0)}`.toUpperCase() || 'U';
-
-      document.querySelectorAll('[data-dynamic-initials]').forEach((initialsEl) => {
-        initialsEl.textContent = initials;
-      });
-
-      if (member.profileImage) {
-        document.querySelectorAll('[data-dynamic-profile-img]').forEach((imgEl) => {
-          imgEl.src = member.profileImage;
-          imgEl.classList.remove('hidden');
-        });
-      }
-    } catch (error) {
-      console.error('Memberstack initialization pending.');
-    }
-  };
-
-  hydrateMemberProfile();
 });
