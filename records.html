@@ -1033,22 +1033,52 @@
         return;
       }
 
-      // 2. Fetch video curriculum objectives
-      const { data: videoData } = await window.dbClient
+      // 2. Fetch video curriculum objectives (Case-insensitive & handles duplicate rows gracefully)
+      let objectives = [];
+      let durationMins = 30;
+
+      const cleanTitle = (moduleTitle || '').trim();
+
+      const { data: videoRows, error: videoError } = await window.dbClient
         .from('videos')
         .select('objectives, total_seconds')
-        .eq('title', moduleTitle)
-        .maybeSingle();
+        .ilike('title', cleanTitle)
+        .limit(1);
 
-      const objectives = (videoData?.objectives && Array.isArray(videoData.objectives)) ? videoData.objectives : [
-        'Equipment pre-inspection, materials, and safe operational procedures',
-        'Personal Protective Equipment (PPE) requirements and mandatory usage',
-        'Hazard identification, workspace safety, and emergency shutoff protocols',
-        'Proper equipment handling, transport, and secure end-of-shift storage',
-        'Standard reporting procedures for mechanical faults, defects, or injuries'
-      ];
+      if (videoRows && videoRows.length > 0) {
+        const vData = videoRows[0];
+        if (vData.total_seconds) {
+          durationMins = Math.ceil(vData.total_seconds / 60);
+        }
+        
+        if (vData.objectives) {
+          if (Array.isArray(vData.objectives)) {
+            objectives = vData.objectives;
+          } else if (typeof vData.objectives === 'string') {
+            try {
+              const parsed = JSON.parse(vData.objectives);
+              objectives = Array.isArray(parsed) ? parsed : Object.values(parsed);
+            } catch (e) {
+              console.warn('Failed parsing stringified objectives:', e);
+            }
+          } else if (typeof vData.objectives === 'object') {
+            objectives = Object.values(vData.objectives);
+          }
+        }
+      }
 
-      const durationMins = videoData?.total_seconds ? Math.ceil(videoData.total_seconds / 60) : 30;
+      // Fallback only if database column is empty
+      if (!objectives || objectives.length === 0) {
+        objectives = [
+          'Machine components, disc ratings, and spindle guard positioning',
+          'Mandatory Personal Protective Equipment (PPE) requirements',
+          'Pre-operational inspection: disc integrity, cracks, and mounting',
+          'Safe handling, two-handed operation, and spark direction control',
+          'Flammable materials clearance and hot work safety precautions',
+          'Power isolation, disc replacement, and fault reporting'
+        ];
+      }
+
       const comp = await getFreshCompanyInfo();
       const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
       const supervisorSig = batchRecords[0]?.supervisor_signature_data || null;
@@ -1112,19 +1142,21 @@
       doc.text(`TRAINING MODULE: ${moduleTitle.toUpperCase()} (VIDEO INDUCTION)`, 16, contentY);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setTextColor(51, 65, 85);
-      let bulletY = contentY + 8;
+      let bulletY = contentY + 7.5;
       
       objectives.forEach(obj => {
         doc.setFillColor(30, 58, 95);
-        doc.circle(20, bulletY - 1, 1, 'F');
-        doc.text(obj, 25, bulletY);
-        bulletY += 7.5;
+        doc.circle(20, bulletY - 1, 0.9, 'F');
+        // Wrap text to 255mm so longer compliance points wrap cleanly
+        const wrappedLines = doc.splitTextToSize(obj, 255);
+        doc.text(wrappedLines, 24, bulletY);
+        bulletY += (wrappedLines.length * 4.5) + 2.5;
       });
 
-      // 4. Bottom Verification Row: Supervisor Declaration (Left) + Company Stamp (Right)
-      const bottomY = 120;
+      // 4. Bottom Verification Row: Positioned dynamically below objectives
+      const bottomY = Math.max(bulletY + 8, 125);
 
       // Left Box: Trainer Legal Attestation
       const attestW = 160;
