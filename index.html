@@ -693,7 +693,7 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
       <div class="aspect-video w-full">
-        <iframe id="modalVaultIframe" src="https://player.vimeo.com/video/1219493264?title=0&byline=0&portrait=0&autoplay=1" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="modalVaultIframe" src="" data-src="https://player.vimeo.com/video/1219493264?title=0&byline=0&portrait=0&badge=0&autoplay=1" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
       </div>
     </div>
   </div>
@@ -713,16 +713,26 @@
 
     function openVaultDemoModal() {
       const modal = document.getElementById('vaultDemoModal');
-      if (!modal) return;
+      const iframe = document.getElementById('modalVaultIframe');
+      if (!modal || !iframe) return;
+
+      // Only load the Vimeo video URL and autoplay when the modal is opened
+      iframe.src = iframe.getAttribute('data-src');
+
       modal.classList.remove('hidden');
       setTimeout(() => modal.classList.remove('opacity-0'), 10);
     }
 
     function closeVaultDemoModal() {
       const modal = document.getElementById('vaultDemoModal');
+      const iframe = document.getElementById('modalVaultIframe');
       if (!modal) return;
+
       modal.classList.add('opacity-0');
-      setTimeout(() => modal.classList.add('hidden'), 300);
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        if (iframe) iframe.src = ""; // Unloads iframe to kill audio/playback immediately
+      }, 300);
     }
 
     // Global variable tracking active checkout selection
