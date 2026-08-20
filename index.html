@@ -652,14 +652,20 @@
               <input type="text" id="checkout-name" required placeholder="Luca Dudley" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Company / Organization</label>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Company Name</label>
               <input type="text" id="checkout-company" required placeholder="Simple Solutions" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Billing Work Email</label>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Work / Billing Email</label>
             <input type="email" id="checkout-email" required placeholder="you@company.com" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Account Password (For Vault Login)</label>
+            <input type="password" id="checkout-password" required minlength="6" placeholder="Create a secure password" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors">
+            <span class="text-[10px] text-slate-400 mt-0.5 block">Minimum 6 characters. Used to log in after purchase.</span>
           </div>
 
           <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
@@ -766,20 +772,26 @@
 
     function handleProceedToPaystack(e) {
       e.preventDefault();
-      
+
       const userEmail = document.getElementById('checkout-email').value.trim();
       const userName = document.getElementById('checkout-name').value.trim();
       const userCompany = document.getElementById('checkout-company').value.trim();
+      const userPassword = document.getElementById('checkout-password').value;
 
       if (!userEmail || !userEmail.includes('@')) {
         alert('Please enter a valid billing email.');
         return;
       }
 
-      // Close the review modal
+      if (!userPassword || userPassword.length < 6) {
+        alert('Please provide a password of at least 6 characters.');
+        return;
+      }
+
+      // Close review modal
       closeCheckoutModal();
 
-      // Launch Paystack's official secure card drawer
+      // Launch Paystack payment popup
       const popup = new PaystackPop();
       popup.newTransaction({
         key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
@@ -794,12 +806,90 @@
             { display_name: "Tier Selected", variable_name: "tier_selected", value: activeCheckoutPlan.tierName }
           ]
         },
-        onSuccess: (transaction) => {
-          alert(`Payment successful! Reference: ${transaction.reference}`);
-          window.location.href = 'vault.html?subscribed=true&ref=' + transaction.reference;
+        onSuccess: async (transaction) => {
+          console.log('[Paystack] Payment authorized. Ref:', transaction.reference);
+
+          try {
+            // 1. Resolve Tier and Seat Limits
+            let targetTier = 'essential';
+            let seatLimit = 4;
+
+            if (activeCheckoutPlan.planCode === 'PLN_q37eti0fct6aazv') {
+              targetTier = 'basic';
+              seatLimit = 1;
+            } else if (activeCheckoutPlan.planCode === 'PLN_xx7w3l93tke10kh') {
+              targetTier = 'enterprise';
+              seatLimit = 8;
+            }
+
+            const nameParts = userName.split(' ');
+            const fName = nameParts[0] || 'User';
+            const lName = nameParts.slice(1).join(' ') || '';
+
+            // 2. Sign Up User in Supabase Auth
+            const { data: authData, error: authErr } = await window.supabaseClient.auth.signUp({
+              email: userEmail,
+              password: userPassword,
+              options: {
+                data: {
+                  first_name: fName,
+                  last_name: lName,
+                  company_name: userCompany
+                }
+              }
+            });
+
+            if (authErr) throw authErr;
+
+            // 3. Establish Authenticated Session Immediately
+            const { data: loginData, error: loginErr } = await window.supabaseClient.auth.signInWithPassword({
+              email: userEmail,
+              password: userPassword
+            });
+
+            if (loginErr) throw loginErr;
+            const newUserId = loginData?.user?.id || authData?.user?.id;
+            if (!newUserId) throw new Error('User authentication session could not be established.');
+
+            // 4. Create Company Row in public.companies
+            const newCompanyId = crypto.randomUUID();
+            const { error: compErr } = await window.supabaseClient
+              .from('companies')
+              .insert({
+                id: newCompanyId,
+                name: userCompany,
+                tier: targetTier,
+                subscription_status: 'active',
+                seat_limit: seatLimit,
+                paystack_subscription_code: transaction.reference
+              });
+
+            if (compErr) throw compErr;
+
+            // 5. Create / Upsert Master Admin Profile in public.profiles
+            const { error: profErr } = await window.supabaseClient
+              .from('profiles')
+              .upsert({
+                id: newUserId,
+                first_name: fName,
+                last_name: lName,
+                role: 'Master Admin',
+                company_id: newCompanyId,
+                tier: targetTier
+              }, { onConflict: 'id' });
+
+            if (profErr) throw profErr;
+
+            // 6. Redirect into Active Vault Portal
+            window.location.href = 'vault.html?subscribed=true&ref=' + transaction.reference;
+
+          } catch (provisionError) {
+            console.error('[Provisioning Error]:', provisionError);
+            alert(`Payment succeeded, but account provisioning ran into an error: ${provisionError.message}. Please contact support with Ref: ${transaction.reference}`);
+          }
         },
         onCancel: () => {
-          console.log('Customer dismissed payment window.');
+          console.log('Customer cancelled payment popup.');
         }
       });
     }
@@ -808,7 +898,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
-      const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+      
+      window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+      window.dbClient = window.supabaseClient;
 
       window.signInWithGoogle = async () => {
         try {
