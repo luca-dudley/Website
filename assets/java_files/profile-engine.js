@@ -395,7 +395,7 @@ async function loadUserProfile(userId) {
               Your organization's active subscription was cancelled. <strong>All training records, employee completions, and worker logs remain safely archived in our database.</strong>
             </p>
             ${isAdmin ? `
-              <button onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential', 'Essential Vault', 22000)" class="w-full bg-primary py-3 rounded-md font-medium text-white hover:bg-primary/90 transition-colors shadow-lg mb-3">
+              <button onclick="triggerPaystackUpgrade('PLN_glbt6ice9adjj45', 'essential', 'Essential Vault', 28000)" class="w-full bg-primary py-3 rounded-md font-medium text-white hover:bg-primary/90 transition-colors shadow-lg mb-3">
                 Reactivate Workspace (Choose Plan) 💳
               </button>
             ` : `
@@ -557,7 +557,7 @@ function applyTierRestrictions() {
       </span>
       <h3 class="font-serif text-2xl text-foreground mb-2">Compliance Registration Locked</h3>
       <p class="text-slate-500 mb-6 max-w-md mx-auto">
-        Worker tracking and Tally registrations are available on the Essential (R220/mo) tier.
+        Worker tracking and Tally registrations are available on the Essential (R280/mo) tier.
       </p>
       <button onclick="openProfileModal(); switchProfileTab('plans');" class="inline-block bg-primary text-white font-medium py-3 px-8 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
         Upgrade to Essential &rarr;
@@ -612,7 +612,7 @@ let pendingVaultUpgrade = {
   planCode: 'PLN_glbt6ice9adjj45',
   targetTier: 'essential',
   tierDisplayName: 'Essential Vault',
-  amountInCents: 22000
+  amountInCents: 28000
 };
 
 function triggerPaystackUpgrade(planCode, targetTier, tierDisplayName, amountInCents) {
