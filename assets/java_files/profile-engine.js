@@ -792,7 +792,7 @@ async function fetchCompanyTeamMembers() {
 
     const { data: company } = await window.dbClient
       .from('companies')
-      .select('tier, seat_limit, max_supervisors')
+      .select('tier, seat_limit')
       .eq('id', window.userCompanyId)
       .maybeSingle();
 
