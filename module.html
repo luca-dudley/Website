@@ -434,10 +434,15 @@
       sigCanvas = document.getElementById('supervisorSignaturePad');
       if (!sigCanvas) return;
 
-      sigCanvas.width = sigCanvas.offsetWidth || 550;
-      sigCanvas.height = sigCanvas.offsetHeight || 130;
+      const dpr = window.devicePixelRatio || 1;
+      const cssWidth = sigCanvas.offsetWidth || 550;
+      const cssHeight = sigCanvas.offsetHeight || 130;
+
+      sigCanvas.width = cssWidth * dpr;
+      sigCanvas.height = cssHeight * dpr;
 
       sigCtx = sigCanvas.getContext('2d');
+      sigCtx.scale(dpr, dpr);
       sigCtx.strokeStyle = '#000000'; // Crisp black ink
       sigCtx.lineWidth = 2.5;
       sigCtx.lineCap = 'round';
@@ -791,10 +796,7 @@
         return;
       }
 
-      const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
-      const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-      window.dbClient = dbClient;
+      const dbClient = window.dbClient;
 
       let { data: video } = await dbClient
         .from('videos')

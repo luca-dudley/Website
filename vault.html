@@ -716,9 +716,8 @@
       if (languageFilter) languageFilter.addEventListener('change', filterHandler);
     }
 
-    window.addEventListener('load', async () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       await renderContinueWatchingBanner();
-      fetchAndRenderVault();
     });
 
     function handleLockedModuleClick(title, subTag) {

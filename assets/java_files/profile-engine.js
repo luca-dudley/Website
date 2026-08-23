@@ -446,9 +446,8 @@ async function loadUserProfile(userId) {
     }
 
     // --- Resolve company id & tier ----------------------------------------
-window.userCompanyId = profile.company_id || companyObj?.id || null;
-    const devTierOverride = sessionStorage.getItem('dev_tier_override');
-    window.currentCompanyTier = devTierOverride || (companyObj?.tier || profile.tier || 'basic').toLowerCase();
+    window.userCompanyId = profile.company_id || companyObj?.id || null;
+    window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
     console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
 
     const currentPlanName = document.getElementById('current-plan-name');
@@ -851,22 +850,26 @@ async function fetchCompanyTeamMembers() {
     const currentUserProfile = team.find(m => m.id === user?.id);
     const isCurrentAdmin = (currentUserProfile?.role || '').toLowerCase().includes('admin');
 
-    // 4. Render Roster Cards with Revoke Access Trigger
+    // 4. Render Roster Cards with Revoke Access Trigger (Safe escaping & data-attributes)
+    const escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, c => (
+      { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+    ));
+
     container.innerHTML = team.map(member => {
       const isPrimaryAdmin = member.role === 'Master Admin' || member.role === 'admin' || member.role === 'Primary Admin';
       const isSelf = member.id === user?.id;
       const fullName = `${member.first_name || 'User'} ${member.last_name || ''}`.trim();
-      const escapedName = fullName.replace(/'/g, "\\'");
+      const safeFullName = escapeHtml(fullName);
       
       return `
         <div class="flex items-center justify-between p-3.5 border border-slate-200 bg-white rounded-lg text-sm shadow-sm transition-all hover:border-slate-300">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full ${isPrimaryAdmin ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} flex items-center justify-center font-bold text-xs uppercase">
-              ${(member.first_name?.charAt(0) || '') + (member.last_name?.charAt(0) || '') || 'U'}
+              ${escapeHtml((member.first_name?.charAt(0) || '') + (member.last_name?.charAt(0) || '') || 'U')}
             </div>
             <div>
-              <p class="font-semibold text-foreground leading-snug">${fullName} ${isSelf ? '<span class="text-xs text-slate-400 font-normal">(You)</span>' : ''}</p>
-              <p class="text-xs text-muted">${member.role || 'Manager'}</p>
+              <p class="font-semibold text-foreground leading-snug">${safeFullName} ${isSelf ? '<span class="text-xs text-slate-400 font-normal">(You)</span>' : ''}</p>
+              <p class="text-xs text-muted">${escapeHtml(member.role || 'Manager')}</p>
             </div>
           </div>
           <div class="flex items-center gap-2.5">
@@ -876,8 +879,9 @@ async function fetchCompanyTeamMembers() {
             ${(isCurrentAdmin && !isSelf && !isPrimaryAdmin) ? `
               <button 
                 type="button" 
-                onclick="handleRemoveTeamMember('${member.id}', '${escapedName}')" 
-                class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                data-user-id="${escapeHtml(member.id)}"
+                data-user-name="${safeFullName}"
+                class="team-remove-btn p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                 title="Revoke Manager Access">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
               </button>
@@ -886,6 +890,12 @@ async function fetchCompanyTeamMembers() {
         </div>
       `;
     }).join('');
+
+    container.querySelectorAll('.team-remove-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        handleRemoveTeamMember(btn.dataset.userId, btn.dataset.userName);
+      });
+    });
 
   } catch (err) {
     console.error('[ProfileEngine] Failed fetching team members:', err);
@@ -966,10 +976,22 @@ async function handleGenerateManagerInvite() {
     .select('id', { count: 'exact' })
     .eq('company_id', window.userCompanyId);
 
+  if (error) {
+    console.error('[ProfileEngine] Seat count query failed:', error);
+    alert('Unable to verify seat availability right now. Please try again.');
+    return;
+  }
+
+  const { data: companyRow } = await window.dbClient
+    .from('companies')
+    .select('seat_limit')
+    .eq('id', window.userCompanyId)
+    .maybeSingle();
+
   const tier = (window.currentCompanyTier || 'basic').toLowerCase();
   let maxSeats = 1;
   if (tier === 'essential') maxSeats = 4;
-  if (tier === 'enterprise') maxSeats = 8;
+  if (tier === 'enterprise') maxSeats = companyRow?.seat_limit || 8;
 
   if (tier === 'basic') {
     alert("The Basic tier only allows 1 admin seat. Upgrade to Essential to invite up to 3 sub-managers.");
@@ -1084,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.dbClient.auth.onAuthStateChange((event, currentSession) => {
       if (event === 'SIGNED_OUT' || !currentSession) {
         window.location.replace('index.html');
-      } else if (event === 'INITIAL_SESSION' && currentSession) {
+      } else if (event === 'SIGNED_IN' && currentSession?.user?.id !== session.user.id) {
         loadUserProfile(currentSession.user.id);
       }
     });

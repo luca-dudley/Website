@@ -421,6 +421,14 @@
 
     // AUDIT-GRADE A4 SOP PDF GENERATION ENGINE
     async function generateModuleSOPPDF(videoId, moduleTitle) {
+      const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
+      if (currentTier !== 'enterprise') {
+        openProfileModal();
+        switchProfileTab('plans');
+        alert('SOP PDF export is exclusive to the Enterprise tier. Please upgrade your plan.');
+        return;
+      }
+
       if (!window.jspdf || !window.jspdf.jsPDF) {
         alert('PDF Generation library is loading. Please try again.');
         return;
@@ -444,9 +452,17 @@
       ];
 
       if (video?.objectives) {
-        if (Array.isArray(video.objectives)) objectives = video.objectives;
-        else if (typeof video.objectives === 'string') {
-          try { objectives = JSON.parse(video.objectives); } catch (e) {}
+        if (Array.isArray(video.objectives)) {
+          objectives = video.objectives;
+        } else if (typeof video.objectives === 'string') {
+          try {
+            const parsed = JSON.parse(video.objectives);
+            objectives = Array.isArray(parsed) ? parsed : Object.values(parsed);
+          } catch (e) {
+            console.warn('Failed parsing stringified objectives for SOP:', e);
+          }
+        } else if (typeof video.objectives === 'object' && video.objectives !== null) {
+          objectives = Object.values(video.objectives);
         }
       }
 

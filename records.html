@@ -534,17 +534,10 @@
         const displayId = employee.employee_number ? `Emp No: ${escapeHtml(employee.employee_number)}` : 'Employee';
         const moduleCount = employee.modules.length;
 
-        // 1. Table rows for each completed module
         const modulesHtml = employee.modules.map((module) => {
-          const supervisorName = module.supervisor_name ? escapeHtml(module.supervisor_name) : 'Authorized Safety Officer';
+          const supervisorName = module.supervisor_name || 'Authorized Safety Officer';
           const trainingType = module.training_type || 'Individual';
           const dateFormatted = formatDate(module.created_at);
-
-          const empSafe = escapeHtml(employee.employee_name).replace(/'/g, "\\'");
-          const idSafe = escapeHtml(employee.employee_number || '').replace(/'/g, "\\'");
-          const modSafe = escapeHtml(module.module_title).replace(/'/g, "\\'");
-          const supSafe = supervisorName.replace(/'/g, "\\'");
-          const batchIdSafe = escapeHtml(module.batch_session_id || '').replace(/'/g, "\\'");
 
           return `
             <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
@@ -557,7 +550,7 @@
                 </span>
               </td>
               <td class="px-4 py-4 align-middle text-foreground sm:px-6">
-                <div class="font-medium text-slate-700 text-sm">${supervisorName}</div>
+                <div class="font-medium text-slate-700 text-sm">${escapeHtml(supervisorName)}</div>
               </td>
               <td class="px-4 py-4 align-middle text-slate-500 sm:px-6 text-xs">
                 ${escapeHtml(dateFormatted)}
@@ -566,8 +559,13 @@
                 <div class="flex items-center justify-end gap-2">
                   <!-- Individual Cert Button -->
                   <button 
-                    onclick="generateIndividualCertificatePDF('${empSafe}', '${idSafe}', '${modSafe}', '${dateFormatted}', '${supSafe}')"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
+                    type="button"
+                    class="btn-cert-pdf inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-slate-700 text-xs font-medium transition-all shadow-sm group cursor-pointer"
+                    data-emp="${escapeHtml(employee.employee_name)}"
+                    data-id="${escapeHtml(employee.employee_number || '')}"
+                    data-mod="${escapeHtml(module.module_title)}"
+                    data-date="${escapeHtml(dateFormatted)}"
+                    data-sup="${escapeHtml(supervisorName)}"
                     title="Download Individual Worker Certificate">
                     <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -576,10 +574,14 @@
                   </button>
 
                   <!-- 2-Page Group Register Button -->
-                  ${trainingType === 'Group' && batchIdSafe ? `
+                  ${trainingType === 'Group' && module.batch_session_id ? `
                     <button 
-                      onclick="generateGroupLogSheetPDF('${batchIdSafe}', '${modSafe}', '${supSafe}', '${dateFormatted}')"
-                      class="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 text-amber-800 text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                      type="button"
+                      class="btn-group-pdf inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 text-amber-800 text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                      data-batch="${escapeHtml(module.batch_session_id)}"
+                      data-mod="${escapeHtml(module.module_title)}"
+                      data-sup="${escapeHtml(supervisorName)}"
+                      data-date="${escapeHtml(dateFormatted)}"
                       title="Download 2-Page Group Attendance Register">
                       <span>📋 Register</span>
                     </button>
@@ -590,7 +592,6 @@
           `;
         }).join('');
 
-        // 2. Main Employee Accordion Card
         return `
           <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md">
             <button
@@ -623,7 +624,7 @@
               <div class="border-t border-slate-200 bg-slate-50 p-3 sm:px-6 sm:py-5">
                 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div class="overflow-x-auto -mx-3 sm:mx-0">
-                    <table class="min-w-[550px] sm:min-w-[600px] text-left text-sm">
+                    <table class="w-full min-w-[550px] sm:min-w-[600px] text-left text-sm">
                       <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground">
                         <tr>
                           <th scope="col" class="px-4 py-3 font-semibold sm:px-6">Module Title</th>
@@ -649,6 +650,20 @@
       recordsDirectory.classList.remove('hidden');
       recordsEmptyState?.classList.add('hidden');
       recordsLoadingState?.classList.add('hidden');
+      
+      // Bind event listeners safely via data-attributes
+      recordsDirectory.querySelectorAll('.btn-cert-pdf').forEach(btn => {
+        btn.addEventListener('click', () => {
+          generateIndividualCertificatePDF(btn.dataset.emp, btn.dataset.id, btn.dataset.mod, btn.dataset.date, btn.dataset.sup);
+        });
+      });
+
+      recordsDirectory.querySelectorAll('.btn-group-pdf').forEach(btn => {
+        btn.addEventListener('click', () => {
+          generateGroupLogSheetPDF(btn.dataset.batch, btn.dataset.mod, btn.dataset.sup, btn.dataset.date);
+        });
+      });
+
       bindEmployeeAccordionEvents();
     };
 
