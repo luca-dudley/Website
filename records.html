@@ -187,6 +187,14 @@
             <span class="sidebar-text truncate">Training Records</span>
           </a>
 
+          <!-- Standard Operating Procedures (Enterprise Locked) -->
+          <a href="sop.html" title="Standard Operating Procedures" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="sidebar-text truncate">SOPs</span>
+          </a>
+
           <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -209,118 +217,145 @@
   </aside>
 
   <!-- 3. MAIN CONTENT CONTAINER -->
-  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
-    <div class="max-w-5xl mx-auto p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-        <div>
-          <h2 class="text-2xl font-serif text-foreground mb-1">Employee Directory</h2>
-          <p class="text-muted text-sm">Find all recorded employees down below with verified completion logs and downloadable certificates.</p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-          <!-- Dynamic Tier PDF Quota & Countdown Pill -->
-          <div id="pdf-quota-pill" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all">
-            <!-- Injected via updatePdfQuotaUI() -->
+  <main id="mainContent" class="ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
+    
+    <!-- FULL-PAGE BLURRED CONTENT WRAPPER -->
+    <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
+      <div class="max-w-5xl mx-auto w-full p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-serif text-foreground mb-1">Employee Directory</h2>
+            <p class="text-muted text-sm">Find all recorded employees down below with verified completion logs and downloadable certificates.</p>
           </div>
 
-          <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-xl shadow-sm">
-            <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span class="text-xs font-medium text-green-700">Live HR Sync</span>
-          </div>
-        </div>
-      </div>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
+            <!-- Dynamic Tier PDF Quota & Countdown Pill -->
+            <div id="pdf-quota-pill" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-xl border text-xs font-medium shadow-sm transition-all">
+              <!-- Injected via updatePdfQuotaUI() -->
+            </div>
 
-      <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div class="relative w-full sm:w-72">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input id="searchInput" type="text" placeholder="Search employee name or number..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:ring-primary focus:border-primary outline-none transition-colors">
-        </div>
-        <div class="flex gap-2 w-full sm:w-auto">
-          <select id="sortSelect" class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
-            <option value="all">All Employees</option>
-            <option value="recent">Recently Completed</option>
-            <option value="modules">Longest Module List</option>
-          </select>
-          <div class="relative">
-            <button id="filterToggleBtn" type="button" class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2" aria-expanded="false" aria-haspopup="true">
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filter
-            </button>
-            <div id="filterMenu" class="absolute right-0 top-full z-20 mt-2 hidden min-w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="all">All Types</button>
-              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Individual">Individual Only</button>
-              <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Group">Group Only</button>
+            <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-xl shadow-sm">
+              <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span class="text-xs font-medium text-green-700">Live HR Sync</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div id="recordsLoadingState" class="flex min-h-[16rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12">
-        <div class="flex flex-col items-center gap-3 text-center">
-          <div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
-          <div>
-            <p class="text-sm font-medium text-foreground">Loading employee directory</p>
-            <p class="text-xs text-muted">Fetching completed training records from Supabase.</p>
+        <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <div class="relative w-full sm:w-72">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input id="searchInput" type="text" placeholder="Search employee name or number..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:ring-primary focus:border-primary outline-none transition-colors">
           </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <select id="sortSelect" class="w-full sm:w-auto px-4 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
+              <option value="all">All Employees</option>
+              <option value="recent">Recently Completed</option>
+              <option value="modules">Longest Module List</option>
+            </select>
+            <div class="relative">
+              <button id="filterToggleBtn" type="button" class="px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2" aria-expanded="false" aria-haspopup="true">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter
+              </button>
+              <div id="filterMenu" class="absolute right-0 top-full z-20 mt-2 hidden min-w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="all">All Types</button>
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Individual">Individual Only</button>
+                <button type="button" class="filter-option block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50" data-training-type="Group">Group Only</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="recordsLoadingState" class="flex min-h-[16rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+            <div>
+              <p class="text-sm font-medium text-foreground">Loading employee directory</p>
+              <p class="text-xs text-muted">Fetching completed training records from Supabase.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="recordsDirectory" class="hidden space-y-4"></div>
+
+        <div id="recordsEmptyState" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+          <p class="text-sm font-medium text-foreground">No verified training records logged yet.</p>
+          <p class="mt-1 text-xs text-muted">Once employees complete modules, they will appear here by name.</p>
         </div>
       </div>
 
-      <div id="recordsDirectory" class="hidden space-y-4"></div>
+      <!-- Footer -->
+      <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+        <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+          <div class="max-w-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+                <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
+              </div>
+              <div>
+                <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+              </div>
+            </div>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Streamlining operational architectures for modern business safety and workplace compliance.
+            </p>
+          </div>
 
-      <div id="recordsEmptyState" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
-        <p class="text-sm font-medium text-foreground">No verified training records logged yet.</p>
-        <p class="mt-1 text-xs text-muted">Once employees complete modules, they will appear here by name.</p>
-      </div>
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+            <nav class="grid gap-2 text-xs text-slate-300">
+              <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+              <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+              <a href="sop.html" class="transition-colors hover:text-white hover:underline">Standard Operating Procedures</a>
+              <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+            </nav>
+          </div>
+
+          <div class="max-w-xs sm:max-w-sm space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+          <p>© 2026 Simple Solutions. All rights reserved.</p>
+          <p class="text-slate-400">Internal Operational Compliance Portal</p>
+        </div>
+      </footer>
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
-      <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
-        <!-- Brand Summary -->
-        <div class="max-w-sm space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
-              <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
-            </div>
-            <div>
-              <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
-              <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
-            </div>
-          </div>
-          <p class="text-xs leading-relaxed text-slate-300">
-            Streamlining operational architectures for modern business safety and workplace compliance.
-          </p>
+    <!-- CENTERED ESSENTIAL LOCK OVERLAY -->
+    <div id="recordsPaywallOverlay" class="hidden absolute inset-0 z-30 flex items-start justify-center p-6 pt-16 sm:pt-20 bg-slate-900/10 backdrop-blur-[2px]">
+      <div class="max-w-xl w-full bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 text-center shadow-2xl transition-all">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 mx-auto flex items-center justify-center mb-4 border border-amber-500/20 shadow-sm">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
         </div>
-
-        <!-- Quick Links -->
-        <div class="space-y-2.5">
-          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
-          <nav class="grid gap-2 text-xs text-slate-300">
-            <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
-            <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
-            <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
-          </nav>
-        </div>
-
-        <!-- Subscription Management -->
-        <div class="max-w-xs sm:max-w-sm space-y-2.5">
-          <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
-          <p class="text-xs leading-relaxed text-slate-300">
-            To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
-          </p>
+        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 mb-3 uppercase tracking-wider">
+          Essential Feature
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-foreground mb-3">Training Records & Directory Locked</h2>
+        <p class="text-slate-600 text-sm max-w-md mx-auto mb-8 leading-relaxed">
+          Worker compliance logs, individual certificates, and group attendance registers are unlocked on the <strong>Essential Plan</strong> and above.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button onclick="openProfileModal(); switchProfileTab('plans');" class="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-xl transition-all shadow-md">
+            Upgrade to Essential (R280/mo) &rarr;
+          </button>
+          <a href="vault.html" class="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl transition-colors">
+            Return to Vault
+          </a>
         </div>
       </div>
-
-      <!-- Legal Sub-bar -->
-      <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
-        <p>© 2026 Simple Solutions. All rights reserved.</p>
-        <p class="text-slate-400">Internal Operational Compliance Portal</p>
-      </div>
-    </footer>
+    </div>
   </main>
 
   <script src="assets/java_files/main.js"></script>
@@ -1363,6 +1398,19 @@
       doc.text(`Page 2 of 2 — Trainee Sign-Off Register • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
 
       doc.save(`Group_Register_${moduleTitle.replace(/\s+/g, '_')}_${sessionDate}.pdf`);
+    }
+
+    function checkPageTierGating(tier) {
+      const overlay = document.getElementById('recordsPaywallOverlay');
+      const wrapper = document.getElementById('pageContentWrapper');
+
+      if (tier === 'basic') {
+        if (overlay) overlay.classList.remove('hidden');
+        if (wrapper) wrapper.classList.add('blur-md', 'pointer-events-none', 'select-none', 'opacity-40');
+      } else {
+        if (overlay) overlay.classList.add('hidden');
+        if (wrapper) wrapper.classList.remove('blur-md', 'pointer-events-none', 'select-none', 'opacity-40');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {

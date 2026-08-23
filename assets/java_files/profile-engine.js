@@ -447,7 +447,8 @@ async function loadUserProfile(userId) {
 
     // --- Resolve company id & tier ----------------------------------------
 window.userCompanyId = profile.company_id || companyObj?.id || null;
-    window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
+    const devTierOverride = sessionStorage.getItem('dev_tier_override');
+    window.currentCompanyTier = devTierOverride || (companyObj?.tier || profile.tier || 'basic').toLowerCase();
     console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
 
     const currentPlanName = document.getElementById('current-plan-name');
@@ -528,28 +529,36 @@ window.userCompanyId = profile.company_id || companyObj?.id || null;
 function applyTierRestrictions() {
   const tier = window.currentCompanyTier || 'basic';
 
-  // 1. Sidebar Protection for Training Records
+  // 1. Sidebar Visual Indicators (Keep clickable, show badge/tooltip)
   const recordsNavBtn = document.querySelector('a[href="records.html"]');
   if (recordsNavBtn) {
     if (tier === 'basic') {
-      recordsNavBtn.classList.add('opacity-50', 'pointer-events-none');
-      recordsNavBtn.setAttribute('title', 'Upgrade to Essential to unlock Training Records');
+      recordsNavBtn.classList.add('opacity-80');
+      recordsNavBtn.setAttribute('title', 'Essential Plan Feature');
     } else {
-      recordsNavBtn.classList.remove('opacity-50', 'pointer-events-none');
+      recordsNavBtn.classList.remove('opacity-80');
       recordsNavBtn.removeAttribute('title');
     }
   }
 
-  // 2. Direct URL Protection for records.html
-  if (window.location.pathname.includes('records.html') && tier === 'basic') {
-    alert('Training Records and worker compliance tracking are available on the Essential plan and above.');
-    window.location.replace('vault.html');
-    return;
+  const sopNavBtn = document.querySelector('a[href="sop.html"]');
+  if (sopNavBtn) {
+    if (tier !== 'enterprise') {
+      sopNavBtn.classList.add('opacity-80');
+      sopNavBtn.setAttribute('title', 'Enterprise Plan Feature');
+    } else {
+      sopNavBtn.classList.remove('opacity-80');
+      sopNavBtn.removeAttribute('title');
+    }
   }
 
-  // 3. Direct ID Target for Module Compliance Card
-  const complianceContainer = document.getElementById('compliance-card-container');
+  // 2. Check in-page paywall gates if present on active page
+  if (typeof checkPageTierGating === 'function') {
+    checkPageTierGating(tier);
+  }
 
+  // 3. Module page compliance card lock
+  const complianceContainer = document.getElementById('compliance-card-container');
   if (complianceContainer && tier === 'basic') {
     complianceContainer.innerHTML = `
       <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 mb-3">

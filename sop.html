@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standard Operating Procedures - The Vault</title>
+  <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v2/inline.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            foreground: '#1a1a2e',
+            muted: '#6b7280',
+            border: '#e5e7eb',
+            'dark-bg': '#0a0a14',
+            'dark-card': '#12121f'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    #sidebar,
+    #mainContent {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Collapsed Sidebar Rules */
+    #sidebar.collapsed {
+      width: 5rem !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    #sidebar.collapsed .sidebar-text,
+    #sidebar.collapsed .sidebar-category-header,
+    #sidebar.collapsed #sidebarToggle span {
+      display: none !important;
+    }
+    #sidebar.collapsed .sidebar-nav-btn {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    #sidebar.collapsed .sidebar-nav-btn svg {
+      margin: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    #sidebar.collapsed #sidebarToggle svg {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
+
+  <!-- 1. FULL WIDTH TOP BAR -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+    <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
+      <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+        </svg>
+      </div>
+      <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
+    </a>
+
+    <!-- Right-Hand Controls -->
+    <div class="flex items-center gap-5 shrink-0">
+      <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="topbar-company-name" class="font-medium">Simple Solutions</span>
+        <span class="text-slate-300">|</span>
+        <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
+      </div>
+
+      <div class="relative">
+        <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
+          </div>
+          <div class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0 text-sm">📄</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">SOP Library Unlocked</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Audit-grade Standard Operating Procedure documents are ready to export.</p>
+              </div>
+            </div>
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 text-sm">🛡️</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Compliance Tracking Live</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Digital sign-off logging and employee directories are actively syncing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-6 w-px bg-slate-300/80"></div>
+
+      <button onclick="openProfileModal()" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-white border border-transparent hover:border-slate-200 transition-all text-left group">
+        <div class="relative w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center overflow-hidden border border-slate-300 shadow-sm">
+          <span data-dynamic-initials>?</span>
+          <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Avatar">
+        </div>
+        <div class="hidden sm:block leading-tight">
+          <p id="topbar-user-name" class="text-sm font-bold text-foreground group-hover:text-primary transition-colors">Loading...</p>
+          <p id="topbar-user-role" class="text-xs text-muted">Primary Admin</p>
+        </div>
+        <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+    <div class="space-y-6">
+      <div>
+        <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
+        <nav class="space-y-1.5">
+          <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Video Library</span>
+          </a>
+
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Training Records</span>
+          </a>
+
+          <!-- Standard Operating Procedures (Active) -->
+          <a href="sop.html" title="Standard Operating Procedures" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="sidebar-text truncate">SOPs</span>
+          </a>
+
+          <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Help & Support</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Collapse Trigger Button -->
+    <div class="pt-3 border-t border-slate-200/80">
+      <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm" title="Toggle Sidebar">
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+        <span class="truncate">Collapse View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
+    
+    <!-- FULL-PAGE BLURRED CONTENT WRAPPER -->
+    <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
+      <div class="max-w-6xl mx-auto w-full">
+        <!-- Top Title & Search Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px] uppercase tracking-wider">Enterprise Feature</span>
+              <h2 class="text-2xl font-serif text-foreground font-semibold">Standard Operating Procedures (SOPs)</h2>
+            </div>
+            <p class="text-muted text-sm">Audit-ready, standardized safe operating procedure documents generated dynamically for compliance reviews.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="relative w-full sm:w-64">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input id="sopSearchInput" type="text" placeholder="Search SOP module..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+            </div>
+          </div>
+        </div>
+
+        <!-- SOP Cards Grid -->
+        <div id="sopLoadingState" class="flex min-h-[16rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+            <p class="text-sm font-medium text-foreground">Loading Standard Operating Procedures...</p>
+          </div>
+        </div>
+
+        <div id="sopGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        
+        <div id="sopEmptyState" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+          <p class="text-sm font-medium text-foreground">No matching SOP documents found.</p>
+          <p class="mt-1 text-xs text-muted">Try adjusting your search query.</p>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+        <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+          <div class="max-w-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+                <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
+              </div>
+              <div>
+                <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+              </div>
+            </div>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Streamlining operational architectures for modern business safety and workplace compliance.
+            </p>
+          </div>
+
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+            <nav class="grid gap-2 text-xs text-slate-300">
+              <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+              <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+              <a href="sop.html" class="transition-colors hover:text-white hover:underline">Standard Operating Procedures</a>
+              <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+            </nav>
+          </div>
+
+          <div class="max-w-xs sm:max-w-sm space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Enterprise Auditing Suite</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Export standardized SOP documentation stamped with your organization's legal registration details for statutory audits.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+          <p>© 2026 Simple Solutions. All rights reserved.</p>
+          <p class="text-slate-400">Internal Operational Compliance Portal</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- CENTERED ENTERPRISE LOCK OVERLAY -->
+    <div id="sopPaywallOverlay" class="hidden absolute inset-0 z-30 flex items-start justify-center p-6 pt-16 sm:pt-20 bg-slate-900/10 backdrop-blur-[2px]">
+      <div class="max-w-xl w-full bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 text-center shadow-2xl transition-all">
+        <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-primary mx-auto flex items-center justify-center mb-4 border border-blue-500/20 shadow-sm">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-primary mb-3 uppercase tracking-wider">
+          Enterprise Feature
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-foreground mb-3">Standard Operating Procedures (SOPs)</h2>
+        <p class="text-slate-600 text-sm max-w-md mx-auto mb-8 leading-relaxed">
+          Audit-grade, statutory Standard Operating Procedure documentation stamped with your organization's legal details is available exclusively on the <strong>Enterprise Plan</strong>.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button onclick="openProfileModal(); switchProfileTab('plans');" class="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-xl transition-all shadow-md">
+            Upgrade to Enterprise (R450/mo) &rarr;
+          </button>
+          <a href="vault.html" class="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl transition-colors">
+            Return to Vault
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
+  <script>
+    let allSopVideos = [];
+
+    async function fetchAndRenderSOPs() {
+      const loading = document.getElementById('sopLoadingState');
+      const grid = document.getElementById('sopGrid');
+      const empty = document.getElementById('sopEmptyState');
+
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session) return;
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id, tier')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        const userCompanyId = profile?.company_id || null;
+
+        let query = window.dbClient
+          .from('videos')
+          .select('id, title, description, category, sub_tag, objectives, total_seconds, company_id')
+          .order('title', { ascending: true });
+
+        if (userCompanyId) {
+          const { data: customVideos } = await window.dbClient
+            .from('videos')
+            .select('id')
+            .eq('company_id', userCompanyId)
+            .limit(1);
+
+          if (customVideos && customVideos.length > 0) {
+            query = query.eq('company_id', userCompanyId);
+          } else {
+            query = query.is('company_id', null);
+          }
+        } else {
+          query = query.is('company_id', null);
+        }
+
+        const { data: videos, error } = await query;
+        if (error) throw error;
+
+        allSopVideos = videos || [];
+        renderSOPGrid(allSopVideos);
+
+      } catch (err) {
+        console.error('Error loading SOPs:', err);
+      } finally {
+        if (loading) loading.classList.add('hidden');
+      }
+    }
+
+    function renderSOPGrid(videos) {
+      const grid = document.getElementById('sopGrid');
+      const empty = document.getElementById('sopEmptyState');
+      if (!grid) return;
+
+      if (!videos || videos.length === 0) {
+        grid.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+
+      if (empty) empty.classList.add('hidden');
+      grid.classList.remove('hidden');
+
+      grid.innerHTML = videos.map((video, idx) => {
+        const titleSafe = (video.title || 'Standard Module').replace(/'/g, "\\'");
+        const category = video.category || 'Agricultural Operations';
+        const subTag = video.sub_tag || 'Standard Compliance';
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold tracking-wide border border-slate-200">
+                  ${subTag}
+                </span>
+                <span class="text-xs font-mono text-slate-400">SOP-MOD-${String(idx + 1).padStart(2, '0')}</span>
+              </div>
+              <h3 class="font-serif text-lg font-bold text-foreground mb-2">${video.title}</h3>
+              <p class="text-xs text-muted line-clamp-3 mb-4">${video.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Audit A4 PDF</strong></span>
+              <button 
+                onclick="generateModuleSOPPDF('${video.id}', '${titleSafe}')" 
+                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Export SOP</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // AUDIT-GRADE A4 SOP PDF GENERATION ENGINE
+    async function generateModuleSOPPDF(videoId, moduleTitle) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF Generation library is loading. Please try again.');
+        return;
+      }
+
+      const { data: comp } = await window.dbClient
+        .from('companies')
+        .select('name, vat_number, phone, postal_address, contact_email')
+        .eq('id', window.userCompanyId)
+        .maybeSingle();
+
+      const companyName = comp?.name || 'Simple Solutions Client';
+
+      // Fetch objectives
+      const video = allSopVideos.find(v => v.id === videoId);
+      let objectives = [
+        'Mandatory Personal Protective Equipment (PPE) inspection and correct fitting',
+        'Pre-operational equipment safety checks and mechanical integrity verification',
+        'Standard operational controls, safe handling procedures, and hazard zones',
+        'Emergency shutdown protocols, power isolation, and fault escalation pathways'
+      ];
+
+      if (video?.objectives) {
+        if (Array.isArray(video.objectives)) objectives = video.objectives;
+        else if (typeof video.objectives === 'string') {
+          try { objectives = JSON.parse(video.objectives); } catch (e) {}
+        }
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const pageHeight = 297;
+
+      // 1. Clean Header Strip
+      doc.setFillColor(30, 58, 95);
+      doc.rect(14, 14, pageWidth - 28, 20, 'F');
+
+      doc.setFont('times', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(255, 255, 255);
+      doc.text(companyName.toUpperCase(), 20, 24);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(203, 213, 225);
+      doc.text('STANDARD OPERATING PROCEDURE (SOP) — AUDITING & COMPLIANCE', 20, 30);
+
+      // 2. Metadata Box
+      const metaY = 38;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, metaY, pageWidth - 28, 22, 1.5, 1.5, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('DOCUMENT TITLE', 18, metaY + 6);
+      doc.text('REF NUMBER', 120, metaY + 6);
+      doc.text('DATE EFFECTIVE', 165, metaY + 6);
+
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      doc.text(moduleTitle.toUpperCase(), 18, metaY + 13);
+      doc.text(`SOP-VAULT-${videoId.substring(0, 6).toUpperCase()}`, 120, metaY + 13);
+      doc.text(new Intl.DateTimeFormat('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date()), 165, metaY + 13);
+
+      // 3. Section: Purpose & Scope
+      let curY = 68;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text('1. PURPOSE & OPERATIONAL SCOPE', 14, curY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+      curY += 6;
+      const purpose = `This Standard Operating Procedure sets out the mandatory safety requirements, operational controls, and risk-mitigation measures for all personnel and contractors operating within the scope of "${moduleTitle}". Adherence to these guidelines is mandatory under organizational health and safety compliance policies.`;
+      doc.text(doc.splitTextToSize(purpose, pageWidth - 28), 14, curY);
+
+      // 4. Section: Standard Operational Steps & Safe Work Controls
+      curY += 20;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text('2. SAFE OPERATING PROCEDURES & HAZARD CONTROLS', 14, curY);
+
+      curY += 7;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+
+      objectives.forEach((item, index) => {
+        doc.setFillColor(30, 58, 95);
+        doc.circle(18, curY - 1, 0.9, 'F');
+        const wrapped = doc.splitTextToSize(`Step ${index + 1}: ${item}`, pageWidth - 36);
+        doc.text(wrapped, 22, curY);
+        curY += (wrapped.length * 4.5) + 3;
+      });
+
+      // 5. Section: Emergency Isolation & Fault Protocols
+      curY += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text('3. EMERGENCY SHUTDOWN & INCIDENT REPORTING', 14, curY);
+
+      curY += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(51, 65, 85);
+      const emergency = `In the event of equipment malfunction, safety interlock failure, or visible hazard, operators must immediately isolate power/machinery, clear the work area, and notify the designated safety supervisor before attempting inspection or restart.`;
+      doc.text(doc.splitTextToSize(emergency, pageWidth - 28), 14, curY);
+
+      // 6. Section: Official Company Verification Stamp Box
+      const stampBoxH = 45;
+      const stampBoxW = pageWidth - 28;
+      const stampY = pageHeight - 65;
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, stampY, stampBoxW, stampBoxH, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), pageWidth / 2, stampY + 8, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(51, 65, 85);
+      let sLine = stampY + 14;
+      if (comp?.postal_address) { doc.text(comp.postal_address, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
+      if (comp?.vat_number) { doc.text(`VAT / Reg Nr: ${comp.vat_number}`, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
+      if (comp?.phone) { doc.text(`Tel: ${comp.phone}  |  Email: ${comp.contact_email || ''}`, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('OFFICIAL COMPLIANCE STAMP & CONTROLLED DOCUMENT', pageWidth / 2, stampY + stampBoxH - 3, { align: 'center' });
+
+      // Footer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Controlled Document • Generated via The Vault Compliance Engine by Simple Solutions`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+      doc.save(`SOP_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    // Search filter handler
+    document.getElementById('sopSearchInput')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allSopVideos.filter(v => 
+        (v.title || '').toLowerCase().includes(q) || 
+        (v.sub_tag || '').toLowerCase().includes(q)
+      );
+      renderSOPGrid(filtered);
+    });
+
+    function checkPageTierGating(tier) {
+      const overlay = document.getElementById('sopPaywallOverlay');
+      const wrapper = document.getElementById('pageContentWrapper');
+
+      if (tier !== 'enterprise') {
+        if (overlay) overlay.classList.remove('hidden');
+        if (wrapper) wrapper.classList.add('blur-md', 'pointer-events-none', 'select-none', 'opacity-40');
+      } else {
+        if (overlay) overlay.classList.add('hidden');
+        if (wrapper) wrapper.classList.remove('blur-md', 'pointer-events-none', 'select-none', 'opacity-40');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAndRenderSOPs();
+    });
+  </script>
+</body>
+</html>
