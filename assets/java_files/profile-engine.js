@@ -57,7 +57,7 @@ function switchProfileTab(tabName) {
   });
   ['profile', 'company', 'security', 'plans', 'team'].forEach(name => {
     const btn = document.getElementById(`tab-btn-${name}`);
-    if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-100 transition-colors";
+    if (btn) btn.className = "w-auto min-w-max sm:w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-2.5 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-100 transition-colors";
   });
   
   const targetTab = document.getElementById(`tab-${tabName}`);
@@ -67,7 +67,7 @@ function switchProfileTab(tabName) {
   }
 
   const activeBtn = document.getElementById(`tab-btn-${tabName}`);
-  if (activeBtn) activeBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 transition-colors";
+  if (activeBtn) activeBtn.className = "w-auto min-w-max sm:w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-2.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 transition-colors";
 
   // Trigger team roster fetch when switching to team tab
   if (tabName === 'team') {

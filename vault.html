@@ -82,8 +82,15 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
 
+  <!-- Mobile Header -->
+  <header class="lg:hidden sticky top-0 z-40 h-16 px-4 flex items-center justify-between border-b border-slate-200 bg-[#f8fafc]">
+    <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" aria-expanded="false" class="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <a href="vault.html" class="font-serif text-lg font-bold text-foreground">The Vault</a>
+    <button onclick="openProfileModal()" aria-label="Open profile" class="min-h-11 min-w-11 flex items-center justify-center"><div class="relative w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs overflow-hidden border border-slate-300"><span data-dynamic-initials>?</span><img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile"></div></button>
+  </header>
+
   <!-- 1. FULL WIDTH TOP BAR (Spans 100% of viewport) -->
-  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+  <header class="hidden lg:flex sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] items-center justify-between">
     <!-- Brand Logo on the Left -->
     <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
       <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
@@ -153,7 +160,8 @@
   </header>
 
   <!-- 2. SIDEBAR -->
-  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/40 lg:hidden" aria-hidden="true"></div>
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-50 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300 lg:top-[72px] lg:z-30 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
     <div class="space-y-6">
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
@@ -206,7 +214,7 @@
   </aside>
 
   <!-- 3. MAIN CONTENT CONTAINER -->
-  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+  <main id="mainContent" class="ml-0 lg:ml-64 p-4 sm:p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
     <div>
       <!-- Featured Training Banner -->
       <div id="continue-watching-block" class="hidden">
@@ -250,7 +258,7 @@
       <!-- Video Library Section -->
       <section>
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
-          <h2 class="text-2xl font-serif text-slate-800 font-medium">Training Library</h2>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Training Library</h2>
           <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
             <div class="relative w-full sm:w-64">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -273,7 +281,7 @@
         </div>
 
         <!-- Video Cards Grid -->
-        <div id="videoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        <div id="videoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"></div>
       </section>
     </div>
 

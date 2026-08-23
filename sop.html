@@ -84,8 +84,15 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
 
+  <!-- Mobile Header -->
+  <header class="lg:hidden sticky top-0 z-40 h-16 px-4 flex items-center justify-between border-b border-slate-200 bg-[#f8fafc]">
+    <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" aria-expanded="false" class="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <a href="vault.html" class="font-serif text-lg font-bold text-foreground">The Vault</a>
+    <button onclick="openProfileModal()" aria-label="Open profile" class="min-h-11 min-w-11 flex items-center justify-center"><div class="relative w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs overflow-hidden border border-slate-300"><span data-dynamic-initials>?</span><img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile"></div></button>
+  </header>
+
   <!-- 1. FULL WIDTH TOP BAR -->
-  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+  <header class="hidden lg:flex sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] items-center justify-between">
     <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
       <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -151,7 +158,8 @@
   </header>
 
   <!-- 2. SIDEBAR -->
-  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/40 lg:hidden" aria-hidden="true"></div>
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-50 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300 lg:top-[72px] lg:z-30 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
     <div class="space-y-6">
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
@@ -201,7 +209,7 @@
   </aside>
 
   <!-- 3. MAIN CONTENT CONTAINER -->
-  <main id="mainContent" class="ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
+  <main id="mainContent" class="ml-0 lg:ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
     
     <!-- FULL-PAGE BLURRED CONTENT WRAPPER -->
     <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
@@ -209,14 +217,11 @@
         <!-- Top Title & Search Controls -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px] uppercase tracking-wider">Enterprise Feature</span>
-              <h2 class="text-2xl font-serif text-foreground font-semibold">Standard Operating Procedures (SOPs)</h2>
-            </div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Standard Operating Procedures (SOPs)</h2>
             <p class="text-muted text-sm">Audit-ready, standardized safe operating procedure documents generated dynamically for compliance reviews.</p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <div class="relative w-full sm:w-64">
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -286,7 +291,7 @@
     </div>
 
     <!-- CENTERED ENTERPRISE LOCK OVERLAY -->
-    <div id="sopPaywallOverlay" class="hidden absolute inset-0 z-30 flex items-start justify-center p-6 pt-16 sm:pt-20 bg-slate-900/10 backdrop-blur-[2px]">
+    <div id="sopPaywallOverlay" class="hidden absolute inset-0 z-30 flex items-start justify-center p-4 sm:p-6 pt-8 sm:pt-16 bg-slate-900/10 backdrop-blur-sm">
       <div class="max-w-xl w-full bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 text-center shadow-2xl transition-all">
         <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-primary mx-auto flex items-center justify-center mb-4 border border-blue-500/20 shadow-sm">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -404,7 +409,7 @@
               <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Audit A4 PDF</strong></span>
               <button 
                 onclick="generateModuleSOPPDF('${video.id}', '${titleSafe}')" 
-                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+                class="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span>Export SOP</span>
               </button>

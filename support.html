@@ -81,8 +81,15 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
 
+  <!-- Mobile Header -->
+  <header class="lg:hidden sticky top-0 z-40 h-16 px-4 flex items-center justify-between border-b border-slate-200 bg-[#f8fafc]">
+    <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" aria-expanded="false" class="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <a href="vault.html" class="font-serif text-lg font-bold text-foreground">The Vault</a>
+    <button onclick="openProfileModal()" aria-label="Open profile" class="min-h-11 min-w-11 flex items-center justify-center"><div class="relative w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs overflow-hidden border border-slate-300"><span data-dynamic-initials>?</span><img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile"></div></button>
+  </header>
+
   <!-- 1. FULL WIDTH TOP BAR -->
-  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] flex items-center justify-between">
+  <header class="hidden lg:flex sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] items-center justify-between">
     <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
       <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -141,7 +148,8 @@
   </header>
 
   <!-- 2. SIDEBAR -->
-  <aside id="sidebar" class="fixed left-0 top-[72px] bottom-0 z-30 w-64 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/40 lg:hidden" aria-hidden="true"></div>
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-50 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300 lg:top-[72px] lg:z-30 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
     <div class="space-y-6">
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
@@ -194,23 +202,23 @@
   </aside>
 
   <!-- 3. MAIN CONTENT CONTAINER -->
-  <main id="mainContent" class="ml-64 p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
-    <div class="mx-auto mt-4 max-w-xl w-full rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+  <main id="mainContent" class="ml-0 lg:ml-64 p-4 sm:p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+    <div class="mx-auto mt-4 max-w-xl w-full rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 text-center shadow-sm">
       <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-600">
         <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6l6 6v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v5h5" />
         </svg>
       </div>
-      <h2 class="font-serif text-3xl font-semibold text-foreground">Open Support Ticket</h2>
+      <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Open Support Ticket</h2>
       <p class="mt-4 text-sm leading-6 text-muted">
         Need help with your account, experiencing technical difficulties, or want to suggest a brand-new training module? Choose an option below to submit directly to our team.
       </p>
       <div class="mt-6 flex flex-col gap-3">
-        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Technical%20Support" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90 shadow-sm">
+        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Technical%20Support" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg bg-primary px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 shadow-sm">
           Open Technical Support Ticket
         </a>
-        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Video%20Module%20Request" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-primary hover:bg-slate-50 hover:text-primary">
+        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Video%20Module%20Request" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-primary hover:bg-slate-50 hover:text-primary">
           Open Video Request Ticket
         </a>
       </div>
