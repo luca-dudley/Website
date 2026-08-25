@@ -349,7 +349,7 @@
               <button type="button" onclick="clearSignaturePad()" class="text-[11px] text-muted hover:text-red-600 underline">Clear Signature</button>
             </div>
             <div class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner">
-              <canvas id="supervisorSignaturePad" width="550" height="130" class="block w-full h-32 cursor-crosshair touch-none"></canvas>
+              <canvas id="supervisorSignaturePad" class="block w-full h-32 cursor-crosshair" style="touch-action: none;"></canvas>
             </div>
           </div>
         </div>
@@ -418,14 +418,12 @@
     let sigCanvas, sigCtx, isSupervisorDrawing = false;
     let workerCanvas, workerCtx, isWorkerDrawing = false;
 
-    // Helper: calculate exact canvas coordinates regardless of screen scaling or devicePixelRatio
+    // Helper: Exact coordinate calculation mapping client touch/mouse to canvas pixels
     function getCanvasCoordinates(canvas, clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
       return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
       };
     }
 
@@ -434,21 +432,20 @@
       sigCanvas = document.getElementById('supervisorSignaturePad');
       if (!sigCanvas) return;
 
+      const rect = sigCanvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      const cssWidth = sigCanvas.offsetWidth || 550;
-      const cssHeight = sigCanvas.offsetHeight || 130;
 
-      sigCanvas.width = cssWidth * dpr;
-      sigCanvas.height = cssHeight * dpr;
+      // Match internal canvas pixel grid to CSS display box
+      sigCanvas.width = rect.width * dpr;
+      sigCanvas.height = rect.height * dpr;
 
       sigCtx = sigCanvas.getContext('2d');
-      sigCtx.scale(dpr, dpr);
-      sigCtx.strokeStyle = '#000000'; // Crisp black ink
-      sigCtx.lineWidth = 2.5;
+      sigCtx.strokeStyle = '#000000';
+      sigCtx.lineWidth = 2.5 * dpr;
       sigCtx.lineCap = 'round';
       sigCtx.lineJoin = 'round';
 
-      // Mouse
+      // Mouse Listeners
       sigCanvas.onmousedown = (e) => {
         isSupervisorDrawing = true;
         const pos = getCanvasCoordinates(sigCanvas, e.clientX, e.clientY);
@@ -463,7 +460,7 @@
       };
       window.addEventListener('mouseup', () => { isSupervisorDrawing = false; });
 
-      // Touch
+      // Touch Listeners (Mobile)
       sigCanvas.ontouchstart = (e) => {
         e.preventDefault();
         isSupervisorDrawing = true;
@@ -693,9 +690,13 @@
       }
 
       setLogMode('Individual');
-      clearSignaturePad();
       modal?.classList.remove('hidden');
-      setTimeout(initSignaturePad, 50);
+      
+      // Allow modal DOM layout to settle before calculating canvas rect
+      setTimeout(() => {
+        initSignaturePad();
+        clearSignaturePad();
+      }, 120);
     }
 
     function closeComplianceModal() {
