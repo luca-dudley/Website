@@ -378,7 +378,7 @@
           module: video.category || 'Agriculture',
           description: video.description || '',
           totalSeconds: video.total_seconds || 300,
-          thumbnail: video.thumbnail_url || 'assets/thumbnails/Simple/Chemical_Spraying.svg'
+          thumbnail: video.thumbnail_url || 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Chemical_Spraying.svg'
         };
       });
 
@@ -433,7 +433,7 @@
 
         bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
         bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
-        bannerThumb.src = videoData.thumbnail || 'assets/thumbnails/Simple/Chemical_Spraying.svg';
+        bannerThumb.src = videoData.thumbnail || 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Chemical_Spraying.svg';
         bannerThumb.alt = `${bannerTitle.textContent} thumbnail`;
         bannerBtn.href = resumeUrl;
         visualLink.href = resumeUrl;
@@ -507,7 +507,7 @@
         const unlockedBasicCategories = ['general safety', 'machinery & workshop'];
 
         databaseVideos.forEach(video => {
-          const fallbackThumb = 'assets/thumbnails/Simple/General_Farm_Employees.svg';
+          const fallbackThumb = 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/General_Farm_Employees.svg';
           const validThumbnail = (video.thumbnail_url && video.thumbnail_url.trim() !== '') 
             ? video.thumbnail_url 
             : fallbackThumb;

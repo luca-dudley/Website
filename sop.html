@@ -11,7 +11,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://js.paystack.co/v2/inline.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -340,18 +339,18 @@
         const userCompanyId = profile?.company_id || null;
 
         let query = window.dbClient
-          .from('videos')
-          .select('id, title, description, category, sub_tag, objectives, total_seconds, company_id')
+          .from('sops')
+          .select('id, title, description, category, sub_tag, doc_url, video_id, company_id')
           .order('title', { ascending: true });
 
         if (userCompanyId) {
-          const { data: customVideos } = await window.dbClient
-            .from('videos')
+          const { data: customSops } = await window.dbClient
+            .from('sops')
             .select('id')
             .eq('company_id', userCompanyId)
             .limit(1);
 
-          if (customVideos && customVideos.length > 0) {
+          if (customSops && customSops.length > 0) {
             query = query.eq('company_id', userCompanyId);
           } else {
             query = query.is('company_id', null);
@@ -360,10 +359,10 @@
           query = query.is('company_id', null);
         }
 
-        const { data: videos, error } = await query;
+        const { data: sopsData, error } = await query;
         if (error) throw error;
 
-        allSopVideos = videos || [];
+        allSopVideos = sopsData || [];
         renderSOPGrid(allSopVideos);
 
       } catch (err) {
@@ -373,12 +372,12 @@
       }
     }
 
-    function renderSOPGrid(videos) {
+    function renderSOPGrid(sops) {
       const grid = document.getElementById('sopGrid');
       const empty = document.getElementById('sopEmptyState');
       if (!grid) return;
 
-      if (!videos || videos.length === 0) {
+      if (!sops || sops.length === 0) {
         grid.classList.add('hidden');
         if (empty) empty.classList.remove('hidden');
         return;
@@ -387,10 +386,8 @@
       if (empty) empty.classList.add('hidden');
       grid.classList.remove('hidden');
 
-      grid.innerHTML = videos.map((video, idx) => {
-        const titleSafe = (video.title || 'Standard Module').replace(/'/g, "\\'");
-        const category = video.category || 'Agricultural Operations';
-        const subTag = video.sub_tag || 'Standard Compliance';
+      grid.innerHTML = sops.map((sop, idx) => {
+        const subTag = sop.sub_tag || 'Standard Compliance';
 
         return `
           <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
@@ -399,195 +396,29 @@
                 <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold tracking-wide border border-slate-200">
                   ${subTag}
                 </span>
-                <span class="text-xs font-mono text-slate-400">SOP-MOD-${String(idx + 1).padStart(2, '0')}</span>
+                <span class="text-xs font-mono text-slate-400">SOP-${String(idx + 1).padStart(2, '0')}</span>
               </div>
-              <h3 class="font-serif text-lg font-bold text-foreground mb-2">${video.title}</h3>
-              <p class="text-xs text-muted line-clamp-3 mb-4">${video.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
+              <h3 class="font-serif text-lg font-bold text-foreground mb-2">${sop.title}</h3>
+              <p class="text-xs text-muted line-clamp-3 mb-4">${sop.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Audit A4 PDF</strong></span>
-              <button 
-                onclick="generateModuleSOPPDF('${video.id}', '${titleSafe}')" 
-                class="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span>Export SOP</span>
-              </button>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
+              
+              <a 
+                href="${sop.doc_url}" 
+                download 
+                target="_blank"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>Download SOP</span>
+              </a>
             </div>
           </div>
         `;
       }).join('');
-    }
-
-    // AUDIT-GRADE A4 SOP PDF GENERATION ENGINE
-    async function generateModuleSOPPDF(videoId, moduleTitle) {
-      const currentTier = (window.currentCompanyTier || 'basic').toLowerCase();
-      if (currentTier !== 'enterprise') {
-        openProfileModal();
-        switchProfileTab('plans');
-        alert('SOP PDF export is exclusive to the Enterprise tier. Please upgrade your plan.');
-        return;
-      }
-
-      if (!window.jspdf || !window.jspdf.jsPDF) {
-        alert('PDF Generation library is loading. Please try again.');
-        return;
-      }
-
-      const { data: comp } = await window.dbClient
-        .from('companies')
-        .select('name, vat_number, phone, postal_address, contact_email')
-        .eq('id', window.userCompanyId)
-        .maybeSingle();
-
-      const companyName = comp?.name || 'Simple Solutions Client';
-
-      // Fetch objectives
-      const video = allSopVideos.find(v => v.id === videoId);
-      let objectives = [
-        'Mandatory Personal Protective Equipment (PPE) inspection and correct fitting',
-        'Pre-operational equipment safety checks and mechanical integrity verification',
-        'Standard operational controls, safe handling procedures, and hazard zones',
-        'Emergency shutdown protocols, power isolation, and fault escalation pathways'
-      ];
-
-      if (video?.objectives) {
-        if (Array.isArray(video.objectives)) {
-          objectives = video.objectives;
-        } else if (typeof video.objectives === 'string') {
-          try {
-            const parsed = JSON.parse(video.objectives);
-            objectives = Array.isArray(parsed) ? parsed : Object.values(parsed);
-          } catch (e) {
-            console.warn('Failed parsing stringified objectives for SOP:', e);
-          }
-        } else if (typeof video.objectives === 'object' && video.objectives !== null) {
-          objectives = Object.values(video.objectives);
-        }
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = 210;
-      const pageHeight = 297;
-
-      // 1. Clean Header Strip
-      doc.setFillColor(30, 58, 95);
-      doc.rect(14, 14, pageWidth - 28, 20, 'F');
-
-      doc.setFont('times', 'bold');
-      doc.setFontSize(16);
-      doc.setTextColor(255, 255, 255);
-      doc.text(companyName.toUpperCase(), 20, 24);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(203, 213, 225);
-      doc.text('STANDARD OPERATING PROCEDURE (SOP) — AUDITING & COMPLIANCE', 20, 30);
-
-      // 2. Metadata Box
-      const metaY = 38;
-      doc.setDrawColor(203, 213, 225);
-      doc.setLineWidth(0.4);
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(14, metaY, pageWidth - 28, 22, 1.5, 1.5, 'FD');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text('DOCUMENT TITLE', 18, metaY + 6);
-      doc.text('REF NUMBER', 120, metaY + 6);
-      doc.text('DATE EFFECTIVE', 165, metaY + 6);
-
-      doc.setFontSize(9);
-      doc.setTextColor(15, 23, 42);
-      doc.text(moduleTitle.toUpperCase(), 18, metaY + 13);
-      doc.text(`SOP-VAULT-${videoId.substring(0, 6).toUpperCase()}`, 120, metaY + 13);
-      doc.text(new Intl.DateTimeFormat('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date()), 165, metaY + 13);
-
-      // 3. Section: Purpose & Scope
-      let curY = 68;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      doc.setTextColor(30, 58, 95);
-      doc.text('1. PURPOSE & OPERATIONAL SCOPE', 14, curY);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(51, 65, 85);
-      curY += 6;
-      const purpose = `This Standard Operating Procedure sets out the mandatory safety requirements, operational controls, and risk-mitigation measures for all personnel and contractors operating within the scope of "${moduleTitle}". Adherence to these guidelines is mandatory under organizational health and safety compliance policies.`;
-      doc.text(doc.splitTextToSize(purpose, pageWidth - 28), 14, curY);
-
-      // 4. Section: Standard Operational Steps & Safe Work Controls
-      curY += 20;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      doc.setTextColor(30, 58, 95);
-      doc.text('2. SAFE OPERATING PROCEDURES & HAZARD CONTROLS', 14, curY);
-
-      curY += 7;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(51, 65, 85);
-
-      objectives.forEach((item, index) => {
-        doc.setFillColor(30, 58, 95);
-        doc.circle(18, curY - 1, 0.9, 'F');
-        const wrapped = doc.splitTextToSize(`Step ${index + 1}: ${item}`, pageWidth - 36);
-        doc.text(wrapped, 22, curY);
-        curY += (wrapped.length * 4.5) + 3;
-      });
-
-      // 5. Section: Emergency Isolation & Fault Protocols
-      curY += 6;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      doc.setTextColor(30, 58, 95);
-      doc.text('3. EMERGENCY SHUTDOWN & INCIDENT REPORTING', 14, curY);
-
-      curY += 6;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(51, 65, 85);
-      const emergency = `In the event of equipment malfunction, safety interlock failure, or visible hazard, operators must immediately isolate power/machinery, clear the work area, and notify the designated safety supervisor before attempting inspection or restart.`;
-      doc.text(doc.splitTextToSize(emergency, pageWidth - 28), 14, curY);
-
-      // 6. Section: Official Company Verification Stamp Box
-      const stampBoxH = 45;
-      const stampBoxW = pageWidth - 28;
-      const stampY = pageHeight - 65;
-
-      doc.setDrawColor(30, 58, 95);
-      doc.setLineWidth(0.8);
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(14, stampY, stampBoxW, stampBoxH, 2, 2, 'FD');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9.5);
-      doc.setTextColor(30, 58, 95);
-      doc.text(companyName.toUpperCase(), pageWidth / 2, stampY + 8, { align: 'center' });
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
-      doc.setTextColor(51, 65, 85);
-      let sLine = stampY + 14;
-      if (comp?.postal_address) { doc.text(comp.postal_address, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
-      if (comp?.vat_number) { doc.text(`VAT / Reg Nr: ${comp.vat_number}`, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
-      if (comp?.phone) { doc.text(`Tel: ${comp.phone}  |  Email: ${comp.contact_email || ''}`, pageWidth / 2, sLine, { align: 'center' }); sLine += 4.5; }
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text('OFFICIAL COMPLIANCE STAMP & CONTROLLED DOCUMENT', pageWidth / 2, stampY + stampBoxH - 3, { align: 'center' });
-
-      // Footer
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
-      doc.setTextColor(148, 163, 184);
-      doc.text(`Controlled Document • Generated via The Vault Compliance Engine by Simple Solutions`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-
-      doc.save(`SOP_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
     }
 
     // Search filter handler
