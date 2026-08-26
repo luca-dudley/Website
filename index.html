@@ -402,48 +402,91 @@
       </div>
     </section>
 
-<!-- REVIEWS SECTION -->
-    <section id="reviews" class="bg-dark-bg pb-20 pt-16">
+    <!-- REVIEWS SECTION (3-CARD CAROUSEL) -->
+    <section id="reviews" class="bg-dark-bg pb-24 pt-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center mb-12">
-          <p class="text-sm font-medium uppercase tracking-widest text-slate-400">Field Feedback</p>
-          <h2 class="mt-2 font-serif text-3xl font-semibold text-white">Trusted by Industry Leaders</h2>
-        </div>
+        
+        <!-- Centralized Header with Side Arrow Controls -->
+        <div class="flex items-center justify-center gap-4 sm:gap-8 mb-12 max-w-2xl mx-auto">
+          <!-- Left Arrow Button -->
+          <button type="button" 
+                  onclick="scrollReviews('left')" 
+                  aria-label="Previous Review"
+                  class="p-3 rounded-full border border-slate-700 bg-dark-card text-white hover:bg-slate-800 hover:border-slate-500 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
 
-        <div class="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-          <!-- Review 1: Doveton Farms -->
-          <div class="rounded-2xl border border-slate-200 !bg-white p-8 flex flex-col justify-between items-center text-center shadow-2xl transition-transform duration-300 hover:-translate-y-1" style="background-color: #ffffff !important;">
-            <div>
-              <div class="mb-6 flex justify-center">
-                <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
-                  <img src="assets/logos/doveton_farms_logo.png" alt="Doveton Farms Logo" class="h-full w-full object-contain scale-110">
-                </div>
-              </div>
-              <blockquote class="text-lg text-slate-800 italic font-normal leading-relaxed">
-                "Easy to present to staff and simple to understand"
-              </blockquote>
-            </div>
-            <div class="mt-8 pt-4 border-t border-slate-100 w-full">
-              <p class="text-sm font-bold text-slate-900">Sean Doveton</p>
-              <p class="text-xs text-slate-500 mt-0.5">Doveton Farms Pty Ltd</p>
-            </div>
+          <!-- Centered Text Heading -->
+          <div class="text-center">
+            <p class="text-sm font-medium uppercase tracking-widest text-slate-400">Field Feedback</p>
+            <h2 class="mt-2 font-serif text-3xl sm:text-4xl font-semibold text-white">Trusted by Industry Leaders</h2>
           </div>
 
-          <!-- Review 2: GG & QG Elliott Farm -->
-          <div class="rounded-2xl border border-slate-200 !bg-white p-8 flex flex-col justify-between items-center text-center shadow-2xl transition-transform duration-300 hover:-translate-y-1" style="background-color: #ffffff !important;">
-            <div>
-              <div class="mb-6 flex justify-center">
-                <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
-                  <img src="assets/logos/elliott_farms_logo.png" alt="GG & QG Elliott Farm CC Logo" class="h-full w-full object-contain scale-110">
+          <!-- Right Arrow Button -->
+          <button type="button" 
+                  onclick="scrollReviews('right')" 
+                  aria-label="Next Review"
+                  class="p-3 rounded-full border border-slate-700 bg-dark-card text-white hover:bg-slate-800 hover:border-slate-500 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Scroll-Snap Track (Shows 3 cards on desktop, 2 on tablet, 1 on mobile) -->
+        <div class="max-w-7xl mx-auto overflow-hidden relative">
+          <div id="reviews-track" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4" style="scrollbar-width: none; -ms-overflow-style: none;">
+            
+            <!-- Review 1: Doveton Farms -->
+            <div class="review-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-2xl border border-slate-200 bg-white p-8 flex flex-col justify-between items-center text-center shadow-xl">
+              <div>
+                <div class="mb-6 flex justify-center">
+                  <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
+                    <img src="assets/logos/doveton_farms_logo.png" alt="Doveton Farms Logo" class="h-full w-full object-contain scale-110">
+                  </div>
                 </div>
+                <blockquote class="text-base text-slate-800 italic font-normal leading-relaxed">
+                  "Easy to present to staff and simple to understand"
+                </blockquote>
               </div>
-              <blockquote class="text-lg text-slate-800 italic font-normal leading-relaxed">
-                "Very practical with high efficiency implementation"
-              </blockquote>
+              <div class="mt-8 pt-4 border-t border-slate-100 w-full">
+                <p class="text-sm font-bold text-slate-900">Sean Doveton</p>
+                <p class="text-xs text-slate-500 mt-0.5">Doveton Farms Pty Ltd</p>
+              </div>
             </div>
-            <div class="mt-8 pt-4 border-t border-slate-100 w-full">
-              <p class="text-sm font-bold text-slate-900">Quentin Elliott</p>
-              <p class="text-xs text-slate-500 mt-0.5">GG & QG Elliott Farm CC</p>
+
+            <!-- Review 2: GG & QG Elliott Farm -->
+            <div class="review-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-2xl border border-slate-200 bg-white p-8 flex flex-col justify-between items-center text-center shadow-xl">
+              <div>
+                <div class="mb-6 flex justify-center">
+                  <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
+                    <img src="assets/logos/elliott_farms_logo.png" alt="GG & QG Elliott Farm CC Logo" class="h-full w-full object-contain scale-110">
+                  </div>
+                </div>
+                <blockquote class="text-base text-slate-800 italic font-normal leading-relaxed">
+                  "Very practical with high efficiency implementation"
+                </blockquote>
+              </div>
+              <div class="mt-8 pt-4 border-t border-slate-100 w-full">
+                <p class="text-sm font-bold text-slate-900">Quentin Elliott</p>
+                <p class="text-xs text-slate-500 mt-0.5">GG & QG Elliott Farm CC</p>
+              </div>
+            </div>
+
+            <!-- Review 3: Outlook Farms -->
+            <div class="review-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-2xl border border-slate-200 bg-white p-8 flex flex-col justify-between items-center text-center shadow-xl">
+              <div>
+                <div class="mb-6 flex justify-center">
+                  <div class="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-200 p-2 flex items-center justify-center shadow-sm overflow-hidden">
+                    <img src="assets/logos/outlook_farms_logo.png" alt="Outlook Farms Logo" class="h-full w-full object-contain scale-110">
+                  </div>
+                </div>
+                <blockquote class="text-base text-slate-800 italic font-normal leading-relaxed">
+                  "Exactly what we have been looking for."
+                </blockquote>
+              </div>
+              <div class="mt-8 pt-4 border-t border-slate-100 w-full">
+                <p class="text-sm font-bold text-slate-900">Blaine Peckham</p>
+                <p class="text-xs text-slate-500 mt-0.5">Outlook Farms</p>
+              </div>
             </div>
           </div>
         </div>
@@ -451,7 +494,7 @@
     </section>
 
     <!-- FAQ SECTION -->
-    <section id="faq" class="bg-dark-bg py-20 border-t border-gray-800">
+    <section id="faq" class="bg-dark-bg py-20">
       <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="mb-12 text-center">
           <p class="text-sm font-medium uppercase tracking-widest text-gray-400">FAQ</p>
@@ -478,6 +521,16 @@
             </summary>
             <p class="pb-4 text-gray-400 text-sm">
               The Basic plan gives you full access to the streaming video catalog and 1 admin seat. Whereas, the Essential plan adds the Training Records Directory & Dashboard, worker compliance logging via single or group sign-off mode, and 3 additional management sub-accounts.
+            </p>
+          </details>
+
+          <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
+            <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
+              How does Custom Company Branding work on the Enterprise plan?
+              <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <p class="pb-4 text-gray-400 text-sm leading-relaxed">
+              Enterprise subscriptions include private hosting infrastructure for company-specific modules and SOPs. Custom re-rendering and branding of existing Vault modules (incorporating your farm/company logos, and customized SOP documentation) is billed separately at <strong>R370 per module</strong> and produced upon order confirmation.
             </p>
           </details>
 
@@ -672,6 +725,11 @@
             <span class="text-[10px] text-slate-400 mt-0.5 block">Minimum 6 characters. Used to log in after purchase.</span>
           </div>
 
+          <!-- Add this container inside #checkout-form right above the submit button -->
+          <div id="enterprise-branding-note" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed">
+            <strong>Please Note:</strong> The Enterprise subscription provides custom video hosting and SOP capabilities. Custom-branded videos & SOP packages are billed separately at <strong>R370 per module</strong> on request.
+          </div>
+
           <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             Proceed to Secure Payment
@@ -761,6 +819,16 @@
       document.getElementById('checkout-plan-price').textContent = priceDisplay;
       document.getElementById('checkout-plan-desc').textContent = desc;
 
+      // Toggle Enterprise branding disclaimer
+      const brandingNote = document.getElementById('enterprise-branding-note');
+      if (brandingNote) {
+        if (tierName.includes('Enterprise')) {
+          brandingNote.classList.remove('hidden');
+        } else {
+          brandingNote.classList.add('hidden');
+        }
+      }
+
       const modal = document.getElementById('checkoutModal');
       if (!modal) return;
       modal.classList.remove('hidden');
@@ -772,6 +840,20 @@
       if (!modal) return;
       modal.classList.add('opacity-0');
       setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function scrollReviews(direction) {
+      const track = document.getElementById('reviews-track');
+      const firstCard = track ? track.querySelector('.review-card') : null;
+      if (!track || !firstCard) return;
+
+      // Calculate the full width of 1 card plus the 24px (gap-6) track spacing
+      const cardWidth = firstCard.offsetWidth + 24;
+
+      track.scrollBy({
+        left: direction === 'left' ? -cardWidth : cardWidth,
+        behavior: 'smooth'
+      });
     }
 
     function handleProceedToPaystack(e) {
