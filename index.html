@@ -55,7 +55,7 @@
     details[open] summary svg { transform: rotate(180deg); }
   </style>
 </head>
-<body class="font-sans antialiased bg-white text-foreground overflow-x-hidden">
+<body class="font-sans antialiased text-foreground overflow-x-hidden bg-gradient-to-b from-white from-15% via-slate-100 via-45% to-dark-bg">
   <main class="min-h-screen">
 
     <!-- HEADER -->
@@ -111,10 +111,7 @@
     </header>
 
     <!-- HERO SECTION -->
-    <section class="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-28">
-      <div class="absolute inset-0 -z-10">
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem]" style="mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);-webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 110%);"></div>
-      </div>
+    <section class="relative overflow-hidden bg-transparent py-16 sm:py-20 lg:py-28">
 
       <div class="mx-auto max-w-7xl px-4 md:px-8 lg:px-8">
         <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -182,7 +179,7 @@
     </section>
 
     <!-- DUAL PILLAR OVERVIEW CARDS -->
-    <section id="vault-info" class="bg-gray-50/50 py-20 sm:py-24">
+    <section id="vault-info" class="bg-transparent py-20 sm:py-24">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center mb-16">
           <p class="text-sm font-medium uppercase tracking-widest text-muted">Core Disciplines</p>
@@ -240,9 +237,435 @@
       </div>
     </section>
 
+    <!-- VIDEO LIBRARY SHOWCASE CAROUSEL -->
+    <section id="library" class="bg-transparent py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        <!-- Centralized Header with Side Arrow Controls (Matching Reviews Layout) -->
+        <div class="flex items-center justify-center gap-4 sm:gap-8 mb-12 max-w-3xl mx-auto">
+          <!-- Left Arrow Button -->
+          <button type="button" 
+                  onclick="scrollVideoLibrary('left')" 
+                  aria-label="Previous Videos"
+                  class="p-3 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+
+          <!-- Centered Text Heading -->
+          <div class="text-center">
+            <p class="text-sm font-medium uppercase tracking-widest text-muted">Training Modules</p>
+            <h2 class="mt-2 font-serif text-3xl sm:text-4xl font-semibold text-foreground">Streamable Safety Library</h2>
+            <p class="text-sm text-muted mt-2">
+              Standardized training modules translated into local languages with accompanying SOP documents and digital sign-off registers.
+            </p>
+          </div>
+
+          <!-- Right Arrow Button -->
+          <button type="button" 
+                  onclick="scrollVideoLibrary('right')" 
+                  aria-label="Next Videos"
+                  class="p-3 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Scroll-Snap Track (Shows 4 cards on desktop, 2 on tablet, 1 on mobile) -->
+        <div class="overflow-hidden relative">
+          <div id="video-library-track" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 pt-1" style="scrollbar-width: none; -ms-overflow-style: none;">
+            
+            <!-- 1. General Farm Employees -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/General_Farm_Employees.svg" alt="General Farm Employees" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">General Safety</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">General Farm Employees</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">A comprehensive safety overview for all general farm laborers. This introductory module covers hazard identification, situational awareness, standard PPE requirements, and basic emergency response protocols.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 2. Chemical Spraying -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Chemical_Spraying.svg" alt="Chemical Spraying" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">General Safety</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Chemical Spraying</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Master the fundamentals of safe tractor-mounted sprayer operation, chemical handling, and field application. Covers pre-operation checks, PPE selection, and emergency chemical response.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 3. Employee Allergens -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Employee_Allergens.svg" alt="Employee Allergens" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">General Safety</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Employee Allergens</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Essential health and safety awareness covering occupational allergens in agricultural processing. Educates staff on exposure symptoms, preventive PPE usage, cross-contamination, and emergency procedures.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 4. Brush Cutter -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Brush_Cutter.svg" alt="Brush Cutter" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Brush Cutter</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Guidelines for the safe operation of motorized brush cutters and strimmers. Highlights the dangers of flying debris, blade selection, harness adjustment, and operator exclusion zones.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 5. Chainsaw -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Chainsaw.svg" alt="Chainsaw" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Chainsaw</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Master the fundamentals of safe chainsaw operation, maintenance, and timber cutting. Covers pre-start checks, kickback prevention, and mandatory forestry-grade PPE.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 6. Angle Grinder -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Angle_Grinder.svg" alt="Angle Grinder" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Angle Grinder</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Crucial safety instructions for using angle grinders in farm workshops. Emphasizes disc shattering risks, guard usage, securing workpieces, and spark protection.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 7. Farm Saw -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Farm_Saw.svg" alt="Farm Saw" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Farm Saw</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Essential safety training for operating general-purpose farm saws (circular or table saws). Focuses on preventing blade binding, managing kickback, and maintaining a clear work area.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 8. Band/Prop Saw -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Band_Prop_Saw.svg" alt="Band/Prop Saw" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Band/Prop Saw</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Understand specific risks and operational guidelines for stationary band and prop saws. Emphasizes blade inspection, secure material handling, and guard usage to prevent severe lacerations.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 9. Welding -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Welding.svg" alt="Welding" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Welding</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Essential health and safety training for arc and MIG welding operations. Covers electrical hazards, arc eye prevention, fire management strategies, and protective clothing.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 10. Oxy Acetlyne -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Oxy_Acetlyene.svg" alt="Oxy Acetlyne" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Machinery &amp; Workshop</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Oxy Acetlyne</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Critical safety protocols for operating oxy-acetylene cutting torches. Covers pre-use inspections, safe lighting and extinguishing, cylinder storage, and burn prevention PPE.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 11. Irrigation Pump House -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Irrigation_Pump_House.svg" alt="Irrigation Pump House" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Pumping &amp; Irrigation</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Irrigation Pump House</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Safety protocols for operating and maintaining farm irrigation systems and pump houses. Covers high-pressure water hazards, electrical safety in wet environments, and pump start-up/shut-down.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 12. Dehusking -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Dehusking.svg" alt="Dehusking" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Macadamia Processing</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Dehusking</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Operational safety standards for high-throughput macadamia dehusking machinery. Emphasizes entrapment prevention, guarding integrity, pre-run inspection, and lockout-tagout (LOTO) protocols.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 13. Drying -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Drying.svg" alt="Drying" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Macadamia Processing</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Drying</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Standard operational protocols for macadamia nut drying operations. Covers bin moisture regulation, airflow management, burn and heat safety, and confined space inspection protocols.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 14. Storage -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Storage.svg" alt="Storage" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Macadamia Processing</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Storage</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Safety and quality assurance for bulk macadamia storage warehouses. Focuses on safe forklift routing, pallet stacking limits, ventilation maintenance, and fire prevention.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 15. Boiler -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Boiler.svg" alt="Boiler" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Macadamia Processing</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Boiler</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">High-risk operational training for agricultural biomass and drying boilers. Highlights steam pressure monitoring, burner ignition safety, thermal PPE, and emergency blow-down procedures.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 16. Farm Noise -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-100 overflow-hidden flex items-center justify-center p-4">
+                  <img src="https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Farm_Noise.svg" alt="Farm Noise" class="w-full h-full object-contain">
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Macadamia Processing</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Farm Noise</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Learn about the dangers of prolonged exposure to high decibel levels from farm machinery. Educates staff on identifying hazardous noise zones and the mandatory use of hearing protection.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1 font-medium text-slate-700"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Available Now</span>
+                <span>Includes SOP</span>
+              </div>
+            </div>
+
+            <!-- 17. Banana Processing (Coming Soon) -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-amber-200/80 bg-amber-50/20 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-800 overflow-hidden flex items-center justify-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                    <svg class="w-8 h-8 text-amber-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">In Production</span>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded">Packhouse</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Banana Processing</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Multi-video series handling everything related to banana safety.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-amber-100 flex items-center justify-between text-[11px] text-amber-800">
+                <span class="font-medium">Releasing Soon</span>
+                <span>+ Relevant SOPs</span>
+              </div>
+            </div>
+
+            <!-- 18. Tractor Safety (Coming Soon) -->
+            <div class="video-card snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-xl border border-amber-200/80 bg-amber-50/20 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div class="relative aspect-video w-full bg-slate-800 overflow-hidden flex items-center justify-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                    <svg class="w-8 h-8 text-amber-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">In Production</span>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded">Machinery</span>
+                    <span class="text-[10px] text-slate-500 font-medium">English &amp; Zulu</span>
+                  </div>
+                  <h3 class="font-semibold text-foreground text-sm leading-snug">Tractor Operations</h3>
+                  <p class="text-xs text-muted mt-1.5 line-clamp-3">Daily pre-trip inspection checklists, PTO shaft shielding, contour navigation, roll-over protection, and implement coupling.</p>
+                </div>
+              </div>
+              <div class="px-4 pb-4 pt-2 border-t border-amber-100 flex items-center justify-between text-[11px] text-amber-800">
+                <span class="font-medium">Releasing Soon</span>
+                <span>+ Standard SOP & Checklist</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- PRICING SECTION (VAULT ONLY) -->
     <section id="pricing" class="relative">
-      <div class="bg-white pb-48 pt-20 sm:pt-24 lg:pb-56 lg:pt-32">
+      <div class="bg-transparent pb-48 pt-20 sm:pt-24 lg:pb-56 lg:pt-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-2xl text-center">
             <p class="text-sm font-medium uppercase tracking-widest text-muted">The Safety Vault</p>
@@ -254,7 +677,7 @@
         </div>
       </div>
 
-      <div class="bg-dark-bg pb-20 pt-32 sm:pb-24 lg:pb-32">
+      <div class="bg-transparent pb-20 pt-32 sm:pb-24 lg:pb-32">
         <div class="relative z-10 -mt-32 sm:-mt-48 lg:-mt-56">
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-6 lg:grid-cols-3 lg:gap-8 items-stretch">
@@ -352,7 +775,7 @@
                 <div>
                   <div class="mb-6 text-center">
                     <h3 class="font-serif text-xl font-semibold text-foreground">Enterprise Solution</h3>
-                    <p class="mt-1 text-sm text-muted">Scaled operations &amp; custom workflows.</p>
+                    <p class="mt-1 text-sm text-muted">Complete compliance for scaled operations.</p>
                   </div>
                   <div class="mb-6 text-center">
                     <span class="text-4xl font-semibold text-foreground">R450</span>
@@ -373,11 +796,7 @@
                     </li>
                     <li class="flex items-start gap-3">
                       <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                      <span class="text-sm text-muted">Custom Video Hosting</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                      <span class="text-sm text-muted">ClickUp HR Live Sync</span>
+                      <span class="text-sm text-muted">Custom Video & SOP Hosting</span>
                     </li>
                     <li class="flex items-start gap-3">
                       <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
@@ -403,7 +822,7 @@
     </section>
 
     <!-- REVIEWS SECTION (3-CARD CAROUSEL) -->
-    <section id="reviews" class="bg-dark-bg pb-24 pt-16">
+    <section id="reviews" class="bg-transparent pb-24 pt-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <!-- Centralized Header with Side Arrow Controls -->
@@ -494,7 +913,7 @@
     </section>
 
     <!-- FAQ SECTION -->
-    <section id="faq" class="bg-dark-bg py-20">
+    <section id="faq" class="bg-transparent py-20">
       <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="mb-12 text-center">
           <p class="text-sm font-medium uppercase tracking-widest text-gray-400">FAQ</p>
@@ -526,11 +945,11 @@
 
           <details class="group rounded-lg border border-gray-800 bg-dark-card px-6">
             <summary class="flex cursor-pointer items-center justify-between py-4 text-left font-medium text-white">
-              How does Custom Company Branding work on the Enterprise plan?
+              Is custom farm branding available on the Enterprise plan?
               <svg class="h-5 w-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
             <p class="pb-4 text-gray-400 text-sm leading-relaxed">
-              Enterprise subscriptions include private hosting infrastructure for company-specific modules and SOPs. Custom re-rendering and branding of existing Vault modules (incorporating your farm/company logos, and customized SOP documentation) is billed separately at <strong>R370 per module</strong> and produced upon order confirmation.
+              "Essential" & "Enterprise" plans include complete access to our comprehensive, standardized Simple-branded safety catalog and verified SOP documents. For large commercial operations and agricultural estates requiring custom video & SOP branding, tailored enterprise packages are available upon consultation.
             </p>
           </details>
 
@@ -566,7 +985,7 @@
     </section>
 
     <!-- FOOTER -->
-    <footer id="contact" class="border-t border-gray-800 bg-dark-bg">
+    <footer id="contact" class="border-t border-gray-800 bg-transparent">
       <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-4">
           <div class="lg:col-span-1">
@@ -727,7 +1146,7 @@
 
           <!-- Add this container inside #checkout-form right above the submit button -->
           <div id="enterprise-branding-note" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed">
-            <strong>Please Note:</strong> The Enterprise subscription provides custom video hosting and SOP capabilities. Custom-branded videos & SOP packages are billed separately at <strong>R370 per module</strong> on request.
+            <strong>Please Note:</strong> The Enterprise plan includes the complete unconstrained Simple video & SOP library. Custom corporate branding packages are <strong>available upon consultation</strong>.
           </div>
 
           <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
@@ -840,6 +1259,20 @@
       if (!modal) return;
       modal.classList.add('opacity-0');
       setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function scrollVideoLibrary(direction) {
+      const track = document.getElementById('video-library-track');
+      const firstCard = track ? track.querySelector('.video-card') : null;
+      if (!track || !firstCard) return;
+
+      // Calculates 1 card width plus the 24px (gap-6) flex spacing
+      const cardWidth = firstCard.offsetWidth + 24;
+
+      track.scrollBy({
+        left: direction === 'left' ? -cardWidth : cardWidth,
+        behavior: 'smooth'
+      });
     }
 
     function scrollReviews(direction) {
