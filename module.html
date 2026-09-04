@@ -248,6 +248,23 @@
           </div>
         </details>
 
+        <details id="moduleQuestionsCard" class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden hidden">
+          <summary class="cursor-pointer px-6 py-4 flex items-center justify-between bg-slate-50 border-b border-slate-100 font-semibold text-sm text-foreground uppercase tracking-wider">
+            <div class="flex items-center gap-2">
+              <span>Questions</span>
+            </div>
+            <span class="text-xs text-muted font-normal">Expand / Collapse</span>
+          </summary>
+          <div class="p-6 space-y-4">
+            <p class="text-xs text-slate-500 italic pb-2 border-b border-slate-100">
+              Questions should be verbally administered to trainees after watching the module, prior to logging the crew sign-off.
+            </p>
+            <div id="moduleQuestionsList" class="space-y-4">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </details>
+
         <!-- Compliance Form Trigger -->
         <div id="compliance-card-container" class="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
           <h3 class="font-serif text-2xl font-bold text-foreground mb-2">Compliance Registration</h3>
@@ -854,6 +871,45 @@
           li.innerHTML = `<span class="text-green-500 mr-2 font-bold">&#10003;</span>${obj}`;
           objectivesList.appendChild(li);
         });
+      }
+
+      const questionsCard = document.getElementById('moduleQuestionsCard');
+      const questionsList = document.getElementById('moduleQuestionsList');
+      const questionsData = Array.isArray(video.questions) ? video.questions : [];
+
+      if (questionsCard && questionsList) {
+        if (questionsData.length > 0) {
+          questionsList.innerHTML = '';
+          questionsData.forEach((item, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'p-4 rounded-xl border border-slate-100 bg-slate-50/70 space-y-2';
+            
+            let criticalFailHtml = '';
+            if (item.critical_fail && item.critical_fail.trim()) {
+              criticalFailHtml = `
+                <div class="mt-2 text-xs text-amber-900 bg-amber-50 border border-amber-200/80 rounded-lg p-2.5 flex items-start gap-2">
+                  <span class="font-bold text-amber-700 shrink-0">⚠️ Critical Fail:</span>
+                  <span>${item.critical_fail}</span>
+                </div>
+              `;
+            }
+
+            qDiv.innerHTML = `
+              <p class="text-sm font-bold text-slate-800">
+                <span class="text-primary font-mono mr-1">Q${index + 1}:</span> ${item.question}
+              </p>
+              <div class="text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200/80">
+                <strong class="text-slate-700 block mb-0.5">Correct Answer & Rationale:</strong>
+                ${item.answer}
+              </div>
+              ${criticalFailHtml}
+            `;
+            questionsList.appendChild(qDiv);
+          });
+          questionsCard.classList.remove('hidden');
+        } else {
+          questionsCard.classList.add('hidden');
+        }
       }
 
       // Tier Gate Lockout Interceptor

@@ -1111,49 +1111,88 @@
         return;
       }
 
-      // 2. Fetch video curriculum objectives (Case-insensitive & handles duplicate rows gracefully)
+      // 2. Fetch video curriculum objectives & questions
       let objectives = [];
-      let durationMins = 30;
+      let questions = [];
+      let durationMins = 25;
 
-      const cleanTitle = (moduleTitle || '').trim();
+      // Clean module title: strip "(VIDEO INDUCTION)" or trailing descriptors, normalize whitespace
+      const rawTitle = (moduleTitle || '').trim();
+      const cleanTitle = rawTitle.replace(/\s*\(video induction\)\s*/i, '').replace(/\s+/g, ' ').trim();
 
-      const { data: videoRows, error: videoError } = await window.dbClient
-        .from('videos')
-        .select('objectives, total_seconds')
-        .ilike('title', cleanTitle)
-        .limit(1);
-
-      if (videoRows && videoRows.length > 0) {
-        const vData = videoRows[0];
-        if (vData.total_seconds) {
-          durationMins = Math.ceil(vData.total_seconds / 60);
-        }
-        
-        if (vData.objectives) {
-          if (Array.isArray(vData.objectives)) {
-            objectives = vData.objectives;
-          } else if (typeof vData.objectives === 'string') {
-            try {
-              const parsed = JSON.parse(vData.objectives);
-              objectives = Array.isArray(parsed) ? parsed : Object.values(parsed);
-            } catch (e) {
-              console.warn('Failed parsing stringified objectives:', e);
-            }
-          } else if (typeof vData.objectives === 'object') {
-            objectives = Object.values(vData.objectives);
+      // Safely unpack arrays stored as JSON, arrays, or objects (jsonb can come back parsed or as a string)
+      const parseCurriculumArray = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+          try {
+            const parsed = JSON.parse(val);
+            return Array.isArray(parsed) ? parsed : Object.values(parsed);
+          } catch (e) {
+            return val.trim() ? [val] : [];
           }
         }
+        if (typeof val === 'object') return Object.values(val);
+        return [];
+      };
+
+      // Fetch a curriculum row scoped to one tenant tier (companyScope === null -> global master
+      // library). Tries an exact case-insensitive title match first, then a wildcard fallback for
+      // titles saved with extra descriptors/whitespace.
+      async function fetchVideoRow(titleFilter, companyScope) {
+        const baseQuery = () => {
+          let q = window.dbClient
+            .from('videos')
+            .select('objectives, questions, total_seconds, title, company_id');
+          return companyScope === null ? q.is('company_id', null) : q.eq('company_id', companyScope);
+        };
+
+        const { data: exact } = await baseQuery().ilike('title', titleFilter).limit(1);
+        if (exact && exact.length > 0) return exact[0];
+
+        const { data: wildcard } = await baseQuery().ilike('title', `%${titleFilter}%`).limit(1);
+        return (wildcard && wildcard.length > 0) ? wildcard[0] : null;
       }
 
-      // Fallback only if database column is empty
+      // ROOT CAUSE FIX: the old query had no company_id filter, so `.limit(1)` on an ilike match
+      // could silently return a stale tenant-cloned row (company_id = <uuid>, frozen at clone time)
+      // instead of the just-updated master row (company_id IS NULL). We now fetch both explicitly:
+      // the master library row is the source of truth for curriculum content, since that's what the
+      // "update all base videos" SQL script writes to. A company-scoped clone is only trusted when
+      // it demonstrably has its own fully-populated curriculum (non-empty `questions`) — otherwise
+      // it's treated as a stale/partial clone and we fall back to the current master data.
+      const [masterRow, companyRow] = await Promise.all([
+        fetchVideoRow(cleanTitle, null),
+        window.userCompanyId ? fetchVideoRow(cleanTitle, window.userCompanyId) : Promise.resolve(null)
+      ]);
+
+      const masterObjectives = parseCurriculumArray(masterRow?.objectives);
+      const masterQuestions = parseCurriculumArray(masterRow?.questions);
+      const companyObjectives = parseCurriculumArray(companyRow?.objectives);
+      const companyQuestions = parseCurriculumArray(companyRow?.questions);
+
+      let vData;
+      if (companyQuestions.length > 0) {
+        objectives = companyObjectives.length > 0 ? companyObjectives : masterObjectives;
+        questions = companyQuestions;
+        vData = companyRow;
+      } else {
+        objectives = masterObjectives.length > 0 ? masterObjectives : companyObjectives;
+        questions = masterQuestions.length > 0 ? masterQuestions : companyQuestions;
+        vData = masterRow || companyRow;
+      }
+
+      if (vData?.total_seconds) {
+        durationMins = Math.ceil(vData.total_seconds / 60);
+      }
+
+      // Hardcoded fallback only if the database record has no objectives
       if (!objectives || objectives.length === 0) {
         objectives = [
-          'Machine components, disc ratings, and spindle guard positioning',
           'Mandatory Personal Protective Equipment (PPE) requirements',
-          'Pre-operational inspection: disc integrity, cracks, and mounting',
-          'Safe handling, two-handed operation, and spark direction control',
-          'Flammable materials clearance and hot work safety precautions',
-          'Power isolation, disc replacement, and fault reporting'
+          'Standard operational hazard identification and mitigation',
+          'Workplace hygiene and cross-contamination prevention',
+          'Emergency procedures and incident reporting protocols'
         ];
       }
 
@@ -1212,29 +1251,97 @@
       doc.text('25 MIN (Video & Discussion)', 154, metaY + 10.5);
       doc.text(batchSessionId.substring(0, 8).toUpperCase(), 224, metaY + 10.5);
 
-      // 3. Training Curriculum Section (Left Column)
-      const contentY = 56;
+      // 3. Training Curriculum Section
+      const contentY = 54;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setTextColor(30, 58, 95);
-      doc.text(`TRAINING MODULE: ${moduleTitle.toUpperCase()} (VIDEO INDUCTION)`, 16, contentY);
+      doc.text(`TRAINING MODULE: ${cleanTitle.toUpperCase()} (VIDEO INDUCTION)`, 16, contentY);
 
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text('KEY LEARNING OBJECTIVES:', 16, contentY + 5.5);
+
+      const objectivesToRender = objectives.slice(0, 4);
+      const questionsToRender = (questions || []).slice(0, 5);
+
+      // The curriculum block must always fit between blockStartY and the attestation/stamp boxes
+      // below, regardless of how many objectives/questions there are or how long the text runs.
+      // Rather than letting the block grow unbounded (which risked overlapping the signature box
+      // and footer once questions were added), we measure it at progressively more compact type
+      // scales and use the first one that fits the fixed budget.
+      const blockStartY = contentY + 10;
+      const blockBudget = 59; // mm available for objectives + questions before the bottom boxes
+
+      const scales = [
+        { font: 7.5, lineH: 3.5, itemGap: 1.2, qGap: 1.0, sectionGap: 6.5 },
+        { font: 7.0, lineH: 3.2, itemGap: 0.9, qGap: 0.8, sectionGap: 5.5 },
+        { font: 6.5, lineH: 3.0, itemGap: 0.6, qGap: 0.6, sectionGap: 4.5 }
+      ];
+
+      function measure(scale) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(scale.font);
+        let h = 0;
+        const objLines = objectivesToRender.map(obj => doc.splitTextToSize(String(obj), 255));
+        objLines.forEach(lines => { h += (lines.length * scale.lineH) + scale.itemGap; });
+
+        let qLines = [];
+        if (questionsToRender.length > 0) {
+          h += scale.sectionGap;
+          qLines = questionsToRender.map((qItem, idx) => {
+            const qText = typeof qItem === 'string' ? qItem : (qItem.question || '');
+            return doc.splitTextToSize(`Q${idx + 1}: ${qText}`, 255);
+          });
+          qLines.forEach(lines => { h += (lines.length * scale.lineH) + scale.qGap; });
+        }
+        return { height: h, objLines, qLines };
+      }
+
+      let chosen = null;
+      let chosenScale = scales[scales.length - 1];
+      for (const scale of scales) {
+        const result = measure(scale);
+        chosen = result;
+        chosenScale = scale;
+        if (result.height <= blockBudget) break; // fits — stop at the least-compressed tier that works
+      }
+
+      // Render objectives
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
+      doc.setFontSize(chosenScale.font);
       doc.setTextColor(51, 65, 85);
-      let bulletY = contentY + 7.5;
-      
-      objectives.forEach(obj => {
+      let bulletY = blockStartY;
+      chosen.objLines.forEach(wrappedLines => {
         doc.setFillColor(30, 58, 95);
-        doc.circle(20, bulletY - 1, 0.9, 'F');
-        // Wrap text to 255mm so longer compliance points wrap cleanly
-        const wrappedLines = doc.splitTextToSize(obj, 255);
-        doc.text(wrappedLines, 24, bulletY);
-        bulletY += (wrappedLines.length * 4.5) + 2.5;
+        doc.circle(18, bulletY - 0.8, 0.7, 'F');
+        doc.text(wrappedLines, 21, bulletY);
+        bulletY += (wrappedLines.length * chosenScale.lineH) + chosenScale.itemGap;
       });
 
-      // 4. Bottom Verification Row: Positioned dynamically below objectives
-      const bottomY = Math.max(bulletY + 8, 125);
+      // Render Administered Knowledge Checks
+      if (questionsToRender.length > 0) {
+        bulletY += (chosenScale.sectionGap - 4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text('SUPERVISOR VERBAL COMPREHENSION CHECKS ADMINISTERED:', 16, bulletY);
+        bulletY += 4.5;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(chosenScale.font);
+        doc.setTextColor(51, 65, 85);
+
+        chosen.qLines.forEach(wrappedQ => {
+          doc.text(wrappedQ, 18, bulletY);
+          bulletY += (wrappedQ.length * chosenScale.lineH) + chosenScale.qGap;
+        });
+      }
+
+      // 4. Bottom Verification Row: Positioned dynamically below objectives, capped so the
+      // attestation/stamp boxes (65mm tall) never collide with the page-1 footer.
+      const bottomY = Math.min(Math.max(bulletY + 8, 125), 131);
 
       // Left Box: Trainer Legal Attestation
       const attestW = 160;
@@ -1252,7 +1359,7 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(51, 65, 85);
-      const declarationText = `I, ${supervisorName}, hereby confirm that I have conducted and supervised this training induction. The employees listed on Page 2 were instructed on all safety protocols, operational guidelines, and hazard controls specified above.`;
+      const declarationText = `I, ${supervisorName}, hereby confirm that I have conducted and supervised this training induction. The employees listed on Page 2 were instructed on all safety protocols, operational guidelines, and verbally assessed on the comprehension questions specified above.`;
       doc.text(doc.splitTextToSize(declarationText, attestW - 12), 22, bottomY + 16);
 
       // Digital Signature Area
@@ -1326,7 +1433,7 @@
       doc.setFont('times', 'bold');
       doc.setFontSize(18);
       doc.setTextColor(30, 58, 95);
-      doc.text(`${moduleTitle.toUpperCase()} — ATTENDANCE REGISTER`, 16, 18);
+      doc.text(`${cleanTitle.toUpperCase()} — ATTENDANCE REGISTER`, 16, 18);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
