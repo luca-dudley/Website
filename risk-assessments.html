@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Assessments - The Vault</title>
+  <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v2/inline.js"></script>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            foreground: '#1a1a2e',
+            muted: '#6b7280',
+            border: '#e5e7eb',
+            'dark-bg': '#0a0a14',
+            'dark-card': '#12121f'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    #sidebar,
+    #mainContent {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #sidebar.collapsed {
+      width: 5rem !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    #sidebar.collapsed .sidebar-text,
+    #sidebar.collapsed .sidebar-category-header,
+    #sidebar.collapsed #sidebarToggle span {
+      display: none !important;
+    }
+    #sidebar.collapsed .sidebar-nav-btn {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    #sidebar.collapsed .sidebar-nav-btn svg {
+      margin: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    #sidebar.collapsed #sidebarToggle svg {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen overflow-x-hidden">
+
+  <!-- Mobile Header -->
+  <header class="lg:hidden sticky top-0 z-40 h-16 px-4 flex items-center justify-between border-b border-slate-200 bg-[#f8fafc]">
+    <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+    <a href="vault.html" class="font-serif text-lg font-bold text-foreground">The Vault</a>
+    <button onclick="openProfileModal()" aria-label="Open profile" class="min-h-11 min-w-11 flex items-center justify-center">
+      <div class="relative w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs overflow-hidden border border-slate-300">
+        <span data-dynamic-initials>?</span>
+        <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Profile">
+      </div>
+    </button>
+  </header>
+
+  <!-- 1. FULL WIDTH TOP BAR -->
+  <header class="hidden lg:flex sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-8 py-3.5 h-[72px] items-center justify-between">
+    <a href="vault.html" class="flex items-center gap-3.5 group shrink-0 ml-2">
+      <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+        </svg>
+      </div>
+      <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
+    </a>
+
+    <!-- Right-Hand Controls -->
+    <div class="flex items-center gap-5 shrink-0">
+      <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="topbar-company-name" class="font-medium">Simple Solutions</span>
+        <span class="text-slate-300">|</span>
+        <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
+      </div>
+
+      <div class="h-6 w-px bg-slate-300/80"></div>
+
+      <button onclick="openProfileModal()" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-white border border-transparent hover:border-slate-200 transition-all text-left group">
+        <div class="relative w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center overflow-hidden border border-slate-300 shadow-sm">
+          <span data-dynamic-initials>?</span>
+          <img data-dynamic-profile-img class="absolute inset-0 w-full h-full object-cover hidden" alt="Avatar">
+        </div>
+        <div class="hidden sm:block leading-tight">
+          <p id="topbar-user-name" class="text-sm font-bold text-foreground group-hover:text-primary transition-colors">Loading...</p>
+          <p id="topbar-user-role" class="text-xs text-muted">Primary Admin</p>
+        </div>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-50 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300 lg:top-[72px] lg:z-30 border-r border-slate-200/80 bg-[#f8fafc] flex flex-col justify-between p-4">
+    <div class="space-y-6">
+      <div>
+        <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
+        <nav class="space-y-1.5">
+          <!-- Video Library -->  
+          <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Video Library</span>
+          </a>
+
+          <!-- Training Records -->
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span class="sidebar-text truncate">Training Records</span>
+          </a>
+
+          <!-- Standard Operating Procedures (Enterprise Locked) -->
+          <a href="sop.html" title="Standard Operating Procedures" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="sidebar-text truncate">SOPs</span>
+          </a>
+
+          <!-- Risk Assessments (Active Tab) -->
+          <a href="risk-assessments.html" title="Risk Assessments" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span class="sidebar-text truncate">Risk Assessments</span>
+          </a>
+
+          <!-- Help & Support -->
+          <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span class="sidebar-text truncate">Help & Support</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-slate-200/80">
+      <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm">
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+        <span class="truncate">Collapse View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="ml-0 lg:ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
+    <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
+      <div class="max-w-6xl mx-auto w-full">
+        <!-- Header & Top Action -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Digital Risk Assessments (HIRA)</h2>
+            <p class="text-muted text-sm">Conduct, review, and archive audit-ready statutory quarterly risk assessments for your operations.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="openNewAssessmentModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>+ Conduct Assessment</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+          <div class="relative w-full sm:w-80">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+          </div>
+        </div>
+
+        <!-- Assessments Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-4 font-semibold">Equipment / Operational Task</th>
+                  <th class="px-6 py-4 font-semibold">Work Area / ID</th>
+                  <th class="px-6 py-4 font-semibold">Assessor & Supervisor</th>
+                  <th class="px-6 py-4 font-semibold">Assessment Date</th>
+                  <th class="px-6 py-4 font-semibold">Status</th>
+                  <th class="px-6 py-4 font-semibold text-right">Audit PDF</th>
+                </tr>
+              </thead>
+              <tbody id="raTableBody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div id="raEmptyState" class="hidden py-12 text-center">
+            <p class="text-sm font-medium text-foreground">No risk assessments logged yet.</p>
+            <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to record your first quarterly assessment.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANCHORED ROUNDED FOOTER -->
+      <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+        <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
+          <!-- Brand Summary -->
+          <div class="max-w-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
+                <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
+              </div>
+              <div>
+                <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+              </div>
+            </div>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Streamlining operational architectures for modern business safety and workplace compliance.
+            </p>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
+            <nav class="grid gap-2 text-xs text-slate-300">
+              <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
+              <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
+              <a href="sop.html" class="transition-colors hover:text-white hover:underline">Standard Operating Procedures</a>
+              <a href="risk-assessments.html" class="transition-colors hover:text-white hover:underline">Risk Assessments</a>
+              <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+            </nav>
+          </div>
+
+          <!-- Subscription Management -->
+          <div class="max-w-xs sm:max-w-sm space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              To update payment methods, seat delegations, or change subscription tiers, open the Billing & Plans tab in your Account Profile.
+            </p>
+          </div>
+        </div>
+
+        <!-- Legal Sub-bar -->
+        <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+          <p>© 2026 Simple Solutions. All rights reserved.</p>
+          <p class="text-slate-400">Internal Operational Compliance Portal</p>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       MODAL: CONDUCT NEW RISK ASSESSMENT
+  ========================================================================== -->
+  <div id="newAssessmentModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative my-8 max-h-[90vh] flex flex-col justify-between">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div>
+          <span class="text-[11px] font-bold tracking-wider text-primary uppercase">Quarterly Operational Compliance</span>
+          <h3 class="font-serif text-2xl font-bold text-foreground">Conduct Risk Assessment (HIRA)</h3>
+        </div>
+        <button onclick="closeNewAssessmentModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form Body (Scrollable) -->
+      <div class="overflow-y-auto pr-2 py-4 space-y-6 flex-1 text-xs">
+        
+        <!-- Step 1: Select Module -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+          <h4 class="font-bold text-sm text-foreground">1. Equipment / Operational Task Selection</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Select Module / Equipment</label>
+              <select id="modalModuleSelect" onchange="handleModuleSelect(this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+                <option value="">-- Choose Module --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Equipment Serial / Asset ID</label>
+              <input id="modalEquipmentId" type="text" placeholder="e.g. AG-02 Bosch 9-inch / JD 5075E" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">Specific Work Area / Location</label>
+              <input id="modalWorkArea" type="text" placeholder="e.g. Workshop Bay 2 / Macadamia Shed 1" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Hazard Table Preview & Scoring -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-sm text-foreground">2. Hazard Identification & 4x4 Risk Matrix Scoring</h4>
+            <span class="text-[11px] text-muted">Initial vs. Residual Risk</span>
+          </div>
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <table class="w-full text-left">
+              <thead class="bg-slate-100 text-[11px] font-semibold text-slate-700">
+                <tr>
+                  <th class="p-2.5">Hazard & Consequence</th>
+                  <th class="p-2.5 w-24">Initial</th>
+                  <th class="p-2.5">Mandatory Control Measures</th>
+                  <th class="p-2.5 w-24">Residual</th>
+                </tr>
+              </thead>
+              <tbody id="modalHazardTableBody" class="divide-y divide-slate-100 bg-white">
+                <tr>
+                  <td colspan="4" class="p-4 text-center text-muted">Select a module above to preview and score its hazards.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Step 3: Required PPE & Pre-Use Checklist -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-foreground">3. Required PPE Verification</h4>
+            <div id="modalPpeList" class="space-y-1.5 text-slate-600">
+              <p class="text-muted italic">Select module to load mandatory PPE.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-foreground">4. Pre-Use Physical Checks</h4>
+            <div id="modalPreUseList" class="space-y-1.5 text-slate-600">
+              <p class="text-muted italic">Select module to load pre-use checklist.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Authorisation & Sign-Off -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+          <h4 class="font-bold text-sm text-foreground">5. Assessor & Supervisor Authorisation</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            <!-- Assessor -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
+              <label class="block font-semibold text-slate-700">Assessor Name (Conducted By)</label>
+              <input id="modalAssessorName" type="text" placeholder="Full Name of Assessor" class="w-full p-2 border border-slate-200 rounded-lg outline-none">
+              <label class="block text-[11px] font-medium text-slate-500">Digital Signature</label>
+              <canvas id="assessorSigCanvas" class="w-full h-20 border border-dashed border-slate-300 rounded-lg bg-slate-50 cursor-crosshair"></canvas>
+              <button type="button" onclick="clearCanvas('assessorSigCanvas')" class="text-[10px] text-muted hover:text-red-600">Clear Signature</button>
+            </div>
+
+            <!-- Supervisor -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
+              <label class="block font-semibold text-slate-700">Supervisor / Manager Name</label>
+              <input id="modalSupervisorName" type="text" placeholder="Full Name of Supervisor" class="w-full p-2 border border-slate-200 rounded-lg outline-none">
+              <label class="block text-[11px] font-medium text-slate-500">Digital Signature</label>
+              <canvas id="supervisorSigCanvas" class="w-full h-20 border border-dashed border-slate-300 rounded-lg bg-slate-50 cursor-crosshair"></canvas>
+              <button type="button" onclick="clearCanvas('supervisorSigCanvas')" class="text-[10px] text-muted hover:text-red-600">Clear Signature</button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Action Footer -->
+      <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+        <button onclick="closeNewAssessmentModal()" class="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">
+          Cancel
+        </button>
+        <button onclick="saveAndGenerateAssessment()" class="px-6 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-md flex items-center gap-2">
+          <span>Complete Assessment & Generate PDF</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="assets/java_files/main.js"></script>
+  <script src="assets/java_files/profile-engine.js"></script>
+  <script>
+    const MODULE_CATALOG = {
+      "Angle Grinder": {
+        category: "Machinery & Workshop",
+        defaultArea: "Farm Workshop & Maintenance Bay",
+        hazards: [
+          { name: "Rotating disc contact", consequence: "Severe lacerations, amputation", init: "High (9)", controls: "Fitted guard; two-handed grip; authorized operator", res: "Low (3)" },
+          { name: "Disc shattering / bursting", consequence: "Flying projectiles, puncture wounds", init: "Critical (12)", controls: "Matched RPM rating; pre-use crack inspection; no side-grinding with thin discs", res: "Medium (4)" },
+          { name: "Hot sparks and fire ignition", consequence: "Burns, workshop fire outbreak", init: "High (9)", controls: "Clear 5m hot-work zone; DCP fire extinguisher on hand; flame-retardant PPE", res: "Low (3)" }
+        ],
+        ppe: [
+          "Safety goggles / face shield",
+          "Ear protection (earmuffs/plugs)",
+          "Cut-resistant gloves",
+          "Flame-retardant overalls",
+          "Steel-toe safety boots"
+        ],
+        preChecks: [
+          "Inspect body, cord, and plug for damage",
+          "Verify safety guard is positioned correctly",
+          "Inspect disc for cracks, wear, and expiry date",
+          "Ensure disc RPM rating is >= grinder rating",
+          "Confirm workpiece is securely clamped in vice"
+        ]
+      },
+      "Chainsaw": {
+        category: "Machinery & Workshop",
+        defaultArea: "Orchard Perimeter & Tree Clearing",
+        hazards: [
+          { name: "Chainsaw kickback", consequence: "Severe lacerations, fatal arterial cuts", init: "Critical (12)", controls: "Low-kickback chain; two-handed grip; never cut with bar nose; engage chain brake", res: "Medium (4)" },
+          { name: "Ejected wood chips and sawdust", consequence: "Eye trauma, foreign body in eye", init: "High (9)", controls: "Helmet with integrated mesh visor or safety goggles with face shield", res: "Low (2)" },
+          { name: "Refueling fire / hot engine contact", consequence: "Burns, thermal fire ignition", init: "High (9)", controls: "Engine cool-down before fuel top-up; ventilated area away from sparks; fire extinguisher nearby", res: "Low (3)" }
+        ],
+        ppe: [
+          "Safety helmet with mesh visor",
+          "Chainsaw-rated ear defenders",
+          "Cut-resistant gloves",
+          "Chainsaw protective trousers/chaps",
+          "Steel-toe boots with cut protection"
+        ],
+        preChecks: [
+          "Inspect saw body, handles, and guards while engine is OFF",
+          "Check chain tension and guide bar condition",
+          "Inspect chain catcher and anti-vibration mounts",
+          "Test chain brake engagement",
+          "Clear minimum 15m safety exclusion zone"
+        ]
+      },
+      "Brush Cutter": {
+        category: "Machinery & Workshop",
+        defaultArea: "Field Perimeter, Boundaries & Drainage",
+        hazards: [
+          { name: "Thrown debris (stones, wire)", consequence: "Eye damage, bystander lacerations", init: "High (9)", controls: "Inspect and clear cutting path; wear face shield and leg chaps; 15m bystander zone", res: "Low (3)" },
+          { name: "Rotating blade contact", consequence: "Deep cuts, lower limb injury", init: "Critical (12)", controls: "Fitted deflection guard; secure blade lock nut; full two-handed control", res: "Low (2)" }
+        ],
+        ppe: [
+          "Full face shield + safety glasses",
+          "Ear protection",
+          "Cut-resistant gloves",
+          "Leg protector chaps",
+          "Steel-toe safety boots"
+        ],
+        preChecks: [
+          "Inspect harness installation and adjust to body",
+          "Verify blade/line lock nut is secure",
+          "Inspect fuel lines for leaks",
+          "Test emergency stop switch"
+        ]
+      }
+    };
+
+    let samplePastAssessments = [
+      { id: "RA-01", task: "Angle Grinder", area: "Workshop Bay 1", assessor: "Guy Dudley", supervisor: "Jasen", date: "2026-08-15", status: "Active" },
+      { id: "RA-02", task: "Chainsaw", area: "Orchard Clearing Block 3", assessor: "Guy Dudley", supervisor: "Dave", date: "2026-05-10", status: "Renewal Due" }
+    ];
+
+    function renderAssessmentTable() {
+      const tbody = document.getElementById('raTableBody');
+      const empty = document.getElementById('raEmptyState');
+      if (!tbody) return;
+
+      if (samplePastAssessments.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      tbody.innerHTML = samplePastAssessments.map(ra => `
+        <tr class="hover:bg-slate-50/60 transition-colors">
+          <td class="px-6 py-4 font-semibold text-slate-800">${ra.task}</td>
+          <td class="px-6 py-4 text-slate-600">${ra.area}</td>
+          <td class="px-6 py-4 text-slate-600">${ra.assessor} / <span class="font-medium text-slate-800">${ra.supervisor}</span></td>
+          <td class="px-6 py-4 text-slate-500 text-xs">${ra.date}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${ra.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+              ${ra.status}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button onclick="downloadAuditPdf('${ra.task}', '${ra.area}', '${ra.assessor}', '${ra.supervisor}', '${ra.date}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all">
+              📄 Download PDF
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function initModuleDropdown() {
+      const select = document.getElementById('modalModuleSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Choose Module --</option>' + 
+        Object.keys(MODULE_CATALOG).map(k => `<option value="${k}">${k}</option>`).join('');
+    }
+
+    function handleModuleSelect(moduleKey) {
+      const mod = MODULE_CATALOG[moduleKey];
+      if (!mod) return;
+
+      document.getElementById('modalWorkArea').value = mod.defaultArea;
+
+      // Render Hazards
+      const hTable = document.getElementById('modalHazardTableBody');
+      hTable.innerHTML = mod.hazards.map(h => `
+        <tr>
+          <td class="p-2.5 font-medium text-slate-800">${h.name}<br><span class="text-[10px] text-muted">${h.consequence}</span></td>
+          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 text-[10px] font-bold">${h.init}</span></td>
+          <td class="p-2.5 text-[11px] text-slate-600">${h.controls}</td>
+          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold">${h.res}</span></td>
+        </tr>
+      `).join('');
+
+      // Render PPE
+      const ppeDiv = document.getElementById('modalPpeList');
+      ppeDiv.innerHTML = mod.ppe.map(p => `
+        <label class="flex items-center gap-2">
+          <input type="checkbox" checked class="rounded text-primary focus:ring-0">
+          <span>${p}</span>
+        </label>
+      `).join('');
+
+      // Render Pre-use checks
+      const preDiv = document.getElementById('modalPreUseList');
+      preDiv.innerHTML = mod.preChecks.map(c => `
+        <label class="flex items-center gap-2">
+          <input type="checkbox" checked class="rounded text-primary focus:ring-0">
+          <span>${c}</span>
+        </label>
+      `).join('');
+    }
+
+    function openNewAssessmentModal() {
+      document.getElementById('newAssessmentModal').classList.remove('hidden');
+      initCanvas('assessorSigCanvas');
+      initCanvas('supervisorSigCanvas');
+    }
+
+    function closeNewAssessmentModal() {
+      document.getElementById('newAssessmentModal').classList.add('hidden');
+    }
+
+    // Canvas drawing helpers
+    function initCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#1e3a5f';
+
+      let drawing = false;
+      canvas.onmousedown = (e) => {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+      };
+      canvas.onmousemove = (e) => {
+        if (drawing) {
+          ctx.lineTo(e.offsetX, e.offsetY);
+          ctx.stroke();
+        }
+      };
+      window.onmouseup = () => {
+        drawing = false;
+      };
+    }
+
+    function clearCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveAndGenerateAssessment() {
+      const moduleKey = document.getElementById('modalModuleSelect').value;
+      const area = document.getElementById('modalWorkArea').value || 'General Site';
+      const assessor = document.getElementById('modalAssessorName').value || 'Assessor';
+      const supervisor = document.getElementById('modalSupervisorName').value || 'Supervisor';
+
+      if (!moduleKey) {
+        alert('Please select an operational module.');
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      samplePastAssessments.unshift({
+        id: `RA-0${samplePastAssessments.length + 1}`,
+        task: moduleKey,
+        area: area,
+        assessor: assessor,
+        supervisor: supervisor,
+        date: today,
+        status: "Active"
+      });
+
+      renderAssessmentTable();
+      closeNewAssessmentModal();
+      downloadAuditPdf(moduleKey, area, assessor, supervisor, today);
+    }
+
+    // jsPDF Audit Form Generator
+    function downloadAuditPdf(task, area, assessor, supervisor, date) {
+      if (!window.jspdf || !window.jspdf.jsPDF) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+
+      // Header
+      doc.setFont('times', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(30, 58, 95);
+      doc.text("SIMPLE SOLUTIONS", 15, 20);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("STATUTORY HAZARD IDENTIFICATION & RISK ASSESSMENT (HIRA)", 15, 26);
+
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(15, 29, pageWidth - 15, 29);
+
+      // Metadata Grid
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, 33, pageWidth - 30, 18, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text("TASK / OPERATION:", 18, 38);
+      doc.text("WORK AREA:", 85, 38);
+      doc.text("ASSESSMENT DATE:", 150, 38);
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(task.toUpperCase(), 18, 45);
+      doc.text(area, 85, 45);
+      doc.text(date, 150, 45);
+
+      // Section 1: HIRA Table Heading
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 58, 95);
+      doc.text("1. Hazard Identification & Control Table", 15, 60);
+
+      const mod = MODULE_CATALOG[task] || MODULE_CATALOG["Angle Grinder"];
+      let y = 68;
+
+      mod.hazards.forEach((h, i) => {
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.text(`${i + 1}. ${h.name} (Residual Risk: ${h.res})`, 15, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(71, 85, 105);
+        doc.text(doc.splitTextToSize(`Controls: ${h.controls}`, 180), 18, y + 4);
+        y += 12;
+      });
+
+      // Section 2: PPE & Checks
+      y += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 58, 95);
+      doc.text("2. Mandatory PPE & Pre-Use Checks Verified", 15, y);
+
+      y += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`PPE Verified: ${mod.ppe.join(', ')}`, 15, y);
+      y += 5;
+      doc.text(`Pre-Use Checks: All mechanical guards, emergency stops, and physical cables inspected.`, 15, y);
+
+      // Section 3: Sign-Off Block
+      y = 230;
+      doc.setDrawColor(203, 213, 225);
+      doc.rect(15, y, pageWidth - 30, 45);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("STATUTORY VERIFICATION & SIGN-OFF", 20, y + 8);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`Assessor: ${assessor} (Verified on site)`, 20, y + 20);
+      doc.text(`Supervisor: ${supervisor} (Authorized)`, 110, y + 20);
+
+      doc.line(20, y + 35, 80, y + 35);
+      doc.text("Assessor Signature", 20, y + 39);
+
+      doc.line(110, y + 35, 170, y + 35);
+      doc.text("Supervisor Signature", 110, y + 39);
+
+      doc.save(`Risk_Assessment_${task.replace(/\s+/g, '_')}_${date}.pdf`);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initModuleDropdown();
+      renderAssessmentTable();
+    });
+  </script>
+</body>
+</html>
