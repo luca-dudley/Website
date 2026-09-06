@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0HP7V44GT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-L0HP7V44GT', {
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+
   <title>The Vault - Training Module</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -782,6 +795,15 @@
 
         if (error) throw error;
 
+        // --- GA4 Custom Event: Compliance Log Logged ---
+        if (typeof gtag === 'function') {
+          gtag('event', 'compliance_log_submitted', {
+            module: moduleTitle,
+            training_type: currentLogMode,
+            trainee_count: recordsToInsert.length
+          });
+        }
+
         alert(`✓ Successfully logged ${recordsToInsert.length} verified training record(s) for ${moduleTitle}.`);
         closeComplianceModal();
 
@@ -967,6 +989,14 @@
           const progressSeconds = Math.floor(Number(data?.seconds || 0));
           const durationSeconds = Math.floor(Number(data?.duration || 0));
           const percentage = durationSeconds > 0 ? Math.round((progressSeconds / durationSeconds) * 100) : 0;
+          const isCompleted = percentage >= 90;
+
+          if (isCompleted && typeof gtag === 'function') {
+            gtag('event', 'video_complete', {
+              video_title: video.title,
+              video_id: String(videoId)
+            });
+          }
 
           await dbClient.from('user_video_progress').upsert({
             user_id: session.user.id,

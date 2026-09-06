@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0HP7V44GT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-L0HP7V44GT', {
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+
   <title>Training Records - The Vault</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1069,6 +1082,13 @@
       doc.setFont('helvetica', 'bold');
       doc.text(`Internal Record Ref: ${docHash} • Logged via The Vault by Simple Solutions`, pageWidth / 2, 193, { align: 'center' });
 
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_individual_cert', {
+          module: moduleTitle,
+          employee: employeeName
+        });
+      }
+
       doc.save(`Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
     }
 
@@ -1536,6 +1556,13 @@
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
       doc.text(`Page 2 of 2 — Trainee Sign-Off Register • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_group_register', {
+          module: moduleTitle,
+          batch_ref: batchSessionId
+        });
+      }
 
       doc.save(`Group_Register_${moduleTitle.replace(/\s+/g, '_')}_${sessionDate}.pdf`);
     }

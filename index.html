@@ -1227,6 +1227,15 @@
 
     function openCheckoutModal(planCode, amountInCents, tierName, priceDisplay, desc) {
       activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
+
+      // --- GA4 Custom Event: Checkout Initiated ---
+      if (typeof gtag === 'function') {
+        gtag('event', 'begin_checkout', {
+          item_name: tierName,
+          value: amountInCents / 100,
+          currency: 'ZAR'
+        });
+      }
       
       document.getElementById('checkout-plan-name').textContent = tierName;
       document.getElementById('checkout-plan-price').textContent = priceDisplay;
@@ -1321,6 +1330,17 @@
         },
         onSuccess: async (transaction) => {
           console.log('[Paystack] Payment authorized. Ref:', transaction.reference);
+
+          // --- GA4 Custom Event: Successful Subscription Purchase ---
+          if (typeof gtag === 'function') {
+            gtag('event', 'purchase', {
+              transaction_id: transaction.reference,
+              value: activeCheckoutPlan.amountInCents / 100,
+              currency: 'ZAR',
+              tier: activeCheckoutPlan.tierName,
+              company: userCompany
+            });
+          }
 
           try {
             // 1. Resolve Tier and Seat Limits
