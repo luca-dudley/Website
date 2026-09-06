@@ -6,7 +6,7 @@
   <title>Risk Assessments - The Vault</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -34,24 +34,12 @@
   </script>
   
   <style>
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #9ca3af;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-    #sidebar,
-    #mainContent {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    #sidebar, #mainContent { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
     #sidebar.collapsed {
       width: 5rem !important;
@@ -60,9 +48,7 @@
     }
     #sidebar.collapsed .sidebar-text,
     #sidebar.collapsed .sidebar-category-header,
-    #sidebar.collapsed #sidebarToggle span {
-      display: none !important;
-    }
+    #sidebar.collapsed #sidebarToggle span { display: none !important; }
     #sidebar.collapsed .sidebar-nav-btn {
       justify-content: center;
       padding-left: 0;
@@ -70,13 +56,13 @@
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
     }
-    #sidebar.collapsed .sidebar-nav-btn svg {
-      margin: 0;
-      width: 1.5rem;
-      height: 1.5rem;
-    }
-    #sidebar.collapsed #sidebarToggle svg {
-      transform: rotate(180deg);
+    #sidebar.collapsed .sidebar-nav-btn svg { margin: 0; width: 1.5rem; height: 1.5rem; }
+    #sidebar.collapsed #sidebarToggle svg { transform: rotate(180deg); }
+
+    .signature-canvas {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
   </style>
 </head>
@@ -85,9 +71,7 @@
   <!-- Mobile Header -->
   <header class="lg:hidden sticky top-0 z-40 h-16 px-4 flex items-center justify-between border-b border-slate-200 bg-[#f8fafc]">
     <button id="mobile-menu-btn" type="button" aria-label="Open sidebar" class="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 transition-colors">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <a href="vault.html" class="font-serif text-lg font-bold text-foreground">The Vault</a>
     <button onclick="openProfileModal()" aria-label="Open profile" class="min-h-11 min-w-11 flex items-center justify-center">
@@ -109,7 +93,6 @@
       <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
     </a>
 
-    <!-- Right-Hand Controls -->
     <div class="flex items-center gap-5 shrink-0">
       <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -139,44 +122,28 @@
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
         <nav class="space-y-1.5">
-          <!-- Video Library -->  
           <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
-            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span class="sidebar-text truncate">Video Library</span>
           </a>
 
-          <!-- Training Records -->
           <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
-            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span class="sidebar-text truncate">Training Records</span>
           </a>
 
-          <!-- Standard Operating Procedures (Enterprise Locked) -->
           <a href="sop.html" title="Standard Operating Procedures" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
-            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="sidebar-text truncate">SOPs</span>
           </a>
 
-          <!-- Risk Assessments (Active Tab) -->
           <a href="risk-assessments.html" title="Risk Assessments" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
-            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-            </svg>
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="sidebar-text truncate">Risk Assessments</span>
           </a>
 
-          <!-- Help & Support -->
           <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
-            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             <span class="sidebar-text truncate">Help & Support</span>
           </a>
         </nav>
@@ -185,9 +152,7 @@
 
     <div class="pt-3 border-t border-slate-200/80">
       <button id="sidebarToggle" type="button" class="w-full flex items-center justify-center gap-2 p-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm">
-        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-        </svg>
+        <svg class="w-4 h-4 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
         <span class="truncate">Collapse View</span>
       </button>
     </div>
@@ -195,65 +160,65 @@
 
   <!-- 3. MAIN CONTENT CONTAINER -->
   <main id="mainContent" class="ml-0 lg:ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
-    <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
+    <div id="pageContentWrapper" class="p-4 sm:p-8 flex-1 flex flex-col justify-between transition-all duration-300">
       <div class="max-w-6xl mx-auto w-full">
-        <!-- Header & Top Action -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
             <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Digital Risk Assessments</h2>
-            <p class="text-muted text-sm">Conduct, review, and archive audit-ready statutory quarterly risk assessments for your operations.</p>
+            <p class="text-muted text-sm">Conduct, review, and record operational safety risk reviews for your farm operations.</p>
           </div>
 
           <div class="flex items-center gap-3">
             <button onclick="openNewAssessmentModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               <span>Conduct Assessment</span>
             </button>
           </div>
         </div>
 
-        <!-- Filter & Search Bar -->
         <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div class="relative w-full sm:w-80">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
           </div>
         </div>
 
+        <!-- Loading State -->
+        <div id="raLoadingState" class="flex min-h-[14rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+            <p class="text-xs font-medium text-slate-600">Loading risk assessment records...</p>
+          </div>
+        </div>
+
         <!-- Assessments Table -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+        <div id="raTableCard" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-left text-sm min-w-[700px]">
               <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground border-b border-slate-200">
                 <tr>
                   <th class="px-6 py-4 font-semibold">Equipment / Operational Task</th>
-                  <th class="px-6 py-4 font-semibold">Work / Area ID</th>
+                  <th class="px-6 py-4 font-semibold">Work Area / Fleet ID</th>
                   <th class="px-6 py-4 font-semibold">Assessor</th>
                   <th class="px-6 py-4 font-semibold">Assessment Date</th>
+                  <th class="px-6 py-4 font-semibold">Review Due</th>
                   <th class="px-6 py-4 font-semibold">Status</th>
-                  <th class="px-6 py-4 font-semibold text-right">Audit PDF</th>
+                  <th class="px-6 py-4 font-semibold text-right">Review PDF</th>
                 </tr>
               </thead>
-              <tbody id="raTableBody" class="divide-y divide-slate-100">
-                <!-- Dynamically populated via JS -->
-              </tbody>
+              <tbody id="raTableBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
           <div id="raEmptyState" class="hidden py-12 text-center">
-            <p class="text-sm font-medium text-foreground">No risk assessments logged yet.</p>
-            <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to record your first quarterly assessment.</p>
+            <p class="text-sm font-medium text-foreground">No operational risk assessments logged yet.</p>
+            <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to log your first assessment.</p>
           </div>
         </div>
       </div>
 
-      <!-- ANCHORED ROUNDED FOOTER -->
+      <!-- FOOTER -->
       <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
         <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
-          <!-- Brand Summary -->
           <div class="max-w-sm space-y-3">
             <div class="flex items-center gap-3">
               <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
@@ -261,27 +226,23 @@
               </div>
               <div>
                 <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
-                <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Operations</p>
               </div>
             </div>
-            <p class="text-xs leading-relaxed text-slate-300">
-              Streamlining operational architectures for modern business safety and workplace compliance.
-            </p>
+            <p class="text-xs leading-relaxed text-slate-300">Streamlining operational architectures for modern workplace safety and equipment risk management.</p>
           </div>
 
-          <!-- Quick Links -->
           <div class="space-y-2.5">
             <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Quick Links</h3>
             <nav class="grid gap-2 text-xs text-slate-300">
-              <a href="vault.html" class="transition-colors hover:text-white hover:underline">The Vault</a>
-              <a href="records.html" class="transition-colors hover:text-white hover:underline">Training Records</a>
-              <a href="sop.html" class="transition-colors hover:text-white hover:underline">Standard Operating Procedures</a>
-              <a href="risk-assessments.html" class="transition-colors hover:text-white hover:underline">Risk Assessments</a>
-              <a href="support.html" class="transition-colors hover:text-white hover:underline">Help & Support</a>
+              <a href="vault.html" class="hover:underline">The Vault</a>
+              <a href="records.html" class="hover:underline">Training Records</a>
+              <a href="sop.html" class="hover:underline">Standard Operating Procedures</a>
+              <a href="risk-assessments.html" class="hover:underline">Risk Assessments</a>
+              <a href="support.html" class="hover:underline">Help & Support</a>
             </nav>
           </div>
 
-          <!-- Subscription Management -->
           <div class="max-w-xs sm:max-w-sm space-y-2.5">
             <h3 class="text-xs font-bold uppercase tracking-[0.22em] text-slate-200">Subscription Management</h3>
             <p class="text-xs leading-relaxed text-slate-300">
@@ -290,137 +251,173 @@
           </div>
         </div>
 
-        <!-- Legal Sub-bar -->
-        <div class="mt-8 border-t border-blue-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+        <div class="mt-8 border-t border-blue-900/60 pt-4 flex items-center justify-between text-[11px] text-slate-400">
           <p>© 2026 Simple Solutions. All rights reserved.</p>
-          <p class="text-slate-400">Internal Operational Compliance Portal</p>
+          <p>Internal Operational Safety Portal</p>
         </div>
       </footer>
     </div>
   </main>
 
   <!-- =========================================================================
-       MODAL: CONDUCT NEW RISK ASSESSMENT
+       MODAL: CONDUCT RISK ASSESSMENT
   ========================================================================== -->
-  <div id="newAssessmentModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative my-8 max-h-[90vh] flex flex-col justify-between">
+  <div id="newAssessmentModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl max-w-5xl w-full p-4 sm:p-8 shadow-2xl relative my-4 sm:my-8 max-h-[94vh] flex flex-col justify-between">
       
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+      <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-200 shrink-0">
         <div>
-          <span class="text-[11px] font-bold tracking-wider text-primary uppercase">Quarterly Operational Compliance</span>
-          <h3 class="font-serif text-2xl font-bold text-foreground">Conduct Risk Assessment (HIRA)</h3>
+          <span class="text-[10px] sm:text-[11px] font-bold tracking-wider text-primary uppercase">Quarterly Operational Review</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-foreground">Conduct Risk Assessment</h3>
         </div>
         <button onclick="closeNewAssessmentModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- Form Body (Scrollable) -->
-      <div class="overflow-y-auto pr-2 py-4 space-y-6 flex-1 text-xs">
+      <div class="overflow-y-auto pr-1 sm:pr-2 py-4 space-y-6 flex-1 text-xs">
         
-        <!-- Step 1: Select Module -->
+        <!-- Step 1: Equipment Selection -->
         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
-          <h4 class="font-bold text-sm text-foreground">1. Equipment / Operational Task Selection</h4>
+          <h4 class="font-bold text-sm text-foreground">1. Equipment & Task Identification</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Select Module / Equipment</label>
-              <select id="modalModuleSelect" onchange="handleModuleSelect(this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+              <label class="block font-semibold text-slate-700 mb-1">Select Module / Equipment Type</label>
+              <select id="modalModuleSelect" onchange="handleModuleSelect(this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
                 <option value="">-- Choose Module --</option>
               </select>
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Equipment Serial / Asset ID</label>
-              <input id="modalEquipmentId" type="text" placeholder="e.g. AG-02 Bosch 9-inch / JD 5075E" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+              <label class="block font-semibold text-slate-700 mb-1">Equipment / Fleet ID or Serial No.</label>
+              <input id="modalEquipmentId" type="text" placeholder="e.g. All Stihl Cutters (BC-01 to BC-30) / Fleet Wide / AG-02" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+              <span class="text-[10px] text-muted mt-1 block">For multiple identical units, enter fleet range or 'Fleet Wide'.</span>
             </div>
             <div class="sm:col-span-2">
               <label class="block font-semibold text-slate-700 mb-1">Specific Work Area / Location</label>
-              <input id="modalWorkArea" type="text" placeholder="e.g. Workshop Bay 2 / Macadamia Shed 1" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
+              <input id="modalWorkArea" type="text" placeholder="e.g. Field 34 & Perimeter / Workshop Bay 2 / Packhouse Shed" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none">
             </div>
           </div>
         </div>
 
-        <!-- Step 2: Hazard Table Preview & Scoring -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <h4 class="font-bold text-sm text-foreground">2. Hazard Identification & 4x4 Risk Matrix Scoring</h4>
-            <span class="text-[11px] text-muted">Initial vs. Residual Risk</span>
+        <!-- Step 2: 4x4 Risk Matrix Banner & Scoring Table -->
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <h4 class="font-bold text-sm text-foreground">2. Hazard Identification & 4×4 Risk Scoring</h4>
+            <span class="text-[11px] text-muted">Risk Score = Likelihood (1-4) × Severity (1-4)</span>
           </div>
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-left">
+
+          <!-- OPTIMIZED 4x4 RATING MATRIX BANNER -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:border-r sm:border-slate-200 sm:pr-3">
+              <div class="text-[11px] font-bold text-slate-800 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span>Likelihood (L)</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-[10.5px] text-slate-600">
+                <span><strong>1</strong> - Rare</span>
+                <span><strong>2</strong> - Unlikely</span>
+                <span><strong>3</strong> - Possible</span>
+                <span><strong>4</strong> - Likely</span>
+              </div>
+            </div>
+            <div class="sm:border-r sm:border-slate-200 sm:pr-3">
+              <div class="text-[11px] font-bold text-slate-800 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span>Severity (S)</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-[10.5px] text-slate-600">
+                <span><strong>1</strong> - Minor</span>
+                <span><strong>2</strong> - Moderate</span>
+                <span><strong>3</strong> - Serious</span>
+                <span><strong>4</strong> - Major</span>
+              </div>
+            </div>
+            <div>
+              <div class="text-[11px] font-bold text-slate-800 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span>Risk Bands (L × S)</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-[10.5px]">
+                <span class="text-emerald-700 font-semibold">1-3: Low</span>
+                <span class="text-amber-700 font-semibold">4-6: Medium</span>
+                <span class="text-orange-700 font-semibold">7-9: High</span>
+                <span class="text-red-700 font-bold">10-16: Critical</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hazards Table (Responsive Scroll for Mobile) -->
+          <div class="border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
+            <table class="w-full text-left min-w-[640px]">
               <thead class="bg-slate-100 text-[11px] font-semibold text-slate-700">
                 <tr>
-                  <th class="p-2.5">Hazard & Consequence</th>
-                  <th class="p-2.5 w-24">Initial</th>
-                  <th class="p-2.5">Mandatory Control Measures</th>
-                  <th class="p-2.5 w-24">Residual</th>
+                  <th class="p-2.5 w-[30%]">Hazard & Potential Consequence</th>
+                  <th class="p-2.5 w-[20%] text-center">Initial Risk (L × S)</th>
+                  <th class="p-2.5 w-[30%]">Mandatory Control Measures</th>
+                  <th class="p-2.5 w-[20%] text-center">Residual Risk (L × S)</th>
                 </tr>
               </thead>
               <tbody id="modalHazardTableBody" class="divide-y divide-slate-100 bg-white">
                 <tr>
-                  <td colspan="4" class="p-4 text-center text-muted">Select a module above to preview and score its hazards.</td>
+                  <td colspan="4" class="p-6 text-center text-muted">Select an equipment module above to load its hazard register.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Step 3: Required PPE & Pre-Use Checklist -->
+        <!-- Step 3: Required PPE & Checklist (Unticked by default) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <h4 class="font-bold text-sm text-foreground">3. Required PPE Verification</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-sm text-foreground">3. Required PPE Verification</h4>
+              <span class="text-[10px] text-muted">Tick verified items</span>
+            </div>
             <div id="modalPpeList" class="space-y-1.5 text-slate-600">
-              <p class="text-muted italic">Select module to load mandatory PPE.</p>
+              <p class="text-muted italic">Select a module to load mandatory PPE items.</p>
             </div>
           </div>
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <h4 class="font-bold text-sm text-foreground">4. Pre-Use Physical Checks</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-sm text-foreground">4. Pre-Use Physical Checks</h4>
+              <span class="text-[10px] text-muted">Tick verified checks</span>
+            </div>
             <div id="modalPreUseList" class="space-y-1.5 text-slate-600">
-              <p class="text-muted italic">Select module to load pre-use checklist.</p>
+              <p class="text-muted italic">Select a module to load physical inspection checks.</p>
             </div>
           </div>
         </div>
 
-        <!-- Step 4: Authorisation & Sign-Off -->
+        <!-- Step 4: Assessor Authorisation -->
         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
-          <h4 class="font-bold text-sm text-foreground">5. Assessor & Supervisor Authorisation</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            
-            <!-- Assessor -->
-            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
-              <label class="block font-semibold text-slate-700">Assessor Name (Conducted By)</label>
-              <input id="modalAssessorName" type="text" placeholder="Full Name of Assessor" class="w-full p-2 border border-slate-200 rounded-lg outline-none">
-              <label class="block text-[11px] font-medium text-slate-500">Digital Signature</label>
-              <canvas id="assessorSigCanvas" class="w-full h-20 border border-dashed border-slate-300 rounded-lg bg-slate-50 cursor-crosshair"></canvas>
-              <button type="button" onclick="clearCanvas('assessorSigCanvas')" class="text-[10px] text-muted hover:text-red-600">Clear Signature</button>
+          <h4 class="font-bold text-sm text-foreground">5. Assessor Authorisation & Verification</h4>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 max-w-xl mx-auto shadow-sm">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Assessor Name (Conducted By)</label>
+              <input id="modalAssessorName" type="text" placeholder="Full Name of Assessor" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-primary">
             </div>
-
-            <!-- Supervisor -->
-            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
-              <label class="block font-semibold text-slate-700">Supervisor / Manager Name</label>
-              <input id="modalSupervisorName" type="text" placeholder="Full Name of Supervisor" class="w-full p-2 border border-slate-200 rounded-lg outline-none">
-              <label class="block text-[11px] font-medium text-slate-500">Digital Signature</label>
-              <canvas id="supervisorSigCanvas" class="w-full h-20 border border-dashed border-slate-300 rounded-lg bg-slate-50 cursor-crosshair"></canvas>
-              <button type="button" onclick="clearCanvas('supervisorSigCanvas')" class="text-[10px] text-muted hover:text-red-600">Clear Signature</button>
+            <div>
+              <div class="flex items-center justify-between pb-1">
+                <label class="text-[11px] font-medium text-slate-500">Draw Digital Signature</label>
+                <button type="button" onclick="clearCanvas('assessorSigCanvas')" class="text-[10px] text-muted hover:text-red-600 underline">Clear Signature</button>
+              </div>
+              <div class="w-full h-36 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 relative overflow-hidden">
+                <canvas id="assessorSigCanvas" class="signature-canvas w-full h-full block bg-white cursor-crosshair"></canvas>
+              </div>
             </div>
-
           </div>
         </div>
 
       </div>
 
       <!-- Modal Action Footer -->
-      <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+      <div class="pt-3 sm:pt-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
         <button onclick="closeNewAssessmentModal()" class="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">
           Cancel
         </button>
-        <button onclick="saveAndGenerateAssessment()" class="px-6 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-md flex items-center gap-2">
-          <span>Complete Assessment & Generate PDF</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-          </svg>
+        <button id="btnSubmitAssessment" onclick="saveAndCompleteAssessment()" class="px-6 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-md flex items-center gap-2">
+          <span>Complete Assessment</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         </button>
       </div>
 
@@ -430,326 +427,919 @@
   <script src="assets/java_files/main.js"></script>
   <script src="assets/java_files/profile-engine.js"></script>
   <script>
-    const MODULE_CATALOG = {
-      "Angle Grinder": {
-        category: "Machinery & Workshop",
-        defaultArea: "Farm Workshop & Maintenance Bay",
-        hazards: [
-          { name: "Rotating disc contact", consequence: "Severe lacerations, amputation", init: "High (9)", controls: "Fitted guard; two-handed grip; authorized operator", res: "Low (3)" },
-          { name: "Disc shattering / bursting", consequence: "Flying projectiles, puncture wounds", init: "Critical (12)", controls: "Matched RPM rating; pre-use crack inspection; no side-grinding with thin discs", res: "Medium (4)" },
-          { name: "Hot sparks and fire ignition", consequence: "Burns, workshop fire outbreak", init: "High (9)", controls: "Clear 5m hot-work zone; DCP fire extinguisher on hand; flame-retardant PPE", res: "Low (3)" }
-        ],
-        ppe: [
-          "Safety goggles / face shield",
-          "Ear protection (earmuffs/plugs)",
-          "Cut-resistant gloves",
-          "Flame-retardant overalls",
-          "Steel-toe safety boots"
-        ],
-        preChecks: [
-          "Inspect body, cord, and plug for damage",
-          "Verify safety guard is positioned correctly",
-          "Inspect disc for cracks, wear, and expiry date",
-          "Ensure disc RPM rating is >= grinder rating",
-          "Confirm workpiece is securely clamped in vice"
-        ]
-      },
-      "Chainsaw": {
-        category: "Machinery & Workshop",
-        defaultArea: "Orchard Perimeter & Tree Clearing",
-        hazards: [
-          { name: "Chainsaw kickback", consequence: "Severe lacerations, fatal arterial cuts", init: "Critical (12)", controls: "Low-kickback chain; two-handed grip; never cut with bar nose; engage chain brake", res: "Medium (4)" },
-          { name: "Ejected wood chips and sawdust", consequence: "Eye trauma, foreign body in eye", init: "High (9)", controls: "Helmet with integrated mesh visor or safety goggles with face shield", res: "Low (2)" },
-          { name: "Refueling fire / hot engine contact", consequence: "Burns, thermal fire ignition", init: "High (9)", controls: "Engine cool-down before fuel top-up; ventilated area away from sparks; fire extinguisher nearby", res: "Low (3)" }
-        ],
-        ppe: [
-          "Safety helmet with mesh visor",
-          "Chainsaw-rated ear defenders",
-          "Cut-resistant gloves",
-          "Chainsaw protective trousers/chaps",
-          "Steel-toe boots with cut protection"
-        ],
-        preChecks: [
-          "Inspect saw body, handles, and guards while engine is OFF",
-          "Check chain tension and guide bar condition",
-          "Inspect chain catcher and anti-vibration mounts",
-          "Test chain brake engagement",
-          "Clear minimum 15m safety exclusion zone"
-        ]
-      },
-      "Brush Cutter": {
-        category: "Machinery & Workshop",
-        defaultArea: "Field Perimeter, Boundaries & Drainage",
-        hazards: [
-          { name: "Thrown debris (stones, wire)", consequence: "Eye damage, bystander lacerations", init: "High (9)", controls: "Inspect and clear cutting path; wear face shield and leg chaps; 15m bystander zone", res: "Low (3)" },
-          { name: "Rotating blade contact", consequence: "Deep cuts, lower limb injury", init: "Critical (12)", controls: "Fitted deflection guard; secure blade lock nut; full two-handed control", res: "Low (2)" }
-        ],
-        ppe: [
-          "Full face shield + safety glasses",
-          "Ear protection",
-          "Cut-resistant gloves",
-          "Leg protector chaps",
-          "Steel-toe safety boots"
-        ],
-        preChecks: [
-          "Inspect harness installation and adjust to body",
-          "Verify blade/line lock nut is secure",
-          "Inspect fuel lines for leaks",
-          "Test emergency stop switch"
-        ]
+    let dbTemplates = [];
+    let loggedAssessments = [];
+    let activeCanvasPad = {};
+
+    function calcRiskBand(score) {
+      if (score >= 10) return { label: 'Critical', bg: 'bg-red-100 text-red-800' };
+      if (score >= 7) return { label: 'High', bg: 'bg-orange-100 text-orange-800' };
+      if (score >= 4) return { label: 'Medium', bg: 'bg-amber-100 text-amber-800' };
+      return { label: 'Low', bg: 'bg-emerald-100 text-emerald-800' };
+    }
+
+    function updateRowScore(idx, type) {
+      const l = parseInt(document.getElementById(`${type}_l_${idx}`)?.value || '1', 10);
+      const s = parseInt(document.getElementById(`${type}_s_${idx}`)?.value || '1', 10);
+      const score = l * s;
+      const band = calcRiskBand(score);
+
+      const pill = document.getElementById(`${type}_pill_${idx}`);
+      if (pill) {
+        pill.className = `px-2 py-0.5 rounded text-[10px] font-bold ${band.bg}`;
+        pill.textContent = `${score} (${band.label})`;
       }
-    };
+    }
 
-    let samplePastAssessments = [
-      { id: "RA-01", task: "Angle Grinder", area: "Workshop Bay 1", assessor: "Guy Dudley", supervisor: "Jasen", date: "2026-08-15", status: "Active" },
-      { id: "RA-02", task: "Chainsaw", area: "Orchard Clearing Block 3", assessor: "Guy Dudley", supervisor: "Dave", date: "2026-05-10", status: "Renewal Due" }
-    ];
+    // Dynamic Live Company Details Fetcher (Matches records.html)
+    async function getFreshCompanyInfo() {
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session?.user?.id) return window.currentCompanyInfo || {};
 
-    function renderAssessmentTable() {
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.company_id) {
+          const { data: companyData } = await window.dbClient
+            .from('companies')
+            .select('name, vat_number, phone, postal_address, contact_email')
+            .eq('id', profile.company_id)
+            .maybeSingle();
+
+          if (companyData) {
+            window.currentCompanyInfo = companyData;
+            return companyData;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed fetching company info:', err);
+      }
+      return window.currentCompanyInfo || {};
+    }
+
+    async function loadRiskAssessmentTemplates() {
+      try {
+        const { data, error } = await window.dbClient
+          .from('risk_assessment_templates')
+          .select('id, title, sub_tag, hazards, required_ppe, pre_use_checks, safe_work_procedures, emergency_procedures')
+          .order('title', { ascending: true });
+
+        if (error) throw error;
+        dbTemplates = data || [];
+
+        const select = document.getElementById('modalModuleSelect');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">-- Choose Module --</option>' + 
+          dbTemplates.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+
+      } catch (err) {
+        console.error('Failed to load risk assessment templates from Supabase:', err);
+      }
+    }
+
+    function handleModuleSelect(templateId) {
+      const template = dbTemplates.find(t => t.id === templateId);
+      const hTable = document.getElementById('modalHazardTableBody');
+      const ppeDiv = document.getElementById('modalPpeList');
+      const preDiv = document.getElementById('modalPreUseList');
+
+      if (!template) {
+        if (hTable) hTable.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-muted">Select an equipment module above to load its hazard register.</td></tr>`;
+        if (ppeDiv) ppeDiv.innerHTML = `<p class="text-muted italic">Select a module to load mandatory PPE items.</p>`;
+        if (preDiv) preDiv.innerHTML = `<p class="text-muted italic">Select a module to load physical inspection checks.</p>`;
+        return;
+      }
+
+      const hazards = Array.isArray(template.hazards) ? template.hazards : [];
+      if (hTable) {
+        hTable.innerHTML = hazards.map((h, i) => {
+          const initL = h.initial_l || 3;
+          const initS = h.initial_s || 3;
+          const initScore = initL * initS;
+          const initBand = calcRiskBand(initScore);
+
+          const resL = h.residual_l || 1;
+          const resS = h.residual_s || 2;
+          const resScore = resL * resS;
+          const resBand = calcRiskBand(resScore);
+
+          return `
+            <tr class="hover:bg-slate-50/50 transition-colors" data-hazard-index="${i}">
+              <td class="p-2.5 font-medium text-slate-800 align-top">
+                <div class="font-semibold text-slate-800 hazard-name">${h.hazard || 'Operational Hazard'}</div>
+                <div class="text-[10px] text-muted mt-0.5 hazard-consequence">${h.consequence || ''}</div>
+              </td>
+              <td class="p-2.5 text-center align-top">
+                <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
+                  <select id="init_l_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === initL ? 'selected' : ''}>L:${v}</option>`).join('')}
+                  </select>
+                  <select id="init_s_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === initS ? 'selected' : ''}>S:${v}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <span id="init_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${initBand.bg}">
+                    ${initScore} (${initBand.label})
+                  </span>
+                </div>
+              </td>
+              <td class="p-2.5 text-[11px] text-slate-600 leading-relaxed hazard-controls align-top">
+                ${h.controls || ''}
+              </td>
+              <td class="p-2.5 text-center align-top">
+                <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
+                  <select id="res_l_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === resL ? 'selected' : ''}>L:${v}</option>`).join('')}
+                  </select>
+                  <select id="res_s_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === resS ? 'selected' : ''}>S:${v}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <span id="res_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${resBand.bg}">
+                    ${resScore} (${resBand.label})
+                  </span>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const ppe = Array.isArray(template.required_ppe) ? template.required_ppe : [];
+      if (ppeDiv) {
+        ppeDiv.innerHTML = ppe.length > 0
+          ? ppe.map((item, idx) => `
+              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-200">
+                <input type="checkbox" id="ppe_check_${idx}" class="modal-ppe-check rounded text-primary focus:ring-0">
+                <span class="text-slate-700 leading-snug">${item}</span>
+              </label>
+            `).join('')
+          : `<p class="text-muted italic">No specialized PPE specified for this module.</p>`;
+      }
+
+      const preChecks = Array.isArray(template.pre_use_checks) ? template.pre_use_checks : [];
+      if (preDiv) {
+        preDiv.innerHTML = preChecks.length > 0
+          ? preChecks.map((item, idx) => `
+              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-200">
+                <input type="checkbox" id="pre_check_${idx}" class="modal-precheck rounded text-primary focus:ring-0">
+                <span class="text-slate-700 leading-snug">${item}</span>
+              </label>
+            `).join('')
+          : `<p class="text-muted italic">Standard visual equipment check required.</p>`;
+      }
+    }
+
+    async function fetchCompanyAssessments() {
+      const loading = document.getElementById('raLoadingState');
+      const tableCard = document.getElementById('raTableCard');
+      const empty = document.getElementById('raEmptyState');
+
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session?.user?.id) return;
+
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        window.userCompanyId = profile?.company_id || null;
+
+        if (!window.userCompanyId) {
+          if (loading) loading.classList.add('hidden');
+          if (tableCard) tableCard.classList.remove('hidden');
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+
+        const { data, error } = await window.dbClient
+          .from('company_risk_assessments')
+          .select('*')
+          .eq('company_id', window.userCompanyId)
+          .order('assessment_date', { ascending: false });
+
+        if (error) throw error;
+        loggedAssessments = data || [];
+
+        renderAssessmentsTable(loggedAssessments);
+
+      } catch (err) {
+        console.error('Error fetching company risk assessments:', err);
+      } finally {
+        if (loading) loading.classList.add('hidden');
+        if (tableCard) tableCard.classList.remove('hidden');
+      }
+    }
+
+    function renderAssessmentsTable(records) {
       const tbody = document.getElementById('raTableBody');
       const empty = document.getElementById('raEmptyState');
       if (!tbody) return;
 
-      if (samplePastAssessments.length === 0) {
+      if (!records || records.length === 0) {
         tbody.innerHTML = '';
-        empty.classList.remove('hidden');
+        if (empty) empty.classList.remove('hidden');
         return;
       }
 
-      empty.classList.add('hidden');
-      tbody.innerHTML = samplePastAssessments.map(ra => `
-        <tr class="hover:bg-slate-50/60 transition-colors">
-          <td class="px-6 py-4 font-semibold text-slate-800">${ra.task}</td>
-          <td class="px-6 py-4 text-slate-600">${ra.area}</td>
-          <td class="px-6 py-4 text-slate-600">${ra.assessor} / <span class="font-medium text-slate-800">${ra.supervisor}</span></td>
-          <td class="px-6 py-4 text-slate-500 text-xs">${ra.date}</td>
-          <td class="px-6 py-4">
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${ra.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-              ${ra.status}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button onclick="downloadAuditPdf('${ra.task}', '${ra.area}', '${ra.assessor}', '${ra.supervisor}', '${ra.date}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all">
-              📄 Download PDF
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      if (empty) empty.classList.add('hidden');
+
+      const now = new Date();
+
+      tbody.innerHTML = records.map(ra => {
+        const dueDate = ra.review_due_date ? new Date(ra.review_due_date) : null;
+        let displayStatus = 'Active';
+        let statusClass = 'bg-emerald-100 text-emerald-800';
+
+        if (dueDate) {
+          const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 0) {
+            displayStatus = 'Expired';
+            statusClass = 'bg-red-100 text-red-800 font-bold';
+          } else if (diffDays <= 14) {
+            displayStatus = 'Critical';
+            statusClass = 'bg-amber-100 text-amber-800 font-bold animate-pulse';
+          }
+        }
+
+        const displayTitle = ra.title || 'Operational Task';
+
+        return `
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="px-6 py-4">
+              <div class="font-semibold text-slate-800">${displayTitle}</div>
+            </td>
+            <td class="px-6 py-4 text-slate-600">
+              <div>${ra.work_area}</div>
+              ${ra.equipment_id ? `<span class="text-[11px] font-mono text-slate-400">ID: ${ra.equipment_id}</span>` : ''}
+            </td>
+            <td class="px-6 py-4 text-slate-600">
+              <div class="text-slate-800 font-medium">${ra.assessor_name}</div>
+            </td>
+            <td class="px-6 py-4 text-slate-500 text-xs">${ra.assessment_date}</td>
+            <td class="px-6 py-4 text-slate-500 text-xs font-semibold">${ra.review_due_date || 'N/A'}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusClass}">
+                ${displayStatus}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="downloadAssessmentPdfById('${ra.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all">
+                📄 Review PDF
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    function initModuleDropdown() {
-      const select = document.getElementById('modalModuleSelect');
-      if (!select) return;
-      select.innerHTML = '<option value="">-- Choose Module --</option>' + 
-        Object.keys(MODULE_CATALOG).map(k => `<option value="${k}">${k}</option>`).join('');
+    function setupCanvasPad(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      const displayWidth = rect.width > 0 ? rect.width : 450;
+      const displayHeight = rect.height > 0 ? rect.height : 144;
+
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#1e3a5f';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      let isDrawing = false;
+
+      function getCoords(e) {
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - r.left,
+          y: e.clientY - r.top
+        };
+      }
+
+      canvas.onpointerdown = (e) => {
+        canvas.setPointerCapture(e.pointerId);
+        isDrawing = true;
+        const pos = getCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      };
+
+      canvas.onpointermove = (e) => {
+        if (!isDrawing) return;
+        const pos = getCoords(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      };
+
+      canvas.onpointerup = (e) => {
+        if (isDrawing) {
+          isDrawing = false;
+          try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      };
+
+      canvas.onpointercancel = () => { isDrawing = false; };
+
+      activeCanvasPad[canvasId] = { canvas, ctx, dpr };
     }
 
-    function handleModuleSelect(moduleKey) {
-      const mod = MODULE_CATALOG[moduleKey];
-      if (!mod) return;
+    function clearCanvas(canvasId) {
+      const pad = activeCanvasPad[canvasId];
+      if (!pad) return;
+      pad.ctx.clearRect(0, 0, pad.canvas.width, pad.canvas.height);
+    }
 
-      document.getElementById('modalWorkArea').value = mod.defaultArea;
-
-      // Render Hazards
-      const hTable = document.getElementById('modalHazardTableBody');
-      hTable.innerHTML = mod.hazards.map(h => `
-        <tr>
-          <td class="p-2.5 font-medium text-slate-800">${h.name}<br><span class="text-[10px] text-muted">${h.consequence}</span></td>
-          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 text-[10px] font-bold">${h.init}</span></td>
-          <td class="p-2.5 text-[11px] text-slate-600">${h.controls}</td>
-          <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold">${h.res}</span></td>
-        </tr>
-      `).join('');
-
-      // Render PPE
-      const ppeDiv = document.getElementById('modalPpeList');
-      ppeDiv.innerHTML = mod.ppe.map(p => `
-        <label class="flex items-center gap-2">
-          <input type="checkbox" checked class="rounded text-primary focus:ring-0">
-          <span>${p}</span>
-        </label>
-      `).join('');
-
-      // Render Pre-use checks
-      const preDiv = document.getElementById('modalPreUseList');
-      preDiv.innerHTML = mod.preChecks.map(c => `
-        <label class="flex items-center gap-2">
-          <input type="checkbox" checked class="rounded text-primary focus:ring-0">
-          <span>${c}</span>
-        </label>
-      `).join('');
+    function isCanvasEmpty(canvasId) {
+      const pad = activeCanvasPad[canvasId];
+      if (!pad) return true;
+      const blank = document.createElement('canvas');
+      blank.width = pad.canvas.width;
+      blank.height = pad.canvas.height;
+      return pad.canvas.toDataURL() === blank.toDataURL();
     }
 
     function openNewAssessmentModal() {
+      document.getElementById('modalModuleSelect').value = '';
+      document.getElementById('modalEquipmentId').value = '';
+      document.getElementById('modalWorkArea').value = '';
+      document.getElementById('modalAssessorName').value = '';
+      
+      document.getElementById('modalHazardTableBody').innerHTML = `<tr><td colspan="4" class="p-6 text-center text-muted">Select an equipment module above to load its hazard register.</td></tr>`;
+      document.getElementById('modalPpeList').innerHTML = `<p class="text-muted italic">Select a module to load mandatory PPE items.</p>`;
+      document.getElementById('modalPreUseList').innerHTML = `<p class="text-muted italic">Select a module to load physical inspection checks.</p>`;
+
       document.getElementById('newAssessmentModal').classList.remove('hidden');
-      initCanvas('assessorSigCanvas');
-      initCanvas('supervisorSigCanvas');
+      
+      setTimeout(() => {
+        setupCanvasPad('assessorSigCanvas');
+        clearCanvas('assessorSigCanvas');
+      }, 150);
     }
 
     function closeNewAssessmentModal() {
       document.getElementById('newAssessmentModal').classList.add('hidden');
+      clearCanvas('assessorSigCanvas');
     }
 
-    // Canvas drawing helpers
-    function initCanvas(canvasId) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#1e3a5f';
+    async function saveAndCompleteAssessment() {
+      const templateId = document.getElementById('modalModuleSelect').value;
+      const equipId = document.getElementById('modalEquipmentId').value.trim();
+      const area = document.getElementById('modalWorkArea').value.trim();
+      const assessor = document.getElementById('modalAssessorName').value.trim();
+      const btn = document.getElementById('btnSubmitAssessment');
 
-      let drawing = false;
-      canvas.onmousedown = (e) => {
-        drawing = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-      };
-      canvas.onmousemove = (e) => {
-        if (drawing) {
-          ctx.lineTo(e.offsetX, e.offsetY);
-          ctx.stroke();
-        }
-      };
-      window.onmouseup = () => {
-        drawing = false;
-      };
-    }
-
-    function clearCanvas(canvasId) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function saveAndGenerateAssessment() {
-      const moduleKey = document.getElementById('modalModuleSelect').value;
-      const area = document.getElementById('modalWorkArea').value || 'General Site';
-      const assessor = document.getElementById('modalAssessorName').value || 'Assessor';
-      const supervisor = document.getElementById('modalSupervisorName').value || 'Supervisor';
-
-      if (!moduleKey) {
-        alert('Please select an operational module.');
+      if (!templateId) {
+        alert('Please select an operational module template.');
+        return;
+      }
+      if (!area) {
+        alert('Please specify the work area or operational location.');
+        return;
+      }
+      if (!assessor) {
+        alert('Please provide the Assessor name.');
+        return;
+      }
+      if (isCanvasEmpty('assessorSigCanvas')) {
+        alert('Please ensure the Assessor has signed on the signature pad.');
         return;
       }
 
-      const today = new Date().toISOString().split('T')[0];
-      samplePastAssessments.unshift({
-        id: `RA-0${samplePastAssessments.length + 1}`,
-        task: moduleKey,
-        area: area,
-        assessor: assessor,
-        supervisor: supervisor,
-        date: today,
-        status: "Active"
+      const template = dbTemplates.find(t => t.id === templateId);
+      const assessorSig = activeCanvasPad['assessorSigCanvas'].canvas.toDataURL('image/png');
+      
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const renewalDate = new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
+      const scoredHazards = [];
+      document.querySelectorAll('#modalHazardTableBody tr[data-hazard-index]').forEach((tr, i) => {
+        const hazardName = tr.querySelector('.hazard-name')?.textContent?.trim() || '';
+        const consequence = tr.querySelector('.hazard-consequence')?.textContent?.trim() || '';
+        const controls = tr.querySelector('.hazard-controls')?.textContent?.trim() || '';
+
+        const initL = parseInt(document.getElementById(`init_l_${i}`)?.value || '3', 10);
+        const initS = parseInt(document.getElementById(`init_s_${i}`)?.value || '3', 10);
+        const initScore = initL * initS;
+
+        const resL = parseInt(document.getElementById(`res_l_${i}`)?.value || '1', 10);
+        const resS = parseInt(document.getElementById(`res_s_${i}`)?.value || '2', 10);
+        const resScore = resL * resS;
+
+        scoredHazards.push({
+          hazard: hazardName,
+          consequence: consequence,
+          controls: controls,
+          initial_l: initL,
+          initial_s: initS,
+          initial_risk: `${initScore} (${calcRiskBand(initScore).label})`,
+          residual_l: resL,
+          residual_s: resS,
+          residual_risk: `${resScore} (${calcRiskBand(resScore).label})`
+        });
       });
 
-      renderAssessmentTable();
-      closeNewAssessmentModal();
-      downloadAuditPdf(moduleKey, area, assessor, supervisor, today);
+      const ppeListWithStatus = [];
+      document.querySelectorAll('#modalPpeList label').forEach(lbl => {
+        const text = lbl.querySelector('span')?.textContent?.trim() || '';
+        const isChecked = lbl.querySelector('input')?.checked || false;
+        ppeListWithStatus.push({ item: text, verified: isChecked });
+      });
+
+      const preListWithStatus = [];
+      document.querySelectorAll('#modalPreUseList label').forEach(lbl => {
+        const text = lbl.querySelector('span')?.textContent?.trim() || '';
+        const isChecked = lbl.querySelector('input')?.checked || false;
+        preListWithStatus.push({ item: text, verified: isChecked });
+      });
+
+      const newRecord = {
+        company_id: window.userCompanyId,
+        template_id: template.id,
+        title: template.title,
+        work_area: area,
+        equipment_id: equipId || null,
+        assessor_name: assessor,
+        assessment_date: today,
+        review_due_date: renewalDate,
+        risk_items: scoredHazards,
+        ppe_verified: ppeListWithStatus,
+        pre_use_verified: preListWithStatus,
+        assessor_signature: assessorSig,
+        status: 'Active'
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = `<div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div> Saving...`;
+
+      try {
+        const { data, error } = await window.dbClient
+          .from('company_risk_assessments')
+          .insert([newRecord])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        alert('✓ Operational Risk Assessment recorded and stored in directory.');
+        loggedAssessments.unshift(data || newRecord);
+        renderAssessmentsTable(loggedAssessments);
+        closeNewAssessmentModal();
+
+      } catch (err) {
+        console.error('Error saving risk assessment to Supabase:', err);
+        alert(`Error saving assessment: ${err.message || 'Database error'}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Complete Assessment</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+      }
     }
 
-    // jsPDF Audit Form Generator
-    function downloadAuditPdf(task, area, assessor, supervisor, date) {
-      if (!window.jspdf || !window.jspdf.jsPDF) return;
+    // 8. TIGHT FLOW AUDIT PDF ENGINE (WITH RECTANGULAR COMPANY STAMP ON RIGHT)
+    async function downloadAssessmentPdfById(recordId) {
+      const record = loggedAssessments.find(r => r.id === recordId);
+      const template = dbTemplates.find(t => t.id === record?.template_id) || {};
+      if (record) await downloadFullAuditPdf(record, template);
+    }
+
+    async function downloadFullAuditPdf(record, template) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF generator is loading. Please try again.');
+        return;
+      }
+
+      // Retrieve fresh legal stamp details from Supabase (identical to records.html)
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 14;
+      const contentWidth = pageWidth - (margin * 2);
+      const bottomLimit = pageHeight - 16;
 
-      // Header
-      doc.setFont('times', 'bold');
-      doc.setFontSize(20);
-      doc.setTextColor(30, 58, 95);
-      doc.text("SIMPLE SOLUTIONS", 15, 20);
+      const docTitle = (record.title || 'Operational Task').toUpperCase();
+      let pageNumber = 1;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text("STATUTORY HAZARD IDENTIFICATION & RISK ASSESSMENT (HIRA)", 15, 26);
-
-      doc.setDrawColor(30, 58, 95);
-      doc.setLineWidth(0.8);
-      doc.line(15, 29, pageWidth - 15, 29);
-
-      // Metadata Grid
-      doc.setFillColor(248, 250, 252);
-      doc.rect(15, 33, pageWidth - 30, 18, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text("TASK / OPERATION:", 18, 38);
-      doc.text("WORK AREA:", 85, 38);
-      doc.text("ASSESSMENT DATE:", 150, 38);
-
-      doc.setFontSize(9.5);
-      doc.setTextColor(15, 23, 42);
-      doc.text(task.toUpperCase(), 18, 45);
-      doc.text(area, 85, 45);
-      doc.text(date, 150, 45);
-
-      // Section 1: HIRA Table Heading
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(30, 58, 95);
-      doc.text("1. Hazard Identification & Control Table", 15, 60);
-
-      const mod = MODULE_CATALOG[task] || MODULE_CATALOG["Angle Grinder"];
-      let y = 68;
-
-      mod.hazards.forEach((h, i) => {
-        doc.setFontSize(8.5);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(30, 41, 59);
-        doc.text(`${i + 1}. ${h.name} (Residual Risk: ${h.res})`, 15, y);
+      function renderRunningHeader() {
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`${record.title || 'Task'} - Risk Assessment Guide`, margin, 10);
+        doc.text(`Page ${pageNumber}`, pageWidth - margin, 10, { align: 'right' });
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.4);
+        doc.line(margin, 12, pageWidth - margin, 12);
+      }
+
+      let y = 18;
+
+      function ensureSpace(neededHeight) {
+        if (y + neededHeight > bottomLimit) {
+          doc.addPage();
+          pageNumber++;
+          renderRunningHeader();
+          y = 18;
+        }
+      }
+
+      renderRunningHeader();
+
+      // Title
+      doc.setFont('times', 'bold');
+      doc.setFontSize(15);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`${docTitle} - OPERATIONAL RISK ASSESSMENT`, margin, y);
+      y += 5;
+
+      // Meta Block
+      const colW = contentWidth / 2;
+      const rowH = 7.5;
+      const metaRows = [
+        ['Company / Farm:', companyName, 'Work Area:', record.work_area || 'General Site'],
+        ['Task Reviewed:', record.title || 'Operational Safe Work', 'Assessment Date:', record.assessment_date || ''],
+        ['Assessor Name:', record.assessor_name || '', 'Review Due Date:', record.review_due_date || ''],
+        ['Equipment / Fleet ID:', record.equipment_id || 'Fleet Wide', 'Operational Context:', 'Internal Farm Safety Review']
+      ];
+
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+
+      metaRows.forEach(row => {
+        doc.rect(margin, y, colW, rowH);
+        doc.rect(margin + colW, y, colW, rowH);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.2);
         doc.setTextColor(71, 85, 105);
-        doc.text(doc.splitTextToSize(`Controls: ${h.controls}`, 180), 18, y + 4);
-        y += 12;
+        doc.text(row[0], margin + 2, y + 5);
+        doc.text(row[2], margin + colW + 2, y + 5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(15, 23, 42);
+        doc.text(row[1], margin + 34, y + 5);
+        doc.text(row[3], margin + colW + 34, y + 5);
+
+        y += rowH;
       });
 
-      // Section 2: PPE & Checks
       y += 4;
+
+      // 4x4 Matrix Legend Box
+      const matrixBoxH = 14;
+      doc.setFillColor(248, 250, 252);
+      doc.rect(margin, y, contentWidth, matrixBoxH, 'FD');
+
+      const matW = contentWidth / 3;
+      doc.line(margin + matW, y, margin + matW, y + matrixBoxH);
+      doc.line(margin + (matW * 2), y, margin + (matW * 2), y + matrixBoxH);
+
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(30, 58, 95);
-      doc.text("2. Mandatory PPE & Pre-Use Checks Verified", 15, y);
+      doc.setFontSize(7.2);
+      doc.setTextColor(71, 85, 105);
+      doc.text("LIKELIHOOD (L)", margin + 3, y + 4);
+      doc.text("SEVERITY (S)", margin + matW + 3, y + 4);
+      doc.text("RISK BANDS (L x S)", margin + (matW * 2) + 3, y + 4);
 
-      y += 6;
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
+      doc.setFontSize(6.5);
       doc.setTextColor(51, 65, 85);
-      doc.text(`PPE Verified: ${mod.ppe.join(', ')}`, 15, y);
-      y += 5;
-      doc.text(`Pre-Use Checks: All mechanical guards, emergency stops, and physical cables inspected.`, 15, y);
+      doc.text("1-Rare  2-Unlikely  3-Possible  4-Likely", margin + 3, y + 9);
+      doc.text("1-Minor  2-Moderate  3-Serious  4-Major", margin + matW + 3, y + 9);
+      doc.text("1-3: Low   4-6: Medium   7-9: High   10-16: Critical", margin + (matW * 2) + 3, y + 9);
 
-      // Section 3: Sign-Off Block
-      y = 230;
-      doc.setDrawColor(203, 213, 225);
-      doc.rect(15, y, pageWidth - 30, 45);
+      y += matrixBoxH + 5;
+
+      // Section 1: HIRA Register
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("1. Operational Hazard Identification & Risk Assessment", margin, y);
+      y += 4;
+
+      const colHazardW = 40;
+      const colConseqW = 38;
+      const colInitW = 20;
+      const colCtrlW = 64;
+      const colResW = 20;
+
+      doc.setFillColor(241, 245, 249);
+      doc.rect(margin, y, contentWidth, 6.5, 'FD');
+
+      doc.setFontSize(6.8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 58, 95);
+      doc.text("HAZARD", margin + 2, y + 4.5);
+      doc.text("POTENTIAL CONSEQUENCE", margin + colHazardW + 2, y + 4.5);
+      doc.text("INITIAL", margin + colHazardW + colConseqW + 2, y + 4.5);
+      doc.text("CONTROL MEASURES", margin + colHazardW + colConseqW + colInitW + 2, y + 4.5);
+      doc.text("RESIDUAL", margin + colHazardW + colConseqW + colInitW + colCtrlW + 2, y + 4.5);
+
+      y += 6.5;
+      const hazards = Array.isArray(record.risk_items) ? record.risk_items : [];
+
+      hazards.forEach(h => {
+        const hazardLines = doc.splitTextToSize(h.hazard || '', colHazardW - 3);
+        const conseqLines = doc.splitTextToSize(h.consequence || '', colConseqW - 3);
+        const ctrlLines = doc.splitTextToSize(h.controls || '', colCtrlW - 3);
+        const rowHeight = Math.max(hazardLines.length, conseqLines.length, ctrlLines.length) * 3.2 + 3.5;
+
+        ensureSpace(rowHeight);
+
+        doc.setDrawColor(226, 232, 240);
+        doc.rect(margin, y, contentWidth, rowHeight, 'S');
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(15, 23, 42);
+
+        doc.text(hazardLines, margin + 2, y + 3.5);
+        doc.text(conseqLines, margin + colHazardW + 2, y + 3.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(h.initial_risk || ''), margin + colHazardW + colConseqW + 2, y + 3.8);
+
+        doc.setFont('helvetica', 'normal');
+        doc.text(ctrlLines, margin + colHazardW + colConseqW + colInitW + 2, y + 3.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(h.residual_risk || ''), margin + colHazardW + colConseqW + colInitW + colCtrlW + 2, y + 3.8);
+
+        y += rowHeight;
+      });
+
+      y += 5;
+
+      // Section 2: PPE
+      ensureSpace(24);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("2. Mandatory Personal Protective Equipment (PPE)", margin, y);
+      y += 4;
+
+      const ppeData = Array.isArray(record.ppe_verified) ? record.ppe_verified : [];
+      const col2W = contentWidth / 2;
+
+      for (let i = 0; i < ppeData.length; i += 2) {
+        ensureSpace(5.5);
+        const item1 = ppeData[i];
+        const item2 = ppeData[i + 1];
+
+        if (item1) {
+          doc.setDrawColor(148, 163, 184);
+          doc.rect(margin + 2, y + 0.5, 3, 3, item1.verified ? 'FD' : 'S');
+          doc.setFont('helvetica', item1.verified ? 'bold' : 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(item1.verified ? 15 : 100, item1.verified ? 23 : 116, item1.verified ? 42 : 139);
+          doc.text(String(item1.item || item1), margin + 7, y + 3);
+        }
+
+        if (item2) {
+          doc.setDrawColor(148, 163, 184);
+          doc.rect(margin + col2W + 2, y + 0.5, 3, 3, item2.verified ? 'FD' : 'S');
+          doc.setFont('helvetica', item2.verified ? 'bold' : 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(item2.verified ? 15 : 100, item2.verified ? 23 : 116, item2.verified ? 42 : 139);
+          doc.text(String(item2.item || item2), margin + col2W + 7, y + 3);
+        }
+
+        y += 5;
+      }
+
+      y += 4;
+
+      // Section 3: Pre-Use Inspection Checklist
+      ensureSpace(24);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("3. Pre-Use Inspection Checklist", margin, y);
+      y += 4;
+
+      const preData = (Array.isArray(record.pre_use_verified) && record.pre_use_verified.length > 0)
+        ? record.pre_use_verified 
+        : (Array.isArray(template.pre_use_checks) ? template.pre_use_checks.map(c => ({ item: c, verified: true })) : []);
+
+      for (let i = 0; i < preData.length; i += 2) {
+        ensureSpace(5.5);
+        const c1 = preData[i];
+        const c2 = preData[i + 1];
+
+        if (c1) {
+          doc.setDrawColor(148, 163, 184);
+          doc.rect(margin + 2, y + 0.5, 3, 3, c1.verified ? 'FD' : 'S');
+          doc.setFont('helvetica', c1.verified ? 'bold' : 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(c1.verified ? 15 : 100, c1.verified ? 23 : 116, c1.verified ? 42 : 139);
+          const t1 = doc.splitTextToSize(String(c1.item || c1), col2W - 10);
+          doc.text(t1[0], margin + 7, y + 3);
+        }
+
+        if (c2) {
+          doc.setDrawColor(148, 163, 184);
+          doc.rect(margin + col2W + 2, y + 0.5, 3, 3, c2.verified ? 'FD' : 'S');
+          doc.setFont('helvetica', c2.verified ? 'bold' : 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(c2.verified ? 15 : 100, c2.verified ? 23 : 116, c2.verified ? 42 : 139);
+          const t2 = doc.splitTextToSize(String(c2.item || c2), col2W - 10);
+          doc.text(t2[0], margin + col2W + 7, y + 3);
+        }
+
+        y += 5;
+      }
+
+      y += 4;
+
+      // Section 4: Safe Work Procedure (SWP)
+      ensureSpace(30);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("4. Safe Work Procedure (SWP)", margin, y);
+      y += 4;
+
+      const swp = template.safe_work_procedures || {};
+      const swpPhases = [
+        ['Before Starting:', swp.before_starting || []],
+        ['During Operation:', swp.during_operation || []],
+        ['After Operation / Handover:', swp.post_operation || []]
+      ];
+
+      swpPhases.forEach(([phaseName, steps]) => {
+        ensureSpace(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(71, 85, 105);
+        doc.text(phaseName, margin, y);
+        y += 3.5;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.8);
+        doc.setTextColor(30, 41, 59);
+
+        if (steps.length === 0) {
+          doc.text("Adhere strictly to manufacturer operating manual and farm supervisor guidance.", margin + 4, y);
+          y += 4;
+        } else {
+          steps.forEach((step, idx) => {
+            const stepLines = doc.splitTextToSize(`${idx + 1}. ${step}`, contentWidth - 4);
+            ensureSpace((stepLines.length * 3.2) + 1);
+            doc.text(stepLines, margin + 2, y);
+            y += (stepLines.length * 3.2) + 1;
+          });
+        }
+        y += 1.5;
+      });
+
+      y += 3;
+
+      // Section 5: Emergency Protocols
+      ensureSpace(24);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 58, 95);
+      doc.text("5. Emergency & Incident Response Protocols", margin, y);
+      y += 4;
+
+      const emProcedures = template.emergency_procedures || [
+        "Immediately isolate equipment and disconnect power/fuel source.",
+        "Deploy on-site dry chemical fire extinguisher if fire outbreak occurs.",
+        "Administer certified occupational first aid and seek medical care if required.",
+        "Preserve machine state for incident investigation and report to farm manager."
+      ];
+
+      emProcedures.forEach(ep => {
+        ensureSpace(5);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.8);
+        doc.setTextColor(51, 65, 85);
+        doc.text(`* ${ep}`, margin + 2, y);
+        y += 3.8;
+      });
+
+      y += 5;
+
+      // Section 6: Operational Verification & Sign-Off (Direct Flow Inside Main Box)
+      const signBoxH = 38;
+      ensureSpace(signBoxH + 16);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(30, 58, 95);
-      doc.text("STATUTORY VERIFICATION & SIGN-OFF", 20, y + 8);
+      doc.text("6. Operational Review & Verification Sign-Off", margin, y);
+      y += 4;
+
+      // Outer Container Box
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.5);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, y, contentWidth, signBoxH, 'S');
+
+      // 1. Column 1 (Left): Assessor Details
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text("ASSESSOR VERIFICATION", margin + 4, y + 6);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
+      doc.setFontSize(7.2);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Assessor Name:   ${record.assessor_name}`, margin + 4, y + 15);
+      doc.text(`Assessment Date: ${record.assessment_date}`, margin + 4, y + 22);
+      doc.text(`Review Due Date: ${record.review_due_date || '90 Days'}`, margin + 4, y + 29);
+
+      // 2. Column 2 (Middle): Assessor Digital Signature
+      const sigCenterX = margin + 84;
+      if (record.assessor_signature) {
+        doc.addImage(record.assessor_signature, 'PNG', sigCenterX - 22, y + 4, 44, 20);
+      }
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.4);
+      doc.line(sigCenterX - 26, y + 27, sigCenterX + 26, y + 27);
+
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Verified Assessor Digital Signature", sigCenterX, y + 32, { align: 'center' });
+
+      // 3. Column 3 (Right): Company Stamp Details (Seamless Inside Main Block)
+      const stampCenterX = margin + contentWidth - 34;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), stampCenterX, y + 6.5, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
       doc.setTextColor(51, 65, 85);
-      doc.text(`Assessor: ${assessor} (Verified on site)`, 20, y + 20);
-      doc.text(`Supervisor: ${supervisor} (Authorized)`, 110, y + 20);
 
-      doc.line(20, y + 35, 80, y + 35);
-      doc.text("Assessor Signature", 20, y + 39);
+      let stampLineY = y + 11.5;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.8;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.8;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.8;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.8;
+      }
 
-      doc.line(110, y + 35, 170, y + 35);
-      doc.text("Supervisor Signature", 110, y + 39);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.2);
+      doc.setTextColor(100, 116, 139);
+      doc.text("OFFICIAL VERIFIED STAMP", stampCenterX, y + signBoxH - 6.8, { align: 'center' });
 
-      doc.save(`Risk_Assessment_${task.replace(/\s+/g, '_')}_${date}.pdf`);
+      y += signBoxH + 5;
+
+      // Clean Operational Liability Disclaimer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.2);
+      doc.setTextColor(148, 163, 184);
+      const disclaimerText = "DISCLAIMER: This document serves as an internal operational safety review and procedural risk guide compiled for internal farm use. It does not constitute certified legal, statutory, or accredited occupational health and safety engineering advice.";
+      doc.text(doc.splitTextToSize(disclaimerText, contentWidth), margin, y);
+
+      doc.save(`Risk_Assessment_${(record.title || 'Task').replace(/\s+/g, '_')}_${record.assessment_date}.pdf`);
     }
 
+    document.getElementById('raSearchInput')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = loggedAssessments.filter(ra => 
+        (ra.title || '').toLowerCase().includes(q) ||
+        (ra.work_area || '').toLowerCase().includes(q) ||
+        (ra.equipment_id || '').toLowerCase().includes(q)
+      );
+      renderAssessmentsTable(filtered);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
-      initModuleDropdown();
-      renderAssessmentTable();
+      loadRiskAssessmentTemplates();
+      fetchCompanyAssessments();
     });
   </script>
 </body>
