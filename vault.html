@@ -271,6 +271,7 @@
               <option value="General Safety">General Safety</option>
               <option value="Machinery & Workshop">Machinery & Workshop</option>
               <option value="Macadamia Processing">Macadamia Processing</option>
+              <option value="Banana Processing">Banana Processing</option>
               <option value="Pumping & Irrigation">Pumping & Irrigation</option>
             </select>
             <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
@@ -532,6 +533,8 @@
           let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
           if (subTag === 'Macadamia Processing') {
             badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/60';
+          } else if (subTag === 'Banana Processing') {
+            badgeClass = 'bg-yellow-50 text-yellow-800 border-yellow-200/60';
           } else if (subTag === 'Machinery & Workshop') {
             badgeClass = 'bg-blue-50 text-blue-700 border-blue-200/60';
           } else if (subTag === 'Pumping & Irrigation') {
