@@ -230,7 +230,7 @@
               <a href="systems.html" class="w-full inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-foreground py-3 px-6 rounded-md font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm">
                 Explore Workflow Systems &rarr;
               </a>
-              <a href="https://calendar.app.google/xwA29eip7c7uDqPt6" target="_blank" rel="noopener noreferrer" class="text-xs text-center text-muted hover:text-primary underline py-1">Book a 30-Min Scoping Call &rarr;</a>
+              <a href="https://calendar.app.google/xwA29eip7c7uDqPt6" onclick="gtag('event', 'click_book_scoping_call', {'event_category': 'consulting'});" target="_blank" rel="noopener noreferrer" class="text-xs text-center text-muted hover:text-primary underline py-1">Book a 30-Min Scoping Call &rarr;</a>
             </div>
           </div>
         </div>
@@ -868,16 +868,21 @@
     };
 
     function openCheckoutModal(planCode, amountInCents, tierName, priceDisplay, desc) {
-      activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
-
-      // --- GA4 Custom Event: Checkout Initiated ---
+      // GA4: Standard Begin Checkout Event
       if (typeof gtag === 'function') {
         gtag('event', 'begin_checkout', {
-          item_name: tierName,
           value: amountInCents / 100,
-          currency: 'ZAR'
+          currency: 'ZAR',
+          items: [{
+            item_id: planCode,
+            item_name: tierName,
+            price: amountInCents / 100,
+            quantity: 1
+          }]
         });
       }
+
+      activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
       
       document.getElementById('checkout-plan-name').textContent = tierName;
       document.getElementById('checkout-plan-price').textContent = priceDisplay;
@@ -973,14 +978,18 @@
         onSuccess: async (transaction) => {
           console.log('[Paystack] Payment authorized. Ref:', transaction.reference);
 
-          // --- GA4 Custom Event: Successful Subscription Purchase ---
+          // GA4: Standard Ecommerce Purchase Event
           if (typeof gtag === 'function') {
             gtag('event', 'purchase', {
               transaction_id: transaction.reference,
               value: activeCheckoutPlan.amountInCents / 100,
               currency: 'ZAR',
-              tier: activeCheckoutPlan.tierName,
-              company: userCompany
+              items: [{
+                item_id: activeCheckoutPlan.planCode,
+                item_name: activeCheckoutPlan.tierName,
+                price: activeCheckoutPlan.amountInCents / 100,
+                quantity: 1
+              }]
             });
           }
 
