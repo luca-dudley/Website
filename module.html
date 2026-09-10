@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0HP7V44GT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-L0HP7V44GT', {
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+
   <title>The Vault - Training Module</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,7 +173,7 @@
           <!-- Training Records -->
           <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
             <span class="sidebar-text truncate">Training Records</span>
           </a>
@@ -171,6 +184,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             <span class="sidebar-text truncate">SOPs</span>
+          </a>
+
+          <!-- Digital Risk Assessments -->
+          <a href="risk-assessments.html" title="Risk Assessments" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span class="sidebar-text truncate">Risk Assessments</span>
           </a>
 
           <!-- Help & Support -->
@@ -774,6 +795,15 @@
 
         if (error) throw error;
 
+        // --- GA4 Custom Event: Compliance Log Logged ---
+        if (typeof gtag === 'function') {
+          gtag('event', 'compliance_log_submitted', {
+            module: moduleTitle,
+            training_type: currentLogMode,
+            trainee_count: recordsToInsert.length
+          });
+        }
+
         alert(`✓ Successfully logged ${recordsToInsert.length} verified training record(s) for ${moduleTitle}.`);
         closeComplianceModal();
 
@@ -959,6 +989,14 @@
           const progressSeconds = Math.floor(Number(data?.seconds || 0));
           const durationSeconds = Math.floor(Number(data?.duration || 0));
           const percentage = durationSeconds > 0 ? Math.round((progressSeconds / durationSeconds) * 100) : 0;
+          const isCompleted = percentage >= 90;
+
+          if (isCompleted && typeof gtag === 'function') {
+            gtag('event', 'video_complete', {
+              video_title: video.title,
+              video_id: String(videoId)
+            });
+          }
 
           await dbClient.from('user_video_progress').upsert({
             user_id: session.user.id,

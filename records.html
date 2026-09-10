@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0HP7V44GT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-L0HP7V44GT', {
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+
   <title>Training Records - The Vault</title>
   <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -179,6 +192,7 @@
       <div>
         <p class="sidebar-category-header px-3 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Workspace</p>
         <nav class="space-y-1.5">
+          <!-- Video Library -->
           <a href="vault.html" title="Video Library" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -188,9 +202,9 @@
           </a>
 
           <!-- Training Records (Active) -->
-          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-semibold bg-primary text-white shadow-sm transition-all">
-            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          <a href="records.html" title="Training Records" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
             <span class="sidebar-text truncate">Training Records</span>
           </a>
@@ -203,6 +217,15 @@
             <span class="sidebar-text truncate">SOPs</span>
           </a>
 
+          <!-- Digital Risk Assessment (Enterprise Locked) -->
+          <a href="risk-assessments.html" title="Risk Assessments" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
+            <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span class="sidebar-text truncate">Risk Assessments</span>
+          </a>
+
+          <!-- Help & Support -->
           <a href="support.html" title="Help & Support" class="sidebar-nav-btn flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all">
             <svg class="w-6 h-6 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -1059,6 +1082,13 @@
       doc.setFont('helvetica', 'bold');
       doc.text(`Internal Record Ref: ${docHash} • Logged via The Vault by Simple Solutions`, pageWidth / 2, 193, { align: 'center' });
 
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_individual_cert', {
+          module: moduleTitle,
+          employee: employeeName
+        });
+      }
+
       doc.save(`Training_Record_${(employeeName || 'Operator').replace(/\s+/g, '_')}_${moduleTitle.replace(/\s+/g, '_')}.pdf`);
     }
 
@@ -1526,6 +1556,13 @@
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
       doc.text(`Page 2 of 2 — Trainee Sign-Off Register • Logged via The Vault by Simple Solutions`, pageWidth / 2, 200, { align: 'center' });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_group_register', {
+          module: moduleTitle,
+          batch_ref: batchSessionId
+        });
+      }
 
       doc.save(`Group_Register_${moduleTitle.replace(/\s+/g, '_')}_${sessionDate}.pdf`);
     }
