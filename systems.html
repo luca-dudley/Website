@@ -9,11 +9,14 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-L0HP7V44GT', {
-      cookie_flags: 'SameSite=None;Secure'
-    });
+    // Block localhost and local dev environments from sending data
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      window['ga-disable-G-L0HP7V44GT'] = true;
+    }
+
+    gtag('js', new Date());
+    gtag('config', 'G-L0HP7V44GT');
   </script>
 
   <title>Workflow Engineering — Simple Solutions</title>
