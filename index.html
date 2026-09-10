@@ -771,9 +771,14 @@
                     <h3 class="font-serif text-xl font-semibold text-foreground">Enterprise Solution</h3>
                     <p class="mt-1 text-sm text-muted">Complete compliance for scaled operations.</p>
                   </div>
-                  <div class="mb-6 text-center">
+                  <div class="mb-2 text-center">
                     <span class="text-4xl font-semibold text-foreground">R450</span>
                     <span class="text-muted"> /mo</span>
+                  </div>
+                  <div class="mb-6 text-center">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/70 px-3 py-1 text-[11px] font-semibold text-amber-800">
+                      Processor Grower? From R337.50/mo &rarr;
+                    </span>
                   </div>
                   <ul class="mb-8 space-y-3">
                     <li class="flex items-start gap-3">
@@ -1143,6 +1148,22 @@
             <strong>Please Note:</strong> The Enterprise plan includes the complete unconstrained Simple video & SOP library. Custom corporate branding packages are <strong>available upon consultation</strong>.
           </div>
 
+          <!-- Corporate Grower Subsidy: Processor Grower Code -->
+          <div id="grower-code-section" class="hidden">
+            <button type="button" onclick="toggleGrowerCodeInput()" id="grower-code-toggle" class="text-xs font-semibold text-primary underline mb-2">
+              Have a Processor Grower Code?
+            </button>
+            <div id="grower-code-input-wrap" class="hidden gap-2 items-start mb-1">
+              <div class="flex-1">
+                <input type="text" id="grower-code-input" placeholder="e.g. MM-XXXX-01" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:border-primary transition-colors uppercase">
+              </div>
+              <button type="button" onclick="applyGrowerCode()" id="grower-code-apply-btn" class="px-4 py-2 bg-slate-800 text-white text-xs font-semibold rounded-md hover:bg-slate-700 transition-colors shrink-0">
+                Apply
+              </button>
+            </div>
+            <p id="grower-code-status" class="text-xs font-medium mt-1 hidden"></p>
+          </div>
+
           <button type="submit" id="proceed-pay-btn" class="w-full mt-2 bg-primary text-white py-3 rounded-md font-medium text-sm hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             Proceed to Secure Payment
@@ -1217,6 +1238,16 @@
     }
 
     // Global variable tracking active checkout selection
+    const RETAIL_ENTERPRISE_PLAN = {
+      planCode: 'PLN_xx7w3l93tke10kh',
+      amountInCents: 45000,
+      tierName: 'Enterprise Solution',
+      priceDisplay: 'R450 /mo',
+      desc: '8 Seats • Priority Support • ClickUp HR Live Sync'
+    };
+    const CORPORATE_ENTERPRISE_PLAN_CODE = 'PLN_v8iouh4li43y60u';
+    const CORPORATE_ENTERPRISE_AMOUNT_CENTS = 33750; // R337.50
+
     let activeCheckoutPlan = {
       planCode: 'PLN_glbt6ice9adjj45',
       amountInCents: 28000,
@@ -1225,8 +1256,13 @@
       desc: '4 Seats • Records Dashboard • Compliance Sign-offs'
     };
 
+    // Set once a grower code is verified via the validate_grower_code RPC.
+    // Passed through to provision_company_subscription on successful payment.
+    let activeGrowerCode = null;
+
     function openCheckoutModal(planCode, amountInCents, tierName, priceDisplay, desc) {
       activeCheckoutPlan = { planCode, amountInCents, tierName, priceDisplay, desc };
+      activeGrowerCode = null;
 
       // --- GA4 Custom Event: Checkout Initiated ---
       if (typeof gtag === 'function') {
@@ -1241,20 +1277,100 @@
       document.getElementById('checkout-plan-price').textContent = priceDisplay;
       document.getElementById('checkout-plan-desc').textContent = desc;
 
-      // Toggle Enterprise branding disclaimer
+      // Toggle Enterprise branding disclaimer + Corporate Grower Code section
       const brandingNote = document.getElementById('enterprise-branding-note');
-      if (brandingNote) {
-        if (tierName.includes('Enterprise')) {
-          brandingNote.classList.remove('hidden');
-        } else {
-          brandingNote.classList.add('hidden');
-        }
-      }
+      const growerSection = document.getElementById('grower-code-section');
+      const isEnterprise = tierName.includes('Enterprise');
+      if (brandingNote) brandingNote.classList.toggle('hidden', !isEnterprise);
+      if (growerSection) growerSection.classList.toggle('hidden', !isEnterprise);
+
+      // Reset grower code UI state each time the modal opens
+      const inputWrap = document.getElementById('grower-code-input-wrap');
+      const toggleBtn = document.getElementById('grower-code-toggle');
+      const status = document.getElementById('grower-code-status');
+      const codeInput = document.getElementById('grower-code-input');
+      if (inputWrap) inputWrap.classList.add('hidden');
+      if (inputWrap) inputWrap.classList.remove('flex');
+      if (toggleBtn) { toggleBtn.classList.remove('hidden'); toggleBtn.textContent = 'Have a Processor Grower Code?'; }
+      if (status) { status.classList.add('hidden'); status.textContent = ''; }
+      if (codeInput) codeInput.value = '';
 
       const modal = document.getElementById('checkoutModal');
       if (!modal) return;
       modal.classList.remove('hidden');
       setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function toggleGrowerCodeInput() {
+      const inputWrap = document.getElementById('grower-code-input-wrap');
+      const toggleBtn = document.getElementById('grower-code-toggle');
+      if (!inputWrap) return;
+      inputWrap.classList.remove('hidden');
+      inputWrap.classList.add('flex');
+      if (toggleBtn) toggleBtn.classList.add('hidden');
+      document.getElementById('grower-code-input')?.focus();
+    }
+
+    function setGrowerCodeStatus(message, isError) {
+      const status = document.getElementById('grower-code-status');
+      if (!status) return;
+      status.textContent = message;
+      status.className = `text-xs font-medium mt-1 ${isError ? 'text-red-600' : 'text-green-700'}`;
+    }
+
+    // Preview-only check against partner_grower_registry via a read-only,
+    // SECURITY DEFINER RPC. Does NOT write anything — the code is validated
+    // again, authoritatively, inside provision_company_subscription on the
+    // server once payment succeeds. This call only lets us show the correct
+    // discounted price before the person pays.
+    async function applyGrowerCode() {
+      const codeInput = document.getElementById('grower-code-input');
+      const applyBtn = document.getElementById('grower-code-apply-btn');
+      const code = (codeInput?.value || '').trim().toUpperCase();
+
+      if (!code) {
+        setGrowerCodeStatus('Please enter a grower code.', true);
+        return;
+      }
+
+      applyBtn.disabled = true;
+      applyBtn.textContent = '...';
+
+      try {
+        const { data, error } = await window.supabaseClient.rpc('validate_grower_code', {
+          p_grower_code: code
+        });
+        if (error) throw error;
+
+        // Expected shape: { valid: boolean, partner_name?: string }
+        if (data?.valid) {
+          activeGrowerCode = code;
+          activeCheckoutPlan = {
+            planCode: CORPORATE_ENTERPRISE_PLAN_CODE,
+            amountInCents: CORPORATE_ENTERPRISE_AMOUNT_CENTS,
+            tierName: 'Enterprise Solution (Corporate Subsidized)',
+            priceDisplay: 'R337.50 /mo',
+            desc: '8 Seats • Priority Support • 25% Processor-Sponsored Subsidy'
+          };
+          document.getElementById('checkout-plan-name').textContent = activeCheckoutPlan.tierName;
+          document.getElementById('checkout-plan-price').textContent = activeCheckoutPlan.priceDisplay;
+          document.getElementById('checkout-plan-desc').textContent = activeCheckoutPlan.desc;
+          setGrowerCodeStatus(`✓ Code verified${data?.partner_name ? ' — ' + data.partner_name + ' Processor Partner' : ''}. 25% subsidy applied.`, false);
+        } else {
+          activeGrowerCode = null;
+          activeCheckoutPlan = { ...RETAIL_ENTERPRISE_PLAN };
+          document.getElementById('checkout-plan-name').textContent = activeCheckoutPlan.tierName;
+          document.getElementById('checkout-plan-price').textContent = activeCheckoutPlan.priceDisplay;
+          document.getElementById('checkout-plan-desc').textContent = activeCheckoutPlan.desc;
+          setGrowerCodeStatus('That code is invalid, already claimed, or expired.', true);
+        }
+      } catch (err) {
+        console.error('[GrowerCode] Validation error:', err);
+        setGrowerCodeStatus('Could not verify that code right now. Please try again.', true);
+      } finally {
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+      }
     }
 
     function closeCheckoutModal() {
@@ -1343,16 +1459,17 @@
           }
 
           try {
-            // 1. Resolve Tier and Seat Limits
+            // 1. Resolve Tier from the selected plan code
+            //    (seat limits, subscription_status, sponsored_crop_packs, etc. are
+            //    all resolved and written server-side inside provision_company_subscription)
             let targetTier = 'essential';
-            let seatLimit = 4;
-
             if (activeCheckoutPlan.planCode === 'PLN_q37eti0fct6aazv') {
               targetTier = 'basic';
-              seatLimit = 1;
-            } else if (activeCheckoutPlan.planCode === 'PLN_xx7w3l93tke10kh') {
+            } else if (
+              activeCheckoutPlan.planCode === 'PLN_xx7w3l93tke10kh' ||
+              activeCheckoutPlan.planCode === CORPORATE_ENTERPRISE_PLAN_CODE
+            ) {
               targetTier = 'enterprise';
-              seatLimit = 8;
             }
 
             const nameParts = userName.split(' ');
@@ -1384,36 +1501,26 @@
             const newUserId = loginData?.user?.id || authData?.user?.id;
             if (!newUserId) throw new Error('User authentication session could not be established.');
 
-            // 4. Create Company Row in public.companies
-            const newCompanyId = crypto.randomUUID();
-            const { error: compErr } = await window.supabaseClient
-              .from('companies')
-              .insert({
-                id: newCompanyId,
-                name: userCompany,
-                tier: targetTier,
-                subscription_status: 'active',
-                seat_limit: seatLimit,
-                paystack_subscription_code: transaction.reference
-              });
+            // 4. Provision the company + admin profile via a SECURITY DEFINER RPC.
+            //    Per the backend security audit, we never insert directly into
+            //    `companies` (or set tier: 'enterprise') from the browser. The RPC
+            //    runs server-side using auth.uid() for the just-authenticated user,
+            //    re-validates any grower code against partner_grower_registry,
+            //    enforces uniqueness, and unlocks sponsored_crop_packs accordingly.
+            const { data: provisionData, error: provisionErr } = await window.supabaseClient.rpc(
+              'provision_company_subscription',
+              {
+                p_company_name: userCompany,
+                p_user_email: userEmail,
+                p_paystack_ref: transaction.reference,
+                p_target_tier: targetTier,
+                p_grower_code: activeGrowerCode || null
+              }
+            );
 
-            if (compErr) throw compErr;
+            if (provisionErr) throw provisionErr;
 
-            // 5. Create / Upsert Master Admin Profile in public.profiles
-            const { error: profErr } = await window.supabaseClient
-              .from('profiles')
-              .upsert({
-                id: newUserId,
-                first_name: fName,
-                last_name: lName,
-                role: 'Master Admin',
-                company_id: newCompanyId,
-                tier: targetTier
-              }, { onConflict: 'id' });
-
-            if (profErr) throw profErr;
-
-            // 6. Redirect into Active Vault Portal
+            // 5. Redirect into Active Vault Portal
             window.location.href = 'vault.html?subscribed=true&ref=' + transaction.reference;
 
           } catch (provisionError) {

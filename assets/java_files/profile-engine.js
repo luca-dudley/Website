@@ -9,6 +9,72 @@ if (!window.dbClient) {
 }
 window.userCompanyId = null;
 window.currentCompanyTier = 'basic';
+window.currentCompanyData = null; // full `companies` row incl. sponsored_crop_packs / purchased_crop_packs
+
+// ============================================================================
+// CROP-PACK STACKING ARCHITECTURE — shared helpers (Layer 2 / Layer 3)
+// Used by vault.html, module.html, sop.html to gate + co-brand crop content.
+//
+// Expected schema (non-destructive additions to `companies`):
+//   sponsored_crop_packs: jsonb[]  e.g. [{ "crop": "Macadamia", "partner_name": "Mayo Mac", "partner_logo_url": "https://..." }]
+//   purchased_crop_packs: text[]   e.g. ["Banana"]   (self-funded R80/mo bolt-ons — never co-branded)
+// ============================================================================
+
+// Layer 1 (Universal Farm Core): neutral, never crop-gated, never co-branded.
+const CORE_NEUTRAL_SUBTAGS = ['general safety', 'machinery & workshop', 'pumping & irrigation'];
+
+// Layer 2 (Specialized Crop Packs): sub_tags containing these keywords belong to a crop pack.
+const CROP_PACK_KEYWORDS = ['Macadamia', 'Banana'];
+
+// Resolves a video/SOP sub_tag to its parent crop pack name, or null if it's Layer 1 core.
+function getCropFromSubTag(subTag) {
+  const tag = (subTag || '').trim();
+  if (!tag) return null;
+  const tagLower = tag.toLowerCase();
+  if (CORE_NEUTRAL_SUBTAGS.includes(tagLower)) return null;
+  const match = CROP_PACK_KEYWORDS.find(crop => tagLower.includes(crop.toLowerCase()));
+  return match || null;
+}
+
+// Returns the sponsor entry ({crop, partner_name, partner_logo_url}) for a crop, or null.
+function getSponsorEntry(companyObj, cropName) {
+  if (!companyObj || !cropName) return null;
+  const list = Array.isArray(companyObj.sponsored_crop_packs) ? companyObj.sponsored_crop_packs : [];
+  return list.find(entry => (entry?.crop || '').toLowerCase() === cropName.toLowerCase()) || null;
+}
+
+// Self-funded bolt-on packs (R80/mo) — unlocked but never co-branded.
+function isCropPurchased(companyObj, cropName) {
+  if (!companyObj || !cropName) return false;
+  const list = Array.isArray(companyObj.purchased_crop_packs) ? companyObj.purchased_crop_packs : [];
+  return list.some(c => (c || '').toLowerCase() === cropName.toLowerCase());
+}
+
+// A crop is unlocked if it's Layer 1 core, sponsored by a processor, or bolted on.
+function isCropUnlocked(companyObj, cropName) {
+  if (!cropName) return true;
+  return !!getSponsorEntry(companyObj, cropName) || isCropPurchased(companyObj, cropName);
+}
+
+// Layer 3: renders "Industry Compliance Partners: X, Y × Simple Solutions" into a footer element.
+function renderPartnerFooterChain(companyObj, elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const list = Array.isArray(companyObj?.sponsored_crop_packs) ? companyObj.sponsored_crop_packs : [];
+  const partnerNames = [...new Set(list.map(e => e?.partner_name).filter(Boolean))];
+  if (partnerNames.length === 0) {
+    el.classList.add('hidden');
+    return;
+  }
+  el.textContent = `Industry Compliance Partners: ${partnerNames.join(', ')} × Simple Solutions`;
+  el.classList.remove('hidden');
+}
+
+window.getCropFromSubTag = getCropFromSubTag;
+window.getSponsorEntry = getSponsorEntry;
+window.isCropPurchased = isCropPurchased;
+window.isCropUnlocked = isCropUnlocked;
+window.renderPartnerFooterChain = renderPartnerFooterChain;
 
 // 2. DOM MULTI-PAGE INJECTION ENGINE
 async function injectProfileModalContainer() {
@@ -448,6 +514,7 @@ async function loadUserProfile(userId) {
     // --- Resolve company id & tier ----------------------------------------
     window.userCompanyId = profile.company_id || companyObj?.id || null;
     window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
+    window.currentCompanyData = companyObj || null;
     console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
 
     const currentPlanName = document.getElementById('current-plan-name');
