@@ -189,56 +189,97 @@
   <main id="mainContent" class="ml-0 lg:ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
     <div id="pageContentWrapper" class="p-4 sm:p-8 flex-1 flex flex-col justify-between transition-all duration-300">
       <div class="max-w-6xl mx-auto w-full">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <!-- Title & Dynamic Primary Action Button -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <div>
             <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Digital Risk Assessments</h2>
-            <p class="text-muted text-sm">Conduct, review, and record operational safety risk reviews for your farm operations.</p>
+            <p class="text-muted text-sm">Conduct, review, and record statutory risk assessments for your farm operations.</p>
           </div>
 
           <div class="flex items-center gap-3">
-            <button onclick="openNewAssessmentModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+            <button id="btnConductAction" onclick="handlePrimaryActionClick()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              <span>Conduct Assessment</span>
+              <span id="btnConductActionLabel">Conduct Assessment</span>
             </button>
           </div>
         </div>
 
-        <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
-          <div class="relative w-full sm:w-80">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+        <!-- Sub-View Tab Switcher -->
+        <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-5 mb-6">
+          <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <button id="viewTabOperational" type="button" onclick="switchRaView('operational')" class="px-4 py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all">
+              ⚡ Operational Assessments
+            </button>
+            <button id="viewTabBaseline" type="button" onclick="switchRaView('baseline')" class="px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+              🏛️ Statutory Baseline Assessments
+            </button>
+          </div>
+          <div class="hidden sm:flex items-center gap-2">
+            <span id="activeViewDescription" class="text-xs text-muted font-medium">Daily &amp; Equipment HIRA Matrix</span>
           </div>
         </div>
 
-        <!-- Loading State -->
-        <div id="raLoadingState" class="flex min-h-[14rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8">
-          <div class="flex flex-col items-center gap-3 text-center">
-            <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
-            <p class="text-xs font-medium text-slate-600">Loading risk assessment records...</p>
+        <!-- 1. OPERATIONAL REVIEWS CONTAINER -->
+        <div id="operationalViewContainer" class="space-y-6">
+          <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+            <div class="relative w-full sm:w-80">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+            </div>
+          </div>
+
+          <div id="raLoadingState" class="flex min-h-[14rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8">
+            <div class="flex flex-col items-center gap-3 text-center">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+              <p class="text-xs font-medium text-slate-600">Loading risk assessment records...</p>
+            </div>
+          </div>
+
+          <div id="raTableCard" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto w-full">
+              <table class="w-full text-left text-sm min-w-[700px]">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground border-b border-slate-200">
+                  <tr>
+                    <th class="px-6 py-4 font-semibold">Equipment / Operational Task</th>
+                    <th class="px-6 py-4 font-semibold">Work Area / Fleet ID</th>
+                    <th class="px-6 py-4 font-semibold">Assessor</th>
+                    <th class="px-6 py-4 font-semibold">Assessment Date</th>
+                    <th class="px-6 py-4 font-semibold">Review Due</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold text-right">Review PDF</th>
+                  </tr>
+                </thead>
+                <tbody id="raTableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+            <div id="raEmptyState" class="hidden py-12 text-center">
+              <p class="text-sm font-medium text-foreground">No operational risk assessments logged yet.</p>
+              <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to log your first assessment.</p>
+            </div>
           </div>
         </div>
 
-        <!-- Assessments Table -->
-        <div id="raTableCard" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto w-full">
-            <table class="w-full text-left text-sm min-w-[700px]">
-              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-foreground border-b border-slate-200">
-                <tr>
-                  <th class="px-6 py-4 font-semibold">Equipment / Operational Task</th>
-                  <th class="px-6 py-4 font-semibold">Work Area / Fleet ID</th>
-                  <th class="px-6 py-4 font-semibold">Assessor</th>
-                  <th class="px-6 py-4 font-semibold">Assessment Date</th>
-                  <th class="px-6 py-4 font-semibold">Review Due</th>
-                  <th class="px-6 py-4 font-semibold">Status</th>
-                  <th class="px-6 py-4 font-semibold text-right">Review PDF</th>
-                </tr>
-              </thead>
-              <tbody id="raTableBody" class="divide-y divide-slate-100"></tbody>
-            </table>
+        <!-- 2. STATUTORY BASELINE ASSESSMENTS CONTAINER -->
+        <div id="baselineViewContainer" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+            <div class="relative w-full sm:w-80">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input id="baselineSearchInput" type="text" placeholder="Search baseline profile, machinery, or exposure..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+            </div>
           </div>
-          <div id="raEmptyState" class="hidden py-12 text-center">
-            <p class="text-sm font-medium text-foreground">No operational risk assessments logged yet.</p>
-            <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to log your first assessment.</p>
+
+          <div id="baselineLoadingState" class="flex min-h-[14rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8">
+            <div class="flex flex-col items-center gap-3 text-center">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary"></div>
+              <p class="text-xs font-medium text-slate-600">Loading statutory baseline profiles...</p>
+            </div>
+          </div>
+
+          <div id="baselineCardsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+          <div id="baselineEmptyState" class="hidden py-12 text-center rounded-2xl border border-dashed border-slate-200 bg-white">
+            <p class="text-sm font-medium text-foreground">No baseline profiles match your search.</p>
+            <p class="text-xs text-muted mt-1">Try clearing your search terms.</p>
           </div>
         </div>
       </div>
@@ -429,7 +470,7 @@
                 <button type="button" onclick="clearCanvas('assessorSigCanvas')" class="text-[10px] text-muted hover:text-red-600 underline">Clear Signature</button>
               </div>
               <div class="w-full h-36 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 relative overflow-hidden">
-                <canvas id="assessorSigCanvas" class="signature-canvas w-full h-full block bg-white cursor-crosshair"></canvas>
+                <canvas id="assessorSigCanvas" class="signature-canvas w-full h-full block bg-white cursor-crosshair" style="touch-action: none;"></canvas>
               </div>
             </div>
           </div>
@@ -451,12 +492,78 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       MODAL: STATUTORY BASELINE REVIEW & SIGN-OFF
+  ========================================================================== -->
+  <div id="baselineReviewModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-7 shadow-2xl relative my-4 max-h-[94vh] flex flex-col justify-between">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
+        <div>
+          <span class="text-[10px] font-bold tracking-wider text-primary uppercase">Statutory Annual Review</span>
+          <h3 class="font-serif text-xl font-bold text-foreground">Review &amp; Authorize Baseline</h3>
+        </div>
+        <button onclick="closeBaselineReviewModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto pr-1 py-4 space-y-4 flex-1 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Baseline Profile to Review</label>
+          <select id="modalBaselineSelect" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-primary focus:border-primary outline-none cursor-pointer">
+            <option value="">-- Choose Statutory Profile --</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Designated Officer / Assessor Name</label>
+            <input id="modalBaselineOfficerName" type="text" placeholder="e.g. Luca Dudley" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white outline-none focus:border-primary">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assessment Date</label>
+            <input id="modalBaselineDate" type="date" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white outline-none focus:border-primary">
+          </div>
+        </div>
+
+        <div class="bg-blue-50/70 p-3.5 rounded-xl border border-blue-100 text-slate-600 leading-relaxed">
+          <p><strong>Legal Review Undertaking:</strong> I confirm that I have reviewed the hazard registers and control measures for this baseline profile. All operational controls, maintenance regimens, and statutory PPE protocols remain enforced across the estate.</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between pb-1">
+            <label class="font-semibold text-slate-700">Digital Signature (Designated Officer)</label>
+            <button type="button" onclick="clearCanvas('baselineSigCanvas')" class="text-[10px] text-muted hover:text-red-600 underline">Clear Signature</button>
+          </div>
+          <div class="w-full h-36 border-2 border-dashed border-slate-300 rounded-xl bg-white relative overflow-hidden">
+            <canvas id="baselineSigCanvas" class="signature-canvas w-full h-full block bg-white cursor-crosshair" style="touch-action: none;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+        <button onclick="closeBaselineReviewModal()" class="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">
+          Cancel
+        </button>
+        <button id="btnSubmitBaselineReview" onclick="saveAndAuthorizeBaseline()" class="px-6 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-md flex items-center gap-2">
+          <span>Authorize &amp; Set Due Date</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <script src="assets/java_files/main.js"></script>
   <script src="assets/java_files/profile-engine.js"></script>
   <script>
     let dbTemplates = [];
     let loggedAssessments = [];
     let activeCanvasPad = {};
+    let currentActiveView = 'operational';
+    let dbBaselineTemplates = [];
+    let companyBaselineReviews = [];
 
     function calcRiskBand(score) {
       if (score >= 10) return { label: 'Critical', bg: 'bg-red-100 text-red-800' };
@@ -478,7 +585,6 @@
       }
     }
 
-    // Dynamic Live Company Details Fetcher (Matches records.html)
     async function getFreshCompanyInfo() {
       try {
         const { data: { session } } = await window.dbClient.auth.getSession();
@@ -508,6 +614,626 @@
       return window.currentCompanyInfo || {};
     }
 
+    // TAB VIEW SWITCHER
+    function switchRaView(mode) {
+      currentActiveView = mode;
+      const opContainer = document.getElementById('operationalViewContainer');
+      const blContainer = document.getElementById('baselineViewContainer');
+      const tabOp = document.getElementById('viewTabOperational');
+      const tabBl = document.getElementById('viewTabBaseline');
+      const desc = document.getElementById('activeViewDescription');
+      const btnLabel = document.getElementById('btnConductActionLabel');
+
+      if (mode === 'operational') {
+        opContainer?.classList.remove('hidden');
+        blContainer?.classList.add('hidden');
+        tabOp.className = 'px-4 py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all';
+        tabBl.className = 'px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        if (desc) desc.textContent = 'Daily & Equipment HIRA Matrix';
+        if (btnLabel) btnLabel.textContent = 'Conduct Assessment';
+      } else {
+        opContainer?.classList.add('hidden');
+        blContainer?.classList.remove('hidden');
+        tabBl.className = 'px-4 py-2 text-xs font-semibold rounded-lg bg-white text-primary shadow-sm transition-all';
+        tabOp.className = 'px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        if (desc) desc.textContent = 'Annual Statutory Risk Benchmarks';
+        if (btnLabel) btnLabel.textContent = 'Review & Sign Baseline';
+        fetchBaselineTemplates();
+      }
+    }
+
+    function handlePrimaryActionClick() {
+      if (currentActiveView === 'operational') {
+        openNewAssessmentModal();
+      } else {
+        openBaselineReviewModal();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // ACCURATE MOBILE & DESKTOP CANVAS ENGINE (NO SCALING DRIFT)
+    // -------------------------------------------------------------------------
+    function setupCanvasPad(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+
+      if (canvas.__sigPadCleanup) {
+        canvas.__sigPadCleanup();
+      }
+
+      const ctx = canvas.getContext('2d');
+      let dpr = window.devicePixelRatio || 1;
+      let isDrawing = false;
+      let hasStroke = false;
+      let activePointerId = null;
+
+      canvas.style.touchAction = 'none';
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return false;
+
+        dpr = window.devicePixelRatio || 1;
+        const newWidth = Math.round(rect.width * dpr);
+        const newHeight = Math.round(rect.height * dpr);
+
+        if (canvas.width === newWidth && canvas.height === newHeight) return true;
+
+        let snapshot = null;
+        if (canvas.width > 0 && canvas.height > 0 && hasStroke) {
+          snapshot = document.createElement('canvas');
+          snapshot.width = canvas.width;
+          snapshot.height = canvas.height;
+          snapshot.getContext('2d').drawImage(canvas, 0, 0);
+        }
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        ctx.strokeStyle = '#1e3a5f';
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (snapshot) {
+          ctx.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, canvas.width, canvas.height);
+        }
+        return true;
+      }
+
+      let sizingAttempts = 0;
+      function trySizeUntilReady() {
+        if (resizeCanvas() || sizingAttempts > 30) return;
+        sizingAttempts++;
+        requestAnimationFrame(trySizeUntilReady);
+      }
+      trySizeUntilReady();
+
+      const ro = new ResizeObserver(() => resizeCanvas());
+      ro.observe(canvas);
+
+      function getCoords(e) {
+        const r = canvas.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) return null;
+        const scaleX = canvas.width / r.width;
+        const scaleY = canvas.height / r.height;
+        return {
+          x: (e.clientX - r.left) * scaleX,
+          y: (e.clientY - r.top) * scaleY
+        };
+      }
+
+      function startStroke(e) {
+        const pos = getCoords(e);
+        if (!pos) return;
+        isDrawing = true;
+        hasStroke = true;
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      function continueStroke(e) {
+        if (!isDrawing) return;
+        const pos = getCoords(e);
+        if (!pos) return;
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+
+      function endStroke() {
+        isDrawing = false;
+        activePointerId = null;
+      }
+
+      const listeners = [];
+      function bind(target, type, handler, opts) {
+        target.addEventListener(type, handler, opts);
+        listeners.push([target, type, handler, opts]);
+      }
+
+      if (window.PointerEvent) {
+        const onPointerDown = (e) => {
+          e.preventDefault();
+          activePointerId = e.pointerId;
+          canvas.setPointerCapture(e.pointerId);
+          startStroke(e);
+        };
+        const onPointerMove = (e) => {
+          if (activePointerId !== null && e.pointerId !== activePointerId) return;
+          e.preventDefault();
+          continueStroke(e);
+        };
+        const onPointerUp = (e) => {
+          if (activePointerId !== null && e.pointerId !== activePointerId) return;
+          e.preventDefault();
+          try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+          endStroke();
+        };
+
+        bind(canvas, 'pointerdown', onPointerDown, { passive: false });
+        bind(canvas, 'pointermove', onPointerMove, { passive: false });
+        bind(canvas, 'pointerup', onPointerUp, { passive: false });
+        bind(canvas, 'pointercancel', onPointerUp, { passive: false });
+        bind(window, 'pointerup', onPointerUp, { passive: false });
+        bind(window, 'pointercancel', onPointerUp, { passive: false });
+      } else {
+        const onTouchStart = (e) => { e.preventDefault(); startStroke(e.touches[0]); };
+        const onTouchMove = (e) => { e.preventDefault(); continueStroke(e.touches[0]); };
+        const onTouchEnd = (e) => { e.preventDefault(); endStroke(); };
+
+        bind(canvas, 'touchstart', onTouchStart, { passive: false });
+        bind(canvas, 'touchmove', onTouchMove, { passive: false });
+        bind(canvas, 'touchend', onTouchEnd, { passive: false });
+        bind(canvas, 'touchcancel', onTouchEnd, { passive: false });
+
+        const onMouseDown = (e) => startStroke(e);
+        const onMouseMove = (e) => continueStroke(e);
+        const onMouseUp = () => endStroke();
+
+        bind(canvas, 'mousedown', onMouseDown);
+        bind(window, 'mousemove', onMouseMove);
+        bind(window, 'mouseup', onMouseUp);
+      }
+
+      canvas.__sigPadCleanup = function () {
+        ro.disconnect();
+        listeners.forEach(([target, type, handler, opts]) => target.removeEventListener(type, handler, opts));
+        canvas.__sigPadCleanup = null;
+      };
+
+      activeCanvasPad[canvasId] = {
+        canvas,
+        ctx,
+        isEmpty: () => !hasStroke,
+        clear: () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          hasStroke = false;
+        }
+      };
+    }
+
+    function clearCanvas(canvasId) {
+      const pad = activeCanvasPad[canvasId];
+      if (!pad) return;
+      pad.clear();
+    }
+
+    function isCanvasEmpty(canvasId) {
+      const pad = activeCanvasPad[canvasId];
+      if (!pad) return true;
+      return pad.isEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // BASELINE PROFILES & REVIEW ENGINE
+    // -------------------------------------------------------------------------
+    function parseHazards(raw) {
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') {
+        try {
+          const p = JSON.parse(raw);
+          return Array.isArray(p) ? p : Object.values(p);
+        } catch (_) { return []; }
+      }
+      return [];
+    }
+
+    async function fetchBaselineTemplates() {
+      const loading = document.getElementById('baselineLoadingState');
+      const grid = document.getElementById('baselineCardsGrid');
+      const empty = document.getElementById('baselineEmptyState');
+
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        const companyId = window.userCompanyId || null;
+
+        // 1. Fetch Master Templates
+        const { data: templates, error: tErr } = await window.dbClient
+          .from('baseline_ra_templates')
+          .select('*')
+          .order('title', { ascending: true });
+
+        if (tErr) throw tErr;
+        dbBaselineTemplates = templates || [];
+
+        // 2. Fetch Company Completed Reviews to Compute Dynamic Expiration Dates
+        if (companyId) {
+          const { data: reviews } = await window.dbClient
+            .from('company_baseline_assessments')
+            .select('*')
+            .eq('company_id', companyId);
+          companyBaselineReviews = reviews || [];
+        }
+
+        renderBaselineCards(dbBaselineTemplates);
+
+      } catch (err) {
+        console.warn('Error loading baseline templates:', err);
+      } finally {
+        if (loading) loading.classList.add('hidden');
+      }
+    }
+
+    function renderBaselineCards(templates) {
+      const grid = document.getElementById('baselineCardsGrid');
+      const empty = document.getElementById('baselineEmptyState');
+      if (!grid) return;
+
+      if (!templates || templates.length === 0) {
+        grid.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+
+      if (empty) empty.classList.add('hidden');
+      grid.classList.remove('hidden');
+
+      const now = new Date();
+
+      grid.innerHTML = templates.map((tmpl, idx) => {
+        const hazardsList = parseHazards(tmpl.hazards_register);
+        const hazardsCount = hazardsList.length;
+        const category = tmpl.category || 'Estate Safety';
+        const reg = tmpl.regulation_reference || 'OHS Act & Regulations';
+
+        // Find existing review for this specific baseline
+        const review = companyBaselineReviews.find(r => r.template_id === tmpl.id || r.title === tmpl.title);
+
+        let statusText = 'Pending Review';
+        let statusBadge = 'bg-slate-100 text-slate-700 border-slate-200';
+        let dueDateLabel = 'Not established';
+
+        if (review && review.review_due_date) {
+          const dueDate = new Date(review.review_due_date);
+          dueDateLabel = review.review_due_date;
+          const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+          if (diffDays <= 0) {
+            statusText = 'Expired';
+            statusBadge = 'bg-red-100 text-red-800 border-red-200 font-bold';
+          } else if (diffDays <= 30) {
+            statusText = 'Review Due Soon';
+            statusBadge = 'bg-amber-100 text-amber-800 border-amber-200 font-bold animate-pulse';
+          } else {
+            statusText = 'Active';
+            statusBadge = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold';
+          }
+        }
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-primary text-[10px] font-bold uppercase tracking-wider border border-blue-100">
+                  ${category}
+                </span>
+                <span class="text-[11px] font-mono text-slate-400">BRA-${String(idx + 1).padStart(2, '0')}</span>
+              </div>
+              <h3 class="font-serif text-lg font-bold text-foreground mb-1 leading-snug">${tmpl.title}</h3>
+              <p class="text-xs text-muted font-medium mb-3 line-clamp-2" title="${reg}">${reg}</p>
+              
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 text-xs space-y-1 text-slate-600">
+                <div class="flex justify-between items-center">
+                  <span>Hazards Controlled:</span>
+                  <span class="font-semibold text-slate-800">${hazardsCount} Scenarios</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span>Review Due Date:</span>
+                  <span class="font-semibold text-slate-800">${dueDateLabel}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider border ${statusBadge}">
+                ● ${statusText}
+              </span>
+              <button onclick="exportBaselineTemplatePdf('${tmpl.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm cursor-pointer">
+                📄 Export PDF
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // MODAL: OPEN BASELINE REVIEW
+    function openBaselineReviewModal(preselectedId = null) {
+      const select = document.getElementById('modalBaselineSelect');
+      const officerInput = document.getElementById('modalBaselineOfficerName');
+      const dateInput = document.getElementById('modalBaselineDate');
+
+      if (select) {
+        select.innerHTML = '<option value="">-- Choose Statutory Profile --</option>' + 
+          dbBaselineTemplates.map(t => `<option value="${t.id}" ${preselectedId === t.id ? 'selected' : ''}>${t.title}</option>`).join('');
+      }
+
+      const userName = document.getElementById('topbar-user-name')?.textContent;
+      if (officerInput && userName && userName !== 'Loading...') officerInput.value = userName;
+      if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+      document.getElementById('baselineReviewModal')?.classList.remove('hidden');
+
+      setTimeout(() => {
+        setupCanvasPad('baselineSigCanvas');
+        clearCanvas('baselineSigCanvas');
+      }, 150);
+    }
+
+    function closeBaselineReviewModal() {
+      document.getElementById('baselineReviewModal')?.classList.add('hidden');
+      clearCanvas('baselineSigCanvas');
+    }
+
+    async function saveAndAuthorizeBaseline() {
+      const templateId = document.getElementById('modalBaselineSelect')?.value;
+      const officerName = document.getElementById('modalBaselineOfficerName')?.value?.trim();
+      const assessmentDate = document.getElementById('modalBaselineDate')?.value || new Date().toISOString().split('T')[0];
+      const btn = document.getElementById('btnSubmitBaselineReview');
+
+      if (!templateId) {
+        alert('Please select a statutory baseline profile.');
+        return;
+      }
+      if (!officerName) {
+        alert('Please enter the Designated Officer / Assessor name.');
+        return;
+      }
+      if (isCanvasEmpty('baselineSigCanvas')) {
+        alert('Please provide your digital signature on the pad before authorizing.');
+        return;
+      }
+
+      const tmpl = dbBaselineTemplates.find(t => t.id === templateId);
+      const signatureData = activeCanvasPad['baselineSigCanvas'].canvas.toDataURL('image/png');
+
+      // Set expiration (12 or 24 months based on regulation)
+      const months = tmpl.review_interval_months || 12;
+      const dueDate = new Date();
+      dueDate.setMonth(dueDate.getMonth() + months);
+      const reviewDueDate = dueDate.toISOString().split('T')[0];
+
+      const payload = {
+        company_id: window.userCompanyId,
+        template_id: tmpl.id,
+        title: tmpl.title,
+        category: tmpl.category,
+        assessment_date: assessmentDate,
+        review_due_date: reviewDueDate,
+        designated_person_name: officerName,
+        designated_person_signature: signatureData,
+        hazards_register: tmpl.hazards_register,
+        status: 'Active'
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = `<div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div> Authorizing...`;
+
+      try {
+        const { data, error } = await window.dbClient
+          .from('company_baseline_assessments')
+          .insert([payload])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        alert(`✓ Statutory Baseline Review authorized for "${tmpl.title}". Annual review due on ${reviewDueDate}.`);
+        closeBaselineReviewModal();
+        fetchBaselineTemplates();
+
+      } catch (err) {
+        console.error('Error saving baseline review:', err);
+        alert(`Error authorizing baseline: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Authorize &amp; Set Due Date</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // STATUTORY LANDSCAPE A4 PDF GENERATOR (WITH VERTICAL COLUMN BORDERS)
+    // -------------------------------------------------------------------------
+    async function exportBaselineTemplatePdf(templateId) {
+      const tmpl = dbBaselineTemplates.find(t => t.id === templateId);
+      if (!tmpl) return;
+
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF generator is loading. Please try again.');
+        return;
+      }
+
+      const comp = await getFreshCompanyInfo();
+      const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
+      const review = companyBaselineReviews.find(r => r.template_id === tmpl.id || r.title === tmpl.title);
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = 297;
+      const pageHeight = 210;
+      const margin = 14;
+      const contentWidth = pageWidth - (margin * 2);
+      const bottomLimit = pageHeight - 16;
+      let pageNumber = 1;
+
+      function renderHeader() {
+        doc.setFont('times', 'bold');
+        doc.setFontSize(15);
+        doc.setTextColor(30, 58, 95);
+        doc.text(companyName.toUpperCase(), margin, 14);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`STATUTORY BASELINE RISK ASSESSMENT: ${tmpl.title.toUpperCase()}`, margin, 20);
+        doc.text(`Page ${pageNumber}`, pageWidth - margin, 14, { align: 'right' });
+
+        doc.setDrawColor(30, 58, 95);
+        doc.setLineWidth(0.6);
+        doc.line(margin, 23, pageWidth - margin, 23);
+      }
+
+      renderHeader();
+      let y = 27;
+
+      // Clean Enclosed Meta Box
+      const metaBoxH = 12;
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, y, contentWidth, metaBoxH, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.2);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`COMPANY: ${companyName.toUpperCase()}`, margin + 3, y + 5);
+      doc.text(`DATE OF ASSESSMENT: ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 85, y + 5);
+      doc.text(`REVIEW DUE DATE: ${review?.review_due_date || 'Annual Review Scheduled'}`, margin + 85, y + 9.5);
+
+      const stdLines = doc.splitTextToSize(`STANDARD: ${tmpl.regulation_reference || 'OHS Act 85 of 1993'}`, contentWidth - 170);
+      doc.text(stdLines, margin + 165, y + 5);
+      y += metaBoxH + 4;
+
+      // Table Header Row (Widths total 269mm = contentWidth)
+      const colW = [44, 60, 70, 45, 26, 24];
+      const headerH = 7.5;
+
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, y, contentWidth, headerH, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(30, 58, 95);
+
+      let curX = margin;
+      const headers = [
+        "WHAT ARE THE HAZARDS?",
+        "WHO MIGHT BE HARMED & HOW?",
+        "WHAT ARE YOU ALREADY DOING?",
+        "DO YOU NEED ADDITIONAL CONTROLS?",
+        "ACTION BY",
+        "WHEN?"
+      ];
+
+      headers.forEach((h, i) => {
+        // Vertical divider
+        if (i > 0) doc.line(curX, y, curX, y + headerH);
+        const wrappedH = doc.splitTextToSize(h, colW[i] - 3);
+        doc.text(wrappedH, curX + 1.5, y + 4.5);
+        curX += colW[i];
+      });
+      y += headerH;
+
+      const hazards = parseHazards(tmpl.hazards_register);
+
+      hazards.forEach(h => {
+        const c0 = doc.splitTextToSize(String(h.hazard || ''), colW[0] - 3);
+        const c1 = doc.splitTextToSize(String(h.who_harmed || h.consequence || ''), colW[1] - 3);
+        const c2 = doc.splitTextToSize(String(h.existing_controls || h.controls || ''), colW[2] - 3);
+        const c3 = doc.splitTextToSize(String(h.additional_controls || 'None'), colW[3] - 3);
+        const c4 = doc.splitTextToSize(String(h.action_by || 'Employer & H&S Rep'), colW[4] - 3);
+        const c5 = doc.splitTextToSize(String(h.action_when || 'Immediately'), colW[5] - 3);
+
+        const maxLines = Math.max(c0.length, c1.length, c2.length, c3.length, c4.length, c5.length);
+        const rowH = Math.max(maxLines * 3.0 + 3, 7.5);
+
+        if (y + rowH > bottomLimit - 24) {
+          doc.addPage();
+          pageNumber++;
+          renderHeader();
+          y = 28;
+        }
+
+        // Outer Row Box
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.2);
+        doc.rect(margin, y, contentWidth, rowH, 'S');
+
+        // Draw Vertical Column Dividers to Prevent Text Collision
+        let lineX = margin;
+        for (let i = 0; i < colW.length - 1; i++) {
+          lineX += colW[i];
+          doc.line(lineX, y, lineX, y + rowH);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.2);
+        doc.setTextColor(15, 23, 42);
+
+        let cellX = margin;
+        [c0, c1, c2, c3, c4, c5].forEach((lines, idx) => {
+          doc.text(lines, cellX + 1.5, y + 3.5);
+          cellX += colW[idx];
+        });
+
+        y += rowH;
+      });
+
+      // Bottom Sign-off Box
+      if (y + 24 > bottomLimit) {
+        doc.addPage();
+        pageNumber++;
+        renderHeader();
+        y = 28;
+      }
+
+      y += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text("ANNUAL STATUTORY REVIEW DECLARATION", margin, y);
+      y += 3.5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.setTextColor(100, 116, 139);
+      doc.text("This baseline risk assessment is subject to statutory review annually or whenever there is an operational change in machinery, process, or facilities.", margin, y);
+      y += 7;
+
+      // Render Officer Signature if reviewed
+      if (review && review.designated_person_signature) {
+        doc.addImage(review.designated_person_signature, 'PNG', margin + 5, y - 6, 40, 12);
+      }
+
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, margin + 70, y);
+      doc.line(margin + 90, y, margin + 140, y);
+      doc.line(margin + 160, y, margin + 240, y);
+
+      doc.text(`Officer: ${review?.designated_person_name || 'Designated Safety Officer'}`, margin, y + 3.5);
+      doc.text(`Reviewed: ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 90, y + 3.5);
+      doc.text(`Official Stamp: ${companyName.toUpperCase()}`, margin + 160, y + 3.5);
+
+      doc.save(`Baseline_Risk_Assessment_${tmpl.title.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    // -------------------------------------------------------------------------
+    // OPERATIONAL ASSESSMENTS ENGINE
+    // -------------------------------------------------------------------------
     async function loadRiskAssessmentTemplates() {
       try {
         const { data, error } = await window.dbClient
@@ -526,144 +1252,6 @@
 
       } catch (err) {
         console.error('Failed to load risk assessment templates from Supabase:', err);
-      }
-    }
-
-    function handleModuleSelect(templateId) {
-      const template = dbTemplates.find(t => t.id === templateId);
-      const hTable = document.getElementById('modalHazardTableBody');
-      const ppeDiv = document.getElementById('modalPpeList');
-      const preDiv = document.getElementById('modalPreUseList');
-
-      if (!template) {
-        if (hTable) hTable.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-muted">Select an equipment module above to load its hazard register.</td></tr>`;
-        if (ppeDiv) ppeDiv.innerHTML = `<p class="text-muted italic">Select a module to load mandatory PPE items.</p>`;
-        if (preDiv) preDiv.innerHTML = `<p class="text-muted italic">Select a module to load physical inspection checks.</p>`;
-        return;
-      }
-
-      const hazards = Array.isArray(template.hazards) ? template.hazards : [];
-      if (hTable) {
-        hTable.innerHTML = hazards.map((h, i) => {
-          const initL = h.initial_l || 3;
-          const initS = h.initial_s || 3;
-          const initScore = initL * initS;
-          const initBand = calcRiskBand(initScore);
-
-          const resL = h.residual_l || 1;
-          const resS = h.residual_s || 2;
-          const resScore = resL * resS;
-          const resBand = calcRiskBand(resScore);
-
-          return `
-            <tr class="hover:bg-slate-50/50 transition-colors" data-hazard-index="${i}">
-              <td class="p-2.5 font-medium text-slate-800 align-top">
-                <div class="font-semibold text-slate-800 hazard-name">${h.hazard || 'Operational Hazard'}</div>
-                <div class="text-[10px] text-muted mt-0.5 hazard-consequence">${h.consequence || ''}</div>
-              </td>
-              <td class="p-2.5 text-center align-top">
-                <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
-                  <select id="init_l_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
-                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === initL ? 'selected' : ''}>L:${v}</option>`).join('')}
-                  </select>
-                  <select id="init_s_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
-                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === initS ? 'selected' : ''}>S:${v}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <span id="init_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${initBand.bg}">
-                    ${initScore} (${initBand.label})
-                  </span>
-                </div>
-              </td>
-              <td class="p-2.5 text-[11px] text-slate-600 leading-relaxed hazard-controls align-top">
-                ${h.controls || ''}
-              </td>
-              <td class="p-2.5 text-center align-top">
-                <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
-                  <select id="res_l_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
-                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === resL ? 'selected' : ''}>L:${v}</option>`).join('')}
-                  </select>
-                  <select id="res_s_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
-                    ${[1,2,3,4].map(v => `<option value="${v}" ${v === resS ? 'selected' : ''}>S:${v}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <span id="res_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${resBand.bg}">
-                    ${resScore} (${resBand.label})
-                  </span>
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      const ppe = Array.isArray(template.required_ppe) ? template.required_ppe : [];
-      if (ppeDiv) {
-        ppeDiv.innerHTML = ppe.length > 0
-          ? ppe.map((item, idx) => `
-              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-200">
-                <input type="checkbox" id="ppe_check_${idx}" class="modal-ppe-check rounded text-primary focus:ring-0">
-                <span class="text-slate-700 leading-snug">${item}</span>
-              </label>
-            `).join('')
-          : `<p class="text-muted italic">No specialized PPE specified for this module.</p>`;
-      }
-
-      const preChecks = Array.isArray(template.pre_use_checks) ? template.pre_use_checks : [];
-      if (preDiv) {
-        preDiv.innerHTML = preChecks.length > 0
-          ? preChecks.map((item, idx) => `
-              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-200">
-                <input type="checkbox" id="pre_check_${idx}" class="modal-precheck rounded text-primary focus:ring-0">
-                <span class="text-slate-700 leading-snug">${item}</span>
-              </label>
-            `).join('')
-          : `<p class="text-muted italic">Standard visual equipment check required.</p>`;
-      }
-    }
-
-    async function fetchCompanyAssessments() {
-      const loading = document.getElementById('raLoadingState');
-      const tableCard = document.getElementById('raTableCard');
-      const empty = document.getElementById('raEmptyState');
-
-      try {
-        const { data: { session } } = await window.dbClient.auth.getSession();
-        if (!session?.user?.id) return;
-
-        const { data: profile } = await window.dbClient
-          .from('profiles')
-          .select('company_id')
-          .eq('id', session.user.id)
-          .single();
-
-        window.userCompanyId = profile?.company_id || null;
-
-        if (!window.userCompanyId) {
-          if (loading) loading.classList.add('hidden');
-          if (tableCard) tableCard.classList.remove('hidden');
-          if (empty) empty.classList.remove('hidden');
-          return;
-        }
-
-        const { data, error } = await window.dbClient
-          .from('company_risk_assessments')
-          .select('*')
-          .eq('company_id', window.userCompanyId)
-          .order('assessment_date', { ascending: false });
-
-        if (error) throw error;
-        loggedAssessments = data || [];
-
-        renderAssessmentsTable(loggedAssessments);
-
-      } catch (err) {
-        console.error('Error fetching company risk assessments:', err);
-      } finally {
-        if (loading) loading.classList.add('hidden');
-        if (tableCard) tableCard.classList.remove('hidden');
       }
     }
 
@@ -720,7 +1308,7 @@
               </span>
             </td>
             <td class="px-6 py-4 text-right">
-              <button onclick="downloadAssessmentPdfById('${ra.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all">
+              <button onclick="downloadAssessmentPdfById('${ra.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
                 📄 Review PDF
               </button>
             </td>
@@ -729,76 +1317,47 @@
       }).join('');
     }
 
-    function setupCanvasPad(canvasId) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
+    async function fetchCompanyAssessments() {
+      const loading = document.getElementById('raLoadingState');
+      const tableCard = document.getElementById('raTableCard');
+      const empty = document.getElementById('raEmptyState');
 
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      try {
+        const { data: { session } } = await window.dbClient.auth.getSession();
+        if (!session?.user?.id) return;
 
-      const displayWidth = rect.width > 0 ? rect.width : 450;
-      const displayHeight = rect.height > 0 ? rect.height : 144;
+        const { data: profile } = await window.dbClient
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
 
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
+        window.userCompanyId = profile?.company_id || null;
 
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = '#1e3a5f';
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      let isDrawing = false;
-
-      function getCoords(e) {
-        const r = canvas.getBoundingClientRect();
-        return {
-          x: e.clientX - r.left,
-          y: e.clientY - r.top
-        };
-      }
-
-      canvas.onpointerdown = (e) => {
-        canvas.setPointerCapture(e.pointerId);
-        isDrawing = true;
-        const pos = getCoords(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-      };
-
-      canvas.onpointermove = (e) => {
-        if (!isDrawing) return;
-        const pos = getCoords(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-      };
-
-      canvas.onpointerup = (e) => {
-        if (isDrawing) {
-          isDrawing = false;
-          try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+        if (!window.userCompanyId) {
+          if (loading) loading.classList.add('hidden');
+          if (tableCard) tableCard.classList.remove('hidden');
+          if (empty) empty.classList.remove('hidden');
+          return;
         }
-      };
 
-      canvas.onpointercancel = () => { isDrawing = false; };
+        const { data, error } = await window.dbClient
+          .from('company_risk_assessments')
+          .select('*')
+          .eq('company_id', window.userCompanyId)
+          .order('assessment_date', { ascending: false });
 
-      activeCanvasPad[canvasId] = { canvas, ctx, dpr };
-    }
+        if (error) throw error;
+        loggedAssessments = data || [];
 
-    function clearCanvas(canvasId) {
-      const pad = activeCanvasPad[canvasId];
-      if (!pad) return;
-      pad.ctx.clearRect(0, 0, pad.canvas.width, pad.canvas.height);
-    }
+        renderAssessmentsTable(loggedAssessments);
 
-    function isCanvasEmpty(canvasId) {
-      const pad = activeCanvasPad[canvasId];
-      if (!pad) return true;
-      const blank = document.createElement('canvas');
-      blank.width = pad.canvas.width;
-      blank.height = pad.canvas.height;
-      return pad.canvas.toDataURL() === blank.toDataURL();
+      } catch (err) {
+        console.error('Error fetching company risk assessments:', err);
+      } finally {
+        if (loading) loading.classList.add('hidden');
+        if (tableCard) tableCard.classList.remove('hidden');
+      }
     }
 
     function openNewAssessmentModal() {
@@ -924,7 +1483,6 @@
 
         if (error) throw error;
 
-        // --- GA4 Custom Event: Risk Assessment Completed ---
         if (typeof gtag === 'function') {
           gtag('event', 'risk_assessment_completed', {
             task_title: template.title,
@@ -946,7 +1504,6 @@
       }
     }
 
-    // 8. TIGHT FLOW AUDIT PDF ENGINE (WITH RECTANGULAR COMPANY STAMP ON RIGHT)
     async function downloadAssessmentPdfById(recordId) {
       const record = loggedAssessments.find(r => r.id === recordId);
       const template = dbTemplates.find(t => t.id === record?.template_id) || {};
@@ -959,7 +1516,6 @@
         return;
       }
 
-      // Retrieve fresh legal stamp details from Supabase (identical to records.html)
       const comp = await getFreshCompanyInfo();
       const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
 
@@ -998,14 +1554,12 @@
 
       renderRunningHeader();
 
-      // Title
       doc.setFont('times', 'bold');
       doc.setFontSize(15);
       doc.setTextColor(30, 58, 95);
       doc.text(`${docTitle} - OPERATIONAL RISK ASSESSMENT`, margin, y);
       y += 5;
 
-      // Meta Block
       const colW = contentWidth / 2;
       const rowH = 7.5;
       const metaRows = [
@@ -1038,7 +1592,6 @@
 
       y += 4;
 
-      // 4x4 Matrix Legend Box
       const matrixBoxH = 14;
       doc.setFillColor(248, 250, 252);
       doc.rect(margin, y, contentWidth, matrixBoxH, 'FD');
@@ -1063,7 +1616,6 @@
 
       y += matrixBoxH + 5;
 
-      // Section 1: HIRA Register
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(30, 58, 95);
@@ -1123,7 +1675,6 @@
 
       y += 5;
 
-      // Section 2: PPE
       ensureSpace(24);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
@@ -1162,7 +1713,6 @@
 
       y += 4;
 
-      // Section 3: Pre-Use Inspection Checklist
       ensureSpace(24);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
@@ -1204,7 +1754,6 @@
 
       y += 4;
 
-      // Section 4: Safe Work Procedure (SWP)
       ensureSpace(30);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
@@ -1247,7 +1796,6 @@
 
       y += 3;
 
-      // Section 5: Emergency Protocols
       ensureSpace(24);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
@@ -1273,7 +1821,6 @@
 
       y += 5;
 
-      // Section 6: Operational Verification & Sign-Off (Direct Flow Inside Main Box)
       const signBoxH = 38;
       ensureSpace(signBoxH + 16);
 
@@ -1283,13 +1830,11 @@
       doc.text("6. Operational Review & Verification Sign-Off", margin, y);
       y += 4;
 
-      // Outer Container Box
       doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(0.5);
       doc.setFillColor(255, 255, 255);
       doc.rect(margin, y, contentWidth, signBoxH, 'S');
 
-      // 1. Column 1 (Left): Assessor Details
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.5);
       doc.setTextColor(30, 58, 95);
@@ -1302,7 +1847,6 @@
       doc.text(`Assessment Date: ${record.assessment_date}`, margin + 4, y + 22);
       doc.text(`Review Due Date: ${record.review_due_date || '90 Days'}`, margin + 4, y + 29);
 
-      // 2. Column 2 (Middle): Assessor Digital Signature
       const sigCenterX = margin + 84;
       if (record.assessor_signature) {
         doc.addImage(record.assessor_signature, 'PNG', sigCenterX - 22, y + 4, 44, 20);
@@ -1315,7 +1859,6 @@
       doc.setTextColor(100, 116, 139);
       doc.text("Verified Assessor Digital Signature", sigCenterX, y + 32, { align: 'center' });
 
-      // 3. Column 3 (Right): Company Stamp Details (Seamless Inside Main Block)
       const stampCenterX = margin + contentWidth - 34;
 
       doc.setFont('helvetica', 'bold');
@@ -1352,7 +1895,6 @@
 
       y += signBoxH + 5;
 
-      // Clean Operational Liability Disclaimer
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.2);
       doc.setTextColor(148, 163, 184);
@@ -1362,6 +1904,7 @@
       doc.save(`Risk_Assessment_${(record.title || 'Task').replace(/\s+/g, '_')}_${record.assessment_date}.pdf`);
     }
 
+    // SEARCH FILTERS
     document.getElementById('raSearchInput')?.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       const filtered = loggedAssessments.filter(ra => 
@@ -1372,9 +1915,20 @@
       renderAssessmentsTable(filtered);
     });
 
+    document.getElementById('baselineSearchInput')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = dbBaselineTemplates.filter(b => 
+        (b.title || '').toLowerCase().includes(q) ||
+        (b.category || '').toLowerCase().includes(q) ||
+        (b.regulation_reference || '').toLowerCase().includes(q)
+      );
+      renderBaselineCards(filtered);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       loadRiskAssessmentTemplates();
       fetchCompanyAssessments();
+      fetchBaselineTemplates();
     });
   </script>
 </body>
