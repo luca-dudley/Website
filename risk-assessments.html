@@ -10,8 +10,19 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
 
-    // Block localhost and local dev environments from sending data
+    // 1. Automatically block Localhost and 127.0.0.1
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      window['ga-disable-G-L0HP7V44GT'] = true;
+    }
+
+    // 2. Secret URL Switch: Saves persistent flag in browser local storage
+    if (window.location.search.includes('disable_analytics=true')) {
+      localStorage.setItem('internal_user', 'true');
+      alert('Simple Solutions: Internal tracking disabled on this browser.');
+    }
+
+    // 3. If this device is flagged, kill GA4 tracking
+    if (localStorage.getItem('internal_user') === 'true') {
       window['ga-disable-G-L0HP7V44GT'] = true;
     }
 
