@@ -277,9 +277,16 @@
 
           <div id="baselineCardsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
-          <div id="baselineEmptyState" class="hidden py-12 text-center rounded-2xl border border-dashed border-slate-200 bg-white">
-            <p class="text-sm font-medium text-foreground">No baseline profiles match your search.</p>
-            <p class="text-xs text-muted mt-1">Try clearing your search terms.</p>
+          <div id="baselineEmptyState" class="hidden py-16 px-6 text-center rounded-2xl border border-dashed border-slate-200 bg-white shadow-sm max-w-xl mx-auto my-6">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-primary mx-auto flex items-center justify-center mb-4 border border-blue-100 shadow-sm">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <h3 class="font-serif font-bold text-lg text-foreground mb-1">Baseline Risk Assessments Under Review</h3>
+            <p class="text-xs text-muted max-w-md mx-auto leading-relaxed">
+              Statutory baseline assessments are being updated in accordance with the 2026 OHS Act General Safety & Driven Machinery Regulations. Standardized assessments will be available here once certified.
+            </p>
           </div>
         </div>
       </div>
@@ -623,6 +630,7 @@
       const tabBl = document.getElementById('viewTabBaseline');
       const desc = document.getElementById('activeViewDescription');
       const btnLabel = document.getElementById('btnConductActionLabel');
+      const mainBtn = document.getElementById('btnConductAction');
 
       if (mode === 'operational') {
         opContainer?.classList.remove('hidden');
@@ -631,6 +639,12 @@
         tabBl.className = 'px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
         if (desc) desc.textContent = 'Daily & Equipment HIRA Matrix';
         if (btnLabel) btnLabel.textContent = 'Conduct Assessment';
+
+        // Reset button to fully active and unblurred
+        if (mainBtn) {
+          mainBtn.disabled = false;
+          mainBtn.classList.remove('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+        }
       } else {
         opContainer?.classList.add('hidden');
         blContainer?.classList.remove('hidden');
@@ -638,6 +652,7 @@
         tabOp.className = 'px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
         if (desc) desc.textContent = 'Annual Statutory Risk Benchmarks';
         if (btnLabel) btnLabel.textContent = 'Review & Sign Baseline';
+
         fetchBaselineTemplates();
       }
     }
@@ -878,16 +893,44 @@
     function renderBaselineCards(templates) {
       const grid = document.getElementById('baselineCardsGrid');
       const empty = document.getElementById('baselineEmptyState');
+      const searchInput = document.getElementById('baselineSearchInput');
+      const topActionBtn = document.getElementById('btnConductAction');
+
       if (!grid) return;
 
-      if (!templates || templates.length === 0) {
+      const hasNoCards = !templates || templates.length === 0;
+
+      if (hasNoCards) {
         grid.classList.add('hidden');
         if (empty) empty.classList.remove('hidden');
+
+        // Blur and disable search input
+        if (searchInput) {
+          searchInput.disabled = true;
+          searchInput.classList.add('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+        }
+
+        // Blur and disable button on baseline view
+        if (currentActiveView === 'baseline' && topActionBtn) {
+          topActionBtn.disabled = true;
+          topActionBtn.classList.add('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+        }
         return;
       }
 
+      // Restore when cards exist
       if (empty) empty.classList.add('hidden');
       grid.classList.remove('hidden');
+
+      if (searchInput) {
+        searchInput.disabled = false;
+        searchInput.classList.remove('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+      }
+
+      if (topActionBtn) {
+        topActionBtn.disabled = false;
+        topActionBtn.classList.remove('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+      }
 
       const now = new Date();
 
@@ -897,7 +940,6 @@
         const category = tmpl.category || 'Estate Safety';
         const reg = tmpl.regulation_reference || 'OHS Act & Regulations';
 
-        // Find existing review for this specific baseline
         const review = companyBaselineReviews.find(r => r.template_id === tmpl.id || r.title === tmpl.title);
 
         let statusText = 'Pending Review';
