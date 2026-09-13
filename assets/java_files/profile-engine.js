@@ -15,9 +15,18 @@ window.currentCompanyData = null; // full `companies` row incl. sponsored_crop_p
 // CROP-PACK STACKING ARCHITECTURE — shared helpers (Layer 2 / Layer 3)
 // Used by vault.html, module.html, sop.html to gate + co-brand crop content.
 //
-// Expected schema (non-destructive additions to `companies`):
-//   sponsored_crop_packs: jsonb[]  e.g. [{ "crop": "Macadamia", "partner_name": "Mayo Mac", "partner_logo_url": "https://..." }]
-//   purchased_crop_packs: text[]   e.g. ["Banana"]   (self-funded R80/mo bolt-ons — never co-branded)
+// VERIFIED live schema (from Supabase schema export):
+//   companies.sponsored_crop_packs: text[]   e.g. {"Macadamia","Banana"} — just crop names, NOT objects.
+//   companies.purchased_crop_packs: text[]   e.g. {"Banana"}             — self-funded bolt-ons, never co-branded.
+//   companies.partner_grower_codes: text[]   e.g. {"MM-TEST-01"}         — claimed grower codes, for audit/display.
+// Because sponsored_crop_packs is a flat text[] of crop names, it can carry
+// gating data but NOT partner attribution (name/logo) — there's nowhere on
+// that array to hang a partner_name. Partner attribution is derived
+// separately, at read time, via a join: partner_grower_registry
+// (claimed_by_company_id = this company) → corporate_partners (partner_id).
+// See fetchCompanySponsorPartners() below. window.currentCompanySponsors
+// holds the resolved [{crop, partner_name, partner_logo_url, grower_code}]
+// list for the signed-in company; getSponsorEntry() reads from it.
 // ============================================================================
 
 // Layer 1 (Universal Farm Core): neutral, never crop-gated, never co-branded.
@@ -25,6 +34,22 @@ const CORE_NEUTRAL_SUBTAGS = ['general safety', 'machinery & workshop', 'pumping
 
 // Layer 2 (Specialized Crop Packs): sub_tags containing these keywords belong to a crop pack.
 const CROP_PACK_KEYWORDS = ['Macadamia', 'Banana'];
+
+// The single active Paystack plan code for the 25%-off Corporate-Subsidized
+// Enterprise tier (R337.50/mo). Companies on this plan code - or explicitly
+// flagged is_subsidized: true - are pack-restricted; every other Enterprise
+// company paid full price and gets the whole catalog.
+const SUBSIDIZED_ENTERPRISE_PLAN_CODE = 'PLN_v8iouh4li43y60u';
+
+window.currentCompanySponsors = []; // [{crop, partner_name, partner_logo_url, grower_code}]
+
+// True only for companies actually on the subsidized program.
+function isCompanySubsidized(companyObj) {
+  if (!companyObj) return false;
+  if (companyObj.is_subsidized === true) return true;
+  if (companyObj.paystack_subscription_code === SUBSIDIZED_ENTERPRISE_PLAN_CODE) return true;
+  return false;
+}
 
 // Resolves a video/SOP sub_tag to its parent crop pack name, or null if it's Layer 1 core.
 function getCropFromSubTag(subTag) {
@@ -36,11 +61,53 @@ function getCropFromSubTag(subTag) {
   return match || null;
 }
 
-// Returns the sponsor entry ({crop, partner_name, partner_logo_url}) for a crop, or null.
+// Queries the partner join for the signed-in company and caches it on
+// window.currentCompanySponsors. Call after every claim, and once on load.
+// Safe to call with a null companyId (resolves to an empty list).
+async function fetchCompanySponsorPartners(companyId) {
+  if (!companyId || !window.dbClient) {
+    window.currentCompanySponsors = [];
+    return window.currentCompanySponsors;
+  }
+  const { data, error } = await window.dbClient
+    .from('partner_grower_registry')
+    .select('grower_code, corporate_partners(name, logo_url, sponsored_crop_pack)')
+    .eq('claimed_by_company_id', companyId);
+
+  if (error) {
+    console.error('[ProfileEngine] fetchCompanySponsorPartners failed:', error.message);
+    window.currentCompanySponsors = [];
+    return window.currentCompanySponsors;
+  }
+
+  window.currentCompanySponsors = (data || [])
+    .filter(row => row.corporate_partners)
+    .map(row => ({
+      crop: row.corporate_partners.sponsored_crop_pack,
+      partner_name: row.corporate_partners.name,
+      partner_logo_url: row.corporate_partners.logo_url,
+      grower_code: row.grower_code
+    }));
+  return window.currentCompanySponsors;
+}
+
+// Returns the sponsor entry ({crop, partner_name, partner_logo_url}) for a
+// crop, or null. Reads window.currentCompanySponsors (see above) rather than
+// companyObj.sponsored_crop_packs, since that column can't hold partner
+// attribution (it's a flat text[] of crop names).
 function getSponsorEntry(companyObj, cropName) {
-  if (!companyObj || !cropName) return null;
-  const list = Array.isArray(companyObj.sponsored_crop_packs) ? companyObj.sponsored_crop_packs : [];
+  if (!cropName) return null;
+  const list = Array.isArray(window.currentCompanySponsors) ? window.currentCompanySponsors : [];
   return list.find(entry => (entry?.crop || '').toLowerCase() === cropName.toLowerCase()) || null;
+}
+
+// Fast boolean gating check against the flat text[] column directly — used
+// by isCropUnlocked() so a gating decision never has to wait on the partner
+// join above (only badge rendering needs that).
+function isCropSponsored(companyObj, cropName) {
+  if (!companyObj || !cropName) return false;
+  const list = Array.isArray(companyObj.sponsored_crop_packs) ? companyObj.sponsored_crop_packs : [];
+  return list.some(c => (c || '').toLowerCase() === cropName.toLowerCase());
 }
 
 // Self-funded bolt-on packs (R80/mo) — unlocked but never co-branded.
@@ -50,17 +117,43 @@ function isCropPurchased(companyObj, cropName) {
   return list.some(c => (c || '').toLowerCase() === cropName.toLowerCase());
 }
 
-// A crop is unlocked if it's Layer 1 core, sponsored by a processor, or bolted on.
-function isCropUnlocked(companyObj, cropName) {
+// A crop is unlocked if:
+//  - it's Layer 1 core (cropName is null - handled by the caller before this
+//    is ever invoked, but guarded here too),
+//  - the company is a Trial Farm / Custom Override (unlock_all_crops, or a
+//    private branded library - opts.hasCustomLibrary, detected by the caller
+//    from videos.company_id / sops.company_id === the viewer's company id),
+//  - the company is Retail Enterprise (full price, NOT on the subsidized
+//    plan/flag) - unrestricted access to every current and future crop pack,
+//  - or, for every other tier (including Subsidized Corporate Enterprise),
+//    the specific crop is sponsored by a processor or self-funded as a
+//    bolt-on.
+//
+// opts.hasCustomLibrary: pass true when the caller has already established
+// (via its own videos/sops query) that this company has a private branded
+// catalog - e.g. Elliott Farm, Doveton, Outlook Farm.
+function isCropUnlocked(companyObj, cropName, opts = {}) {
   if (!cropName) return true;
-  return !!getSponsorEntry(companyObj, cropName) || isCropPurchased(companyObj, cropName);
+  if (!companyObj) return false;
+
+  if (companyObj.unlock_all_crops === true || opts.hasCustomLibrary === true) {
+    return true;
+  }
+
+  if ((companyObj.tier || '').toLowerCase() === 'enterprise' && !isCompanySubsidized(companyObj)) {
+    return true;
+  }
+
+  return isCropSponsored(companyObj, cropName) || isCropPurchased(companyObj, cropName);
 }
 
-// Layer 3: renders "Industry Compliance Partners: X, Y × Simple Solutions" into a footer element.
+// Layer 3: renders "Industry Compliance Partners: X, Y × Simple Solutions"
+// into a footer element. Reads window.currentCompanySponsors (populated by
+// fetchCompanySponsorPartners) rather than companyObj — see note above.
 function renderPartnerFooterChain(companyObj, elementId) {
   const el = document.getElementById(elementId);
   if (!el) return;
-  const list = Array.isArray(companyObj?.sponsored_crop_packs) ? companyObj.sponsored_crop_packs : [];
+  const list = Array.isArray(window.currentCompanySponsors) ? window.currentCompanySponsors : [];
   const partnerNames = [...new Set(list.map(e => e?.partner_name).filter(Boolean))];
   if (partnerNames.length === 0) {
     el.classList.add('hidden');
@@ -71,9 +164,12 @@ function renderPartnerFooterChain(companyObj, elementId) {
 }
 
 window.getCropFromSubTag = getCropFromSubTag;
+window.fetchCompanySponsorPartners = fetchCompanySponsorPartners;
 window.getSponsorEntry = getSponsorEntry;
+window.isCropSponsored = isCropSponsored;
 window.isCropPurchased = isCropPurchased;
 window.isCropUnlocked = isCropUnlocked;
+window.isCompanySubsidized = isCompanySubsidized;
 window.renderPartnerFooterChain = renderPartnerFooterChain;
 
 // 2. DOM MULTI-PAGE INJECTION ENGINE
@@ -319,6 +415,107 @@ async function saveCompanyProfile() {
   }
 }
 
+// 4a-i. PROCESSOR GROWER CODE LINKING (Subsidy Stacking, Layer 2/3)
+// Lets an existing active user claim an *additional* processor's grower code
+// so a farm delivering to multiple processors (e.g. Macadamias to Processor A,
+// Bananas to Packhouse B) can stack sponsorships. Runs entirely through the
+// claim_additional_grower_subsidy RPC (SECURITY DEFINER) - never writes to
+// companies.sponsored_crop_packs directly from the client, since that would
+// let anyone self-grant a subsidized crop pack by editing the request body.
+async function handleClaimGrowerCode() {
+  const input = document.getElementById('grower-code-input');
+  const statusEl = document.getElementById('grower-code-status');
+  const btn = document.getElementById('claim-grower-code-btn');
+  const code = input?.value?.trim();
+
+  const setStatus = (msg, isError) => {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.classList.remove('hidden', 'text-red-600', 'text-green-700');
+    statusEl.classList.add(isError ? 'text-red-600' : 'text-green-700');
+  };
+
+  if (!code) {
+    setStatus('Enter the grower code your processor gave you.', true);
+    return;
+  }
+  if (!window.userCompanyId) {
+    setStatus('Unable to resolve your organization. Please refresh and try again.', true);
+    return;
+  }
+
+  const originalText = btn ? btn.innerText : 'Link Code';
+  if (btn) { btn.disabled = true; btn.innerText = 'Verifying...'; }
+
+  try {
+    const { data, error } = await window.dbClient.rpc('claim_additional_grower_subsidy', {
+      p_grower_code: code
+    });
+
+    if (error) throw error;
+    if (!data || data.success !== true) {
+      throw new Error(data?.message || 'That grower code could not be verified.');
+    }
+
+    // sponsored_crop_packs is a flat text[] of crop names on companies — the
+    // RPC's return doesn't include a full updated array (nothing to merge in
+    // that shape), so just make sure the crop is present locally, and
+    // re-fetch the partner join for attribution/badges.
+    if (window.currentCompanyData) {
+      const current = Array.isArray(window.currentCompanyData.sponsored_crop_packs)
+        ? window.currentCompanyData.sponsored_crop_packs
+        : [];
+      if (data.crop && !current.some(c => (c || '').toLowerCase() === data.crop.toLowerCase())) {
+        window.currentCompanyData.sponsored_crop_packs = [...current, data.crop];
+      }
+    }
+    await fetchCompanySponsorPartners(window.userCompanyId);
+
+    setStatus(`✓ Linked! ${data.partner_name ? data.partner_name + ' now sponsors your ' + data.crop + ' pack.' : 'Your account has been updated.'}`, false);
+    if (input) input.value = '';
+
+    renderLinkedGrowerCodes(window.currentCompanyData);
+    if (typeof renderPartnerFooterChain === 'function') {
+      renderPartnerFooterChain(window.currentCompanyData, 'partnerChainStrip');
+    }
+  } catch (err) {
+    console.error('[ProfileEngine] claim_additional_grower_subsidy failed:', err);
+    setStatus(err.message || 'Failed to link that grower code. Please check it and try again.', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerText = originalText; }
+  }
+}
+
+// Renders the "linked sponsor chain" list inside the Organization/Plans tab
+// (distinct from the public footer chain - this one shows per-crop detail
+// for the account holder, e.g. which processor sponsors which crop). Reads
+// window.currentCompanySponsors (the partner join) rather than
+// companyObj.sponsored_crop_packs, which is just a flat text[] of crop names
+// with no partner attribution on it.
+function renderLinkedGrowerCodes(companyObj) {
+  const list = document.getElementById('linked-grower-codes-list');
+  if (!list) return;
+  const sponsored = Array.isArray(window.currentCompanySponsors) ? window.currentCompanySponsors : [];
+
+  if (sponsored.length === 0) {
+    list.innerHTML = `<p class="text-xs text-slate-400 italic">No processor-sponsored crop packs linked yet.</p>`;
+    return;
+  }
+
+  list.innerHTML = sponsored.map(entry => `
+    <div class="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-xs">
+      <div class="flex items-center gap-2">
+        ${entry.partner_logo_url ? `<img src="${entry.partner_logo_url}" alt="${entry.partner_name || ''}" class="w-5 h-5 rounded-full object-contain bg-white">` : ''}
+        <span class="font-medium text-slate-700">${entry.crop || 'Crop'}</span>
+      </div>
+      <span class="text-slate-500">sponsored by <strong class="text-slate-700">${entry.partner_name || 'Unknown Partner'}</strong></span>
+    </div>
+  `).join('');
+}
+
+window.handleClaimGrowerCode = handleClaimGrowerCode;
+window.renderLinkedGrowerCodes = renderLinkedGrowerCodes;
+
 // 4b. PROFILE LOADER
 // Split into: (a) resolve the auth user & email fields, (b) resolve profile+company
 // data with a fallback path, (c) populate the DOM. Steps (b) and (c) are decoupled
@@ -339,29 +536,90 @@ async function loadUserProfile(userId) {
     checkNotificationReadStatus(user.id);
 
     // Auto-link pending invite from Google OAuth
-    const pendingCompanyId = localStorage.getItem('pending_invite_company_id');
+    // -----------------------------------------------------------------------
+    // ROOT CAUSE OF THE company_id WIPE BUG:
+    // This block used to run unconditionally whenever *any* string sat in
+    // localStorage.pending_invite_company_id, with zero validation and zero
+    // knowledge of whether the signed-in user already had an established
+    // profile. Two independent failure paths fed it bad data:
+    //   1. A leftover/stale key - e.g. an invite flow was started, abandoned,
+    //      and the browser/profile was later reused (or shared) by an
+    //      already-onboarded user - would still be truthy and would fire.
+    //   2. Anywhere upstream that ever did
+    //      `localStorage.setItem('pending_invite_company_id', someVar)` with
+    //      someVar === null/undefined would silently coerce to the *string*
+    //      "null"/"undefined", which is also truthy.
+    // Because the upsert always included `company_id: pendingCompanyId` and
+    // the call's result was never checked for `error`, an already-linked
+    // Master Admin logging in on such a browser would have their real
+    // profiles.company_id row silently overwritten (with a stale id, or with
+    // the literal string "null") with no error ever surfacing in the UI.
+    //
+    // FIX: (a) strictly validate the value is a real UUID before trusting it
+    // at all, (b) always clear the localStorage keys once read so a bad value
+    // is never retried, and (c) look up the user's *existing* profile first -
+    // if they already have a company_id, the pending invite is stale and MUST
+    // be ignored rather than applied.
+    // -----------------------------------------------------------------------
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const rawPendingCompanyId = localStorage.getItem('pending_invite_company_id');
     const pendingTier = localStorage.getItem('pending_invite_tier') || 'essential';
+    const pendingCompanyId = (rawPendingCompanyId && UUID_RE.test(rawPendingCompanyId))
+      ? rawPendingCompanyId
+      : null;
 
-    if (pendingCompanyId) {
+    if (rawPendingCompanyId !== null) {
+      // Consume the keys unconditionally - valid or not - so a bad/stale
+      // value is never re-evaluated on a future login.
       localStorage.removeItem('pending_invite_company_id');
       localStorage.removeItem('pending_invite_tier');
+      if (!pendingCompanyId) {
+        console.warn('[ProfileEngine] Discarding invalid pending_invite_company_id value:', JSON.stringify(rawPendingCompanyId));
+      }
+    }
 
-      const userMeta = user.user_metadata || {};
-      const fullName = userMeta.full_name || userMeta.name || '';
-      const nameParts = fullName.split(' ');
-      const firstName = userMeta.first_name || nameParts[0] || '';
-      const lastName = userMeta.last_name || nameParts.slice(1).join(' ') || '';
-      const avatarUrl = userMeta.avatar_url || userMeta.picture || null;
+    if (pendingCompanyId) {
+      const { data: existingProfileCheck, error: existingProfileCheckError } = await window.dbClient
+        .from('profiles')
+        .select('id, company_id')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      await window.dbClient.from('profiles').upsert([{
-        id: user.id,
-        company_id: pendingCompanyId,
-        first_name: firstName,
-        last_name: lastName,
-        role: 'Manager',
-        tier: pendingTier,
-        avatar_url: avatarUrl
-      }], { onConflict: 'id' });
+      if (existingProfileCheckError) {
+        // We couldn't verify whether this user already belongs to a company -
+        // safest option is to skip the auto-link entirely rather than risk
+        // clobbering an existing, established profile.
+        console.error('[ProfileEngine] Could not verify existing profile before invite auto-link - skipping link to avoid data loss:', existingProfileCheckError.message);
+      } else if (existingProfileCheck && existingProfileCheck.company_id) {
+        // This user is already established at a company. A stale pending
+        // invite must NEVER be allowed to overwrite it.
+        console.warn('[ProfileEngine] Ignoring stale pending_invite_company_id - profile already belongs to company', existingProfileCheck.company_id);
+      } else {
+        // Genuinely a brand-new user (no profile row yet, or a profile row
+        // whose company_id is still null) - safe to complete the invite link.
+        const userMeta = user.user_metadata || {};
+        const fullName = userMeta.full_name || userMeta.name || '';
+        const nameParts = fullName.split(' ');
+        const firstName = userMeta.first_name || nameParts[0] || '';
+        const lastName = userMeta.last_name || nameParts.slice(1).join(' ') || '';
+        const avatarUrl = userMeta.avatar_url || userMeta.picture || null;
+
+        const { error: inviteUpsertError } = await window.dbClient.from('profiles').upsert([{
+          id: user.id,
+          company_id: pendingCompanyId,
+          first_name: firstName,
+          last_name: lastName,
+          role: 'Manager',
+          tier: pendingTier,
+          avatar_url: avatarUrl
+        }], { onConflict: 'id' });
+
+        if (inviteUpsertError) {
+          console.error('[ProfileEngine] Invite auto-link upsert failed:', inviteUpsertError.message);
+        } else {
+          console.log('[ProfileEngine] Linked new user to company via pending invite:', pendingCompanyId);
+        }
+      }
     }
 
     // Check if Google Identity is already attached
@@ -516,6 +774,10 @@ async function loadUserProfile(userId) {
     window.currentCompanyTier = (companyObj?.tier || profile.tier || 'basic').toLowerCase();
     window.currentCompanyData = companyObj || null;
     console.log('[ProfileEngine] Resolved tier:', window.currentCompanyTier, '| companyId:', window.userCompanyId);
+
+    await fetchCompanySponsorPartners(window.userCompanyId);
+    renderLinkedGrowerCodes(companyObj);
+    renderPartnerFooterChain(companyObj, 'partnerChainStrip');
 
     const currentPlanName = document.getElementById('current-plan-name');
     if (currentPlanName) currentPlanName.textContent = window.currentCompanyTier.toUpperCase();

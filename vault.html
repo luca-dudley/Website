@@ -543,6 +543,12 @@
           .select('id, title, description, category, sub_tag, language, thumbnail_url, total_seconds, company_id')
           .order('title', { ascending: true });
 
+        // Trial Farm / Custom Override (point 2, criterion 3): a company with
+        // its own private branded library (Elliott Farm, Doveton, Outlook)
+        // gets full crop-pack access to that library regardless of subsidy
+        // records - passed into isCropUnlocked() below as opts.hasCustomLibrary.
+        let hasCustomLibrary = false;
+
         if (userCompanyId) {
           // Check if this company actually has custom branded videos
           const { data: customVideos } = await window.dbClient
@@ -554,6 +560,7 @@
           if (customVideos && customVideos.length > 0) {
             // Company has custom branded videos: Show ONLY their custom library
             query = query.eq('company_id', userCompanyId);
+            hasCustomLibrary = true;
           } else {
             // Regular company without custom branding: Show default catalog
             query = query.is('company_id', null);
@@ -594,7 +601,7 @@
           // to access specialized crop modules. Layer 1 core content (machinery,
           // general safety) is never crop-gated.
           const cropName = getCropFromSubTag(subTag);
-          const isCropLocked = !isBasicLocked && !!cropName && !isCropUnlocked(companyObj, cropName);
+          const isCropLocked = !isBasicLocked && !!cropName && !isCropUnlocked(companyObj, cropName, { hasCustomLibrary });
           const isLocked = isBasicLocked || isCropLocked;
 
           const sponsorEntry = cropName ? getSponsorEntry(companyObj, cropName) : null;

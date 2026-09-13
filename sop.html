@@ -347,6 +347,7 @@
   <script>
     let allSopVideos = [];
     let sopCompanyObj = null;
+    let sopHasCustomLibrary = false;
 
     async function fetchAndRenderSOPs() {
       const loading = document.getElementById('sopLoadingState');
@@ -367,10 +368,18 @@
 
         // Fetched directly (rather than relying on window.currentCompanyData) to
         // avoid a race with profile-engine.js's own async DOMContentLoaded chain.
+        // Same reasoning applies to the partner join: fetch it here rather
+        // than assuming loadUserProfile() already populated
+        // window.currentCompanySponsors, since this handler can run first.
+        if (typeof fetchCompanySponsorPartners === 'function') {
+          await fetchCompanySponsorPartners(userCompanyId);
+        }
+
+        let hasCustomLibrary = false;
         if (userCompanyId) {
           const { data: companyRow } = await window.dbClient
             .from('companies')
-            .select('sponsored_crop_packs')
+            .select('id, tier, is_subsidized, paystack_subscription_code, unlock_all_crops, sponsored_crop_packs, purchased_crop_packs')
             .eq('id', userCompanyId)
             .maybeSingle();
           sopCompanyObj = companyRow || null;
@@ -393,6 +402,8 @@
 
           if (customSops && customSops.length > 0) {
             query = query.eq('company_id', userCompanyId);
+            hasCustomLibrary = true;
+            sopHasCustomLibrary = true;
           } else {
             query = query.is('company_id', null);
           }
@@ -430,10 +441,13 @@
       grid.innerHTML = sops.map((sop, idx) => {
         const subTag = sop.sub_tag || 'Standard Compliance';
         const cropName = (typeof getCropFromSubTag === 'function') ? getCropFromSubTag(subTag) : null;
-        const sponsorEntry = (cropName && typeof getSponsorEntry === 'function') ? getSponsorEntry(sopCompanyObj, cropName) : null;
+        const isLocked = !!cropName
+          && typeof isCropUnlocked === 'function'
+          && !isCropUnlocked(sopCompanyObj, cropName, { hasCustomLibrary: sopHasCustomLibrary });
+        const sponsorEntry = (cropName && !isLocked && typeof getSponsorEntry === 'function') ? getSponsorEntry(sopCompanyObj, cropName) : null;
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between${isLocked ? ' opacity-75' : ''}">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold tracking-wide border border-slate-200">
@@ -441,6 +455,12 @@
                 </span>
                 <span class="text-xs font-mono text-slate-400">SOP-${String(idx + 1).padStart(2, '0')}</span>
               </div>
+              ${isLocked ? `
+                <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full pl-2 pr-2.5 py-1 mb-3">
+                  <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <span class="text-[10px] font-semibold text-amber-800">${cropName} Pack Locked</span>
+                </div>
+              ` : ''}
               ${sponsorEntry ? `
                 <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full pl-1 pr-2.5 py-1 mb-3" title="Co-branded with ${sponsorEntry.partner_name}">
                   ${sponsorEntry.partner_logo_url ? `<img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="w-4 h-4 rounded-full object-contain bg-white">` : ''}
@@ -453,7 +473,15 @@
 
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
               <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
-              
+              ${isLocked ? `
+                <button
+                  type="button"
+                  onclick="openProfileModal(); switchProfileTab('organization');"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold hover:bg-slate-200 transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  Unlock Pack
+                </button>
+              ` : `
               <a 
                 href="${sop.doc_url}" 
                 download 
@@ -465,6 +493,7 @@
                 </svg>
                 <span>Download SOP</span>
               </a>
+              `}
             </div>
           </div>
         `;

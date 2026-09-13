@@ -124,6 +124,27 @@
               <input type="email" id="profile-company-email" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none text-sm transition-colors" placeholder="e.g. accounts@acmeinc.co.za">
             </div>
           </div>
+
+          <!-- Processor Grower Code Linking (Subsidy Stacking, Layer 2/3) -->
+          <div class="mt-10 pt-8 border-t border-slate-200">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Processor Sponsorships</h3>
+            <p class="text-xs text-muted mb-4">
+              Deliver to more than one processor? Link each processor's grower code to unlock their sponsored crop pack(s) - e.g. Macadamias to Mayo Mac, Bananas to a packhouse.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-2 mb-4">
+              <input type="text" id="grower-code-input" placeholder="e.g. MM-1234-ABC" class="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-primary focus:border-primary outline-none text-sm transition-colors uppercase">
+              <button id="claim-grower-code-btn" type="button" onclick="handleClaimGrowerCode()" class="px-5 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap">
+                Link Grower Code
+              </button>
+            </div>
+            <p id="grower-code-status" class="hidden text-xs font-medium mb-4"></p>
+
+            <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Linked Sponsorships</h4>
+            <div id="linked-grower-codes-list" class="space-y-2">
+              <p class="text-xs text-slate-400 italic">No processor-sponsored crop packs linked yet.</p>
+            </div>
+          </div>
         </div>
 
         <!-- Security Tab -->

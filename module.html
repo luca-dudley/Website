@@ -865,6 +865,15 @@
 
       window.userCompanyId = profile?.company_id || null;
 
+      // module.html doesn't run through profile-engine.js's loadUserProfile()
+      // flow (it does its own lightweight session/company fetch above), so
+      // window.currentCompanySponsors - the partner-attribution join used by
+      // getSponsorEntry() for the co-brand badge below - won't be populated
+      // unless we fetch it here too.
+      if (typeof fetchCompanySponsorPartners === 'function') {
+        await fetchCompanySponsorPartners(window.userCompanyId);
+      }
+
       const totalSeconds = Number(video.total_seconds || 0);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = Math.floor(totalSeconds % 60);
@@ -946,7 +955,7 @@
       // Tier Gate Lockout Interceptor
       const { data: companyData } = await dbClient
         .from('companies')
-        .select('tier, sponsored_crop_packs, purchased_crop_packs')
+        .select('id, tier, is_subsidized, paystack_subscription_code, unlock_all_crops, sponsored_crop_packs, purchased_crop_packs')
         .eq('id', profile?.company_id)
         .maybeSingle();
 
@@ -955,10 +964,16 @@
       const unlockedBasic = ['general safety', 'machinery & workshop'];
       const isBasicLocked = (userTier === 'basic') && !unlockedBasic.includes(subCategory);
 
+      // Trial Farm / Custom Override (point 2, criterion 3): this specific
+      // video already belongs to the viewer's own company's private branded
+      // library (videos.company_id === companies.id) - full access to it
+      // regardless of subsidy records.
+      const hasCustomLibrary = !!(video.company_id && companyData?.id && video.company_id === companyData.id);
+
       // Crop-Pack Gating (Layer 2): Essential/Enterprise growers still need this
       // specific crop pack unlocked (sponsored or bolted-on) for specialized content.
       const cropName = (typeof getCropFromSubTag === 'function') ? getCropFromSubTag(video.sub_tag) : null;
-      const isCropLocked = !isBasicLocked && !!cropName && typeof isCropUnlocked === 'function' && !isCropUnlocked(companyData, cropName);
+      const isCropLocked = !isBasicLocked && !!cropName && typeof isCropUnlocked === 'function' && !isCropUnlocked(companyData, cropName, { hasCustomLibrary });
 
       if (isBasicLocked) {
         const playerContainer = document.querySelector('.aspect-video');
