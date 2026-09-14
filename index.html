@@ -1581,6 +1581,27 @@
           }
         });
       }
+
+      // =======================================================================
+      // AUTO-APPLY PROCESSOR GROWER CODE FROM URL PARAMETER (?grower_code=...)
+      // =======================================================================
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlGrowerCode = (urlParams.get('grower_code') || urlParams.get('code') || '').trim();
+
+      if (urlGrowerCode) {
+        // Open the Enterprise checkout modal automatically
+        openCheckoutModal(
+          RETAIL_ENTERPRISE_PLAN.planCode,
+          RETAIL_ENTERPRISE_PLAN.amountInCents,
+          RETAIL_ENTERPRISE_PLAN.tierName,
+          RETAIL_ENTERPRISE_PLAN.priceDisplay,
+          RETAIL_ENTERPRISE_PLAN.desc
+        );
+
+        // Expand the grower code entry box and auto-apply the verified discount
+        toggleGrowerCodeInput();
+        applyGrowerCode(urlGrowerCode);
+      }
     });
   </script>
 </body>

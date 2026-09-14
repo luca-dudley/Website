@@ -657,25 +657,26 @@
                     <span class="text-[11px] font-bold tracking-wide uppercase text-amber-300">${isCropLocked ? (cropName + ' Pack Locked') : 'Essential Module'}</span>
                   </div>
                 ` : `
-                  <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded">
+                  <!-- Sponsor pill (top-left): capped width + truncation to avoid colliding with top elements -->
+                  ${sponsorEntry ? `
+                    <div class="absolute top-2 left-2 max-w-[58%] bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-md border border-slate-200/80 z-20">
+                      <span class="text-[10px] font-semibold text-slate-700 truncate block">Sponsored by ${sponsorEntry.partner_name}</span>
+                    </div>
+                  ` : ''}
+
+                  <!-- Duration badge: dynamically positioned above the band when a co-branding band is present -->
+                  <div class="absolute right-2 ${sponsorEntry && sponsorEntry.partner_logo_url ? 'bottom-[calc(24%+8px)]' : 'bottom-2'} bg-black/80 text-white text-xs font-medium px-2 py-1 rounded z-20">
                     ${formatDuration(video.total_seconds)}
                   </div>
-                  ${sponsorEntry ? `
-                    <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-md border border-slate-200/80">
-                      <span class="text-[10px] font-semibold text-slate-700">Sponsored by ${sponsorEntry.partner_name}</span>
+
+                  <!-- Full-width white masking band covering watermark, with centered partner logo -->
+                  ${sponsorEntry && sponsorEntry.partner_logo_url ? `
+                    <div class="absolute inset-x-0 bottom-0 h-[24%] min-h-[36px] bg-white flex items-center justify-center px-14 z-10 border-t border-slate-100">
+                      <img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="h-[60%] max-h-6 w-auto max-w-full object-contain">
                     </div>
-                    ${sponsorEntry.partner_logo_url ? `
-                      <!-- Dynamic Logo Patch (Route A): covers the baked-in "Simple" mark at
-                           bottom-center of the illustration with a white rounded patch, then
-                           lays the sponsoring partner's real logo on top. No duplicate SVG
-                           assets needed per partner/crop — see IMPLEMENTATION_AND_AUDIT.md
-                           for why this beats swapping thumbnail_url per partner. -->
-                      <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-white rounded-md shadow-sm border border-slate-200/80 px-2 py-1 flex items-center justify-center" style="min-width: 64px; max-width: 45%;">
-                        <img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="h-4 max-w-full object-contain">
-                      </div>
-                    ` : ''}
                   ` : ''}
-                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
                     <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
                       <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </div>

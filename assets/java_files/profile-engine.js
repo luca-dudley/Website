@@ -71,7 +71,7 @@ async function fetchCompanySponsorPartners(companyId) {
   }
   const { data, error } = await window.dbClient
     .from('partner_grower_registry')
-    .select('grower_code, corporate_partners(name, logo_url, sponsored_crop_pack)')
+    .select('grower_code, corporate_partners(id, name, logo_url, sponsored_crop_pack)')
     .eq('claimed_by_company_id', companyId);
 
   if (error) {
@@ -83,6 +83,7 @@ async function fetchCompanySponsorPartners(companyId) {
   window.currentCompanySponsors = (data || [])
     .filter(row => row.corporate_partners)
     .map(row => ({
+      partner_id: row.corporate_partners.id,
       crop: row.corporate_partners.sponsored_crop_pack,
       partner_name: row.corporate_partners.name,
       partner_logo_url: row.corporate_partners.logo_url,
