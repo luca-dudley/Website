@@ -1323,18 +1323,21 @@
     // again, authoritatively, inside provision_company_subscription on the
     // server once payment succeeds. This call only lets us show the correct
     // discounted price before the person pays.
-    async function applyGrowerCode() {
+    async function applyGrowerCode(prefilledCode = null) {
       const codeInput = document.getElementById('grower-code-input');
       const applyBtn = document.getElementById('grower-code-apply-btn');
-      const code = (codeInput?.value || '').trim().toUpperCase();
+      const code = (prefilledCode || codeInput?.value || '').trim().toUpperCase();
 
       if (!code) {
         setGrowerCodeStatus('Please enter a grower code.', true);
         return;
       }
 
-      applyBtn.disabled = true;
-      applyBtn.textContent = '...';
+      if (codeInput) codeInput.value = code;
+      if (applyBtn) {
+        applyBtn.disabled = true;
+        applyBtn.textContent = '...';
+      }
 
       try {
         const { data, error } = await window.supabaseClient.rpc('validate_grower_code', {
@@ -1342,7 +1345,6 @@
         });
         if (error) throw error;
 
-        // Expected shape: { valid: boolean, partner_name?: string }
         if (data?.valid) {
           activeGrowerCode = code;
           activeCheckoutPlan = {
@@ -1350,12 +1352,12 @@
             amountInCents: CORPORATE_ENTERPRISE_AMOUNT_CENTS,
             tierName: 'Enterprise Solution (Corporate Subsidized)',
             priceDisplay: 'R337.50 /mo',
-            desc: '8 Seats • Priority Support • 25% Processor-Sponsored Subsidy'
+            desc: `8 Seats • Priority Support • 25% ${data?.partner_name || 'Processor'} Sponsored`
           };
           document.getElementById('checkout-plan-name').textContent = activeCheckoutPlan.tierName;
           document.getElementById('checkout-plan-price').textContent = activeCheckoutPlan.priceDisplay;
           document.getElementById('checkout-plan-desc').textContent = activeCheckoutPlan.desc;
-          setGrowerCodeStatus(`✓ Code verified${data?.partner_name ? ' — ' + data.partner_name + ' Processor Partner' : ''}. 25% subsidy applied.`, false);
+          setGrowerCodeStatus(`✓ Code verified — ${data?.partner_name || 'Processor'} Partner. 25% subsidy applied.`, false);
         } else {
           activeGrowerCode = null;
           activeCheckoutPlan = { ...RETAIL_ENTERPRISE_PLAN };
@@ -1368,8 +1370,10 @@
         console.error('[GrowerCode] Validation error:', err);
         setGrowerCodeStatus('Could not verify that code right now. Please try again.', true);
       } finally {
-        applyBtn.disabled = false;
-        applyBtn.textContent = 'Apply';
+        if (applyBtn) {
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Apply';
+        }
       }
     }
 

@@ -159,7 +159,7 @@ function renderPartnerFooterChain(companyObj, elementId) {
     el.classList.add('hidden');
     return;
   }
-  el.textContent = `Industry Compliance Partners: ${partnerNames.join(', ')} × Simple Solutions`;
+  el.textContent = `Subsidized & Enabled by: ${partnerNames.join(', ')}`;
   el.classList.remove('hidden');
 }
 
@@ -448,6 +448,36 @@ async function handleClaimGrowerCode() {
   if (btn) { btn.disabled = true; btn.innerText = 'Verifying...'; }
 
   try {
+    // Validate first (read-only, no auth/company mutation) so we know the
+    // crop this code sponsors *before* claiming - needed to warn the grower
+    // if it's about to replace a self-funded bolt-on they're currently
+    // paying for.
+    const { data: validation, error: validationError } = await window.dbClient.rpc('validate_grower_code', {
+      p_grower_code: code
+    });
+    if (validationError) throw validationError;
+    if (!validation || validation.valid !== true) {
+      throw new Error(validation?.message || 'That grower code could not be verified.');
+    }
+
+    const purchased = Array.isArray(window.currentCompanyData?.purchased_crop_packs)
+      ? window.currentCompanyData.purchased_crop_packs
+      : [];
+    const isReplacingBoltOn = validation.crop
+      && purchased.some(c => (c || '').toLowerCase() === validation.crop.toLowerCase());
+
+    if (isReplacingBoltOn) {
+      const confirmed = confirm(
+        `You're currently self-funding the ${validation.crop} pack (R80/month). ` +
+        `Linking this code will make ${validation.crop} corporate-sponsored by ${validation.partner_name} instead, ` +
+        `and your R80/month bolt-on billing will be cancelled.\n\nContinue?`
+      );
+      if (!confirmed) {
+        setStatus('Cancelled - your bolt-on billing is unchanged.', false);
+        return;
+      }
+    }
+
     const { data, error } = await window.dbClient.rpc('claim_additional_grower_subsidy', {
       p_grower_code: code
     });
@@ -468,10 +498,21 @@ async function handleClaimGrowerCode() {
       if (data.crop && !current.some(c => (c || '').toLowerCase() === data.crop.toLowerCase())) {
         window.currentCompanyData.sponsored_crop_packs = [...current, data.crop];
       }
+      // The RPC removes a matching crop from purchased_crop_packs server-side
+      // when it was previously a bolt-on - mirror that locally too.
+      if (isReplacingBoltOn && Array.isArray(window.currentCompanyData.purchased_crop_packs)) {
+        window.currentCompanyData.purchased_crop_packs = window.currentCompanyData.purchased_crop_packs
+          .filter(c => (c || '').toLowerCase() !== data.crop.toLowerCase());
+      }
     }
     await fetchCompanySponsorPartners(window.userCompanyId);
 
-    setStatus(`✓ Linked! ${data.partner_name ? data.partner_name + ' now sponsors your ' + data.crop + ' pack.' : 'Your account has been updated.'}`, false);
+    setStatus(
+      isReplacingBoltOn
+        ? `✓ Linked! ${data.partner_name} now sponsors your ${data.crop} pack - your bolt-on billing is being cancelled.`
+        : `✓ Linked! ${data.partner_name ? data.partner_name + ' now sponsors your ' + data.crop + ' pack.' : 'Your account has been updated.'}`,
+      false
+    );
     if (input) input.value = '';
 
     renderLinkedGrowerCodes(window.currentCompanyData);

@@ -1027,16 +1027,15 @@
         return;
       }
 
-      // Co-branding badge (Layer 2, unlocked + sponsored modules only)
+      // Co-branding badge (Layer 2, unlocked + sponsored modules only). Text-only,
+      // matching the vault.html card pill cleanup — the partner logo now only
+      // appears in the thumbnail patch on vault.html, not duplicated in badges.
       const sponsorEntry = (cropName && typeof getSponsorEntry === 'function') ? getSponsorEntry(companyData, cropName) : null;
       const partnerBadge = document.getElementById('modulePartnerBadge');
       if (partnerBadge && sponsorEntry) {
         partnerBadge.classList.remove('hidden');
         partnerBadge.classList.add('inline-flex');
-        partnerBadge.innerHTML = `
-          ${sponsorEntry.partner_logo_url ? `<img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="w-4 h-4 rounded-full object-contain bg-white">` : ''}
-          <span class="text-xs font-semibold text-slate-700">${sponsorEntry.partner_name}</span>
-        `;
+        partnerBadge.innerHTML = `<span class="text-xs font-semibold text-slate-700">Sponsored by ${sponsorEntry.partner_name}</span>`;
       }
 
       const iframe = document.querySelector('#videoPlayer');
@@ -1197,7 +1196,7 @@
         key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
         email: billingEmail,
         amount: 8000,
-        plan: 'PLN_boltOnPlaceholder',
+        plan: 'PLN_8n5qrpeh23evvnu',
         currency: 'ZAR',
         metadata: { custom_fields: [{ display_name: 'Crop Pack', variable_name: 'crop_pack', value: crop }] },
         onSuccess: async (transaction) => {

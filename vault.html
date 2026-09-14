@@ -661,10 +661,19 @@
                     ${formatDuration(video.total_seconds)}
                   </div>
                   ${sponsorEntry ? `
-                    <div class="absolute top-2 left-2 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full pl-1 pr-2.5 py-1 shadow-md border border-slate-200/80" title="Co-branded with ${sponsorEntry.partner_name}">
-                      ${sponsorEntry.partner_logo_url ? `<img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="w-5 h-5 rounded-full object-contain bg-white">` : `<span class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold">${sponsorEntry.partner_name.charAt(0)}</span>`}
-                      <span class="text-[10px] font-semibold text-slate-700">${sponsorEntry.partner_name}</span>
+                    <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-md border border-slate-200/80">
+                      <span class="text-[10px] font-semibold text-slate-700">Sponsored by ${sponsorEntry.partner_name}</span>
                     </div>
+                    ${sponsorEntry.partner_logo_url ? `
+                      <!-- Dynamic Logo Patch (Route A): covers the baked-in "Simple" mark at
+                           bottom-center of the illustration with a white rounded patch, then
+                           lays the sponsoring partner's real logo on top. No duplicate SVG
+                           assets needed per partner/crop — see IMPLEMENTATION_AND_AUDIT.md
+                           for why this beats swapping thumbnail_url per partner. -->
+                      <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-white rounded-md shadow-sm border border-slate-200/80 px-2 py-1 flex items-center justify-center" style="min-width: 64px; max-width: 45%;">
+                        <img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="h-4 max-w-full object-contain">
+                      </div>
+                    ` : ''}
                   ` : ''}
                   <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
@@ -885,9 +894,19 @@
         key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
         email: billingEmail,
         amount: 8000,
-        plan: 'PLN_boltOnPlaceholder',
+        plan: 'PLN_8n5qrpeh23evvnu',
         currency: 'ZAR',
-        metadata: { custom_fields: [{ display_name: 'Crop Pack', variable_name: 'crop_pack', value: crop }] },
+        // company_id + crop_pack in metadata: the paystack-webhook Edge Function
+        // (see COMMERCIAL_FLOWS.md) reads these off the subscription.create
+        // event to know which crop_pack_addon_subscriptions row to attach the
+        // resulting paystack_subscription_code to - Paystack doesn't hand the
+        // subscription code back synchronously in this onSuccess callback,
+        // only the one-time transaction reference.
+        metadata: {
+          company_id: window.userCompanyId,
+          crop_pack: crop,
+          custom_fields: [{ display_name: 'Crop Pack', variable_name: 'crop_pack', value: crop }]
+        },
         onSuccess: async (transaction) => {
           try {
             const { error } = await window.dbClient.rpc('purchase_crop_pack_addon', {
