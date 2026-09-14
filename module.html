@@ -250,6 +250,7 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
           <div class="flex items-center gap-3 mb-3">
             <span data-module-category class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Module</span>
+            <span id="moduleSubTag" class="hidden items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide border">Subtag</span>
             <span id="moduleDuration" class="text-xs text-muted font-medium">Duration: --:--</span>
             <span id="moduleLanguage" class="text-xs text-muted font-medium">Audio Tracks: --</span>
             <span id="modulePartnerBadge" class="hidden items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 pl-1 pr-2.5 py-1"></span>
@@ -878,7 +879,8 @@
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = Math.floor(totalSeconds % 60);
       const durationLabel = `Duration: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      const categoryLabel = video.category || 'Agriculture Module';
+      const categoryLabel = video.category || 'Agriculture';
+      const subTag = video.sub_tag || '';
       const videoTitle = video.title || 'Training Module';
 
       document.title = `${videoTitle} - The Vault`;
@@ -890,14 +892,34 @@
       const moduleDuration = document.getElementById('moduleDuration');
       const moduleLanguage = document.getElementById('moduleLanguage');
       const categoryBadge = document.querySelector('[data-module-category]');
+      const subTagBadge = document.getElementById('moduleSubTag');
 
       if (headerTitle) headerTitle.textContent = videoTitle;
-      if (headerMeta) headerMeta.textContent = `${categoryLabel} • ${minutes}:${String(seconds).padStart(2, '0')}`;
+      if (headerMeta) headerMeta.textContent = `${categoryLabel}${subTag ? ` • ${subTag}` : ''} • ${minutes}:${String(seconds).padStart(2, '0')}`;
       if (moduleTitle) moduleTitle.textContent = videoTitle;
       if (moduleDescription) moduleDescription.textContent = video.description || '';
       if (moduleDuration) moduleDuration.textContent = durationLabel;
-      if (moduleLanguage) moduleLanguage.textContent = video.language || '';
+      if (moduleLanguage) moduleLanguage.textContent = video.language ? `Audio Tracks: ${video.language}` : '';
       if (categoryBadge) categoryBadge.textContent = categoryLabel;
+
+      // Dynamic subtag color mapper matching vault.html
+      if (subTagBadge) {
+        if (subTag) {
+          const subTagMap = {
+            'Macadamia Processing': 'bg-amber-50 text-amber-700 border-amber-200/60',
+            'Banana Processing': 'bg-yellow-50 text-yellow-800 border-yellow-200/60',
+            'Machinery & Workshop': 'bg-blue-50 text-blue-700 border-blue-200/60',
+            'Pumping & Irrigation': 'bg-cyan-50 text-cyan-700 border-cyan-200/60',
+            'General Safety': 'bg-slate-100 text-slate-700 border-slate-200'
+          };
+          const badgeColorClass = subTagMap[subTag] || 'bg-slate-100 text-slate-700 border-slate-200';
+          
+          subTagBadge.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide border ${badgeColorClass}`;
+          subTagBadge.textContent = subTag;
+        } else {
+          subTagBadge.classList.add('hidden');
+        }
+      }
 
       window.currentVideoTitle = videoTitle;
 
