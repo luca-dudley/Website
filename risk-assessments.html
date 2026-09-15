@@ -221,10 +221,19 @@
 
         <!-- 1. OPERATIONAL REVIEWS CONTAINER -->
         <div id="operationalViewContainer" class="space-y-6">
-          <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
-            <div class="relative w-full sm:w-80">
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+          <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center flex-1">
+              <div class="relative w-full sm:w-80">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input id="raSearchInput" type="text" placeholder="Search task, equipment ID or work area..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+              </div>
+              <select id="raStatusFilter" onchange="applyOperationalFilters()" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 outline-none focus:border-primary cursor-pointer shadow-sm">
+                <option value="Current">Current Risk Assessments</option>
+                <option value="Active">Active</option>
+                <option value="Upcoming Review">Upcoming Review</option>
+                <option value="Expired">Expired</option>
+                <option value="Past Risk Assessment">Past Risk Assessments</option>
+              </select>
             </div>
           </div>
 
@@ -253,19 +262,51 @@
               </table>
             </div>
             <div id="raEmptyState" class="hidden py-12 text-center">
-              <p class="text-sm font-medium text-foreground">No operational risk assessments logged yet.</p>
-              <p class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to log your first assessment.</p>
+              <p id="raEmptyTitle" class="text-sm font-medium text-foreground">No operational risk assessments logged yet.</p>
+              <p id="raEmptyDesc" class="text-xs text-muted mt-1">Click "+ Conduct Assessment" above to log your first assessment.</p>
             </div>
           </div>
         </div>
 
         <!-- 2. STATUTORY BASELINE ASSESSMENTS CONTAINER -->
         <div id="baselineViewContainer" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
-            <div class="relative w-full sm:w-80">
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input id="baselineSearchInput" type="text" placeholder="Search baseline profile, machinery, or exposure..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+          <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center flex-1">
+              <div class="relative w-full sm:w-80">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input id="baselineSearchInput" type="text" placeholder="Search baseline profile, machinery, or exposure..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+              </div>
+              <select id="baselineStatusFilter" onchange="applyBaselineFilters()" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 outline-none focus:border-primary cursor-pointer shadow-sm">
+                <option value="Current">Current Baseline Assessments</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Active">Active</option>
+                <option value="Upcoming Review">Upcoming Review</option>
+                <option value="Expired">Expired</option>
+                <option value="Past Risk Assessment">Past Risk Assessments</option>
+              </select>
             </div>
+          </div>
+
+          <!-- Canonical 5 Category Pill Filter Bar -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="baselineCategoryPills">
+            <button type="button" onclick="filterBaselineByCategory('All')" data-category="All" class="baseline-pill active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary text-white border border-primary transition-all shadow-sm shrink-0">
+              All <span class="ml-1 opacity-80" data-count="All">0</span>
+            </button>
+            <button type="button" onclick="filterBaselineByCategory('Environmental & Weather')" data-category="Environmental & Weather" class="baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0">
+              Environmental & Weather <span class="ml-1 opacity-70" data-count="Environmental & Weather">0</span>
+            </button>
+            <button type="button" onclick="filterBaselineByCategory('Estate Infrastructure')" data-category="Estate Infrastructure" class="baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0">
+              Estate Infrastructure <span class="ml-1 opacity-70" data-count="Estate Infrastructure">0</span>
+            </button>
+            <button type="button" onclick="filterBaselineByCategory('Machinery & Workshop')" data-category="Machinery & Workshop" class="baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0">
+              Machinery & Workshop <span class="ml-1 opacity-70" data-count="Machinery & Workshop">0</span>
+            </button>
+            <button type="button" onclick="filterBaselineByCategory('Crop Handling')" data-category="Crop Handling" class="baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0">
+              Crop Handling <span class="ml-1 opacity-70" data-count="Crop Handling">0</span>
+            </button>
+            <button type="button" onclick="filterBaselineByCategory('Chemicals & Hygiene')" data-category="Chemicals & Hygiene" class="baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0">
+              Chemicals & Hygiene <span class="ml-1 opacity-70" data-count="Chemicals & Hygiene">0</span>
+            </button>
           </div>
 
           <div id="baselineLoadingState" class="flex min-h-[14rem] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8">
@@ -277,15 +318,15 @@
 
           <div id="baselineCardsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
-          <div id="baselineEmptyState" class="hidden py-16 px-6 text-center rounded-2xl border border-dashed border-slate-200 bg-white shadow-sm max-w-xl mx-auto my-6">
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-primary mx-auto flex items-center justify-center mb-4 border border-blue-100 shadow-sm">
+          <div id="baselineEmptyState" class="hidden py-14 px-6 text-center rounded-2xl border border-dashed border-slate-200 bg-white shadow-sm max-w-xl mx-auto my-6">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center mb-3.5 border border-slate-200 shadow-sm">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
               </svg>
             </div>
-            <h3 class="font-serif font-bold text-lg text-foreground mb-1">Baseline Risk Assessments Under Review</h3>
-            <p class="text-xs text-muted max-w-md mx-auto leading-relaxed">
-              Statutory baseline assessments are being updated in accordance with the 2026 OHS Act General Safety & Driven Machinery Regulations. Standardized assessments will be available here once certified.
+            <h3 id="baselineEmptyTitle" class="font-serif font-bold text-lg text-foreground mb-1">No Matching Baseline Assessments</h3>
+            <p id="baselineEmptyDesc" class="text-xs text-muted max-w-md mx-auto leading-relaxed">
+              No statutory baseline profiles found matching your active category and status filters. Try clearing your search or switching filters.
             </p>
           </div>
         </div>
@@ -559,6 +600,48 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: INSPECT STATUTORY 6-COLUMN HAZARD REGISTER
+  ========================================================================== -->
+  <div id="inspectBaselineModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl max-w-6xl w-full p-4 sm:p-8 shadow-2xl relative my-6 max-h-[92vh] flex flex-col justify-between">
+      <div class="flex items-start justify-between pb-4 border-b border-slate-200 shrink-0">
+        <div>
+          <span id="inspectModalCategory" class="text-[11px] font-bold tracking-wider text-primary uppercase">Statutory Baseline</span>
+          <h3 id="inspectModalTitle" class="font-serif text-xl sm:text-2xl font-bold text-foreground mt-0.5">Hazard Register</h3>
+          <p id="inspectModalReg" class="text-xs text-slate-500 font-mono mt-1"></p>
+        </div>
+        <button onclick="closeInspectBaselineModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 text-xs">
+        <table class="w-full text-left border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead class="bg-slate-100 text-[11px] font-bold uppercase text-slate-700 tracking-wider">
+            <tr>
+              <th class="p-3 w-[12%]">Hazard ID & Activity</th>
+              <th class="p-3 w-[22%]">Hazard & Consequence</th>
+              <th class="p-3 w-[12%] text-center">Inherent Risk</th>
+              <th class="p-3 w-[34%]">Control Measures & Actions</th>
+              <th class="p-3 w-[10%] text-center">Residual Risk</th>
+              <th class="p-3 w-[10%]">Audit Standard</th>
+            </tr>
+          </thead>
+          <tbody id="inspectModalTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+        <div id="inspectModalSignatory" class="text-xs text-slate-500"></div>
+        <div class="flex items-center gap-2">
+          <button onclick="closeInspectBaselineModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">Close</button>
+          <button id="inspectModalExportBtn" class="px-5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">Export Statutory PDF</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -854,6 +937,8 @@
       return [];
     }
 
+    let activeBaselineCategory = 'All';
+
     async function fetchBaselineTemplates() {
       const loading = document.getElementById('baselineLoadingState');
       const grid = document.getElementById('baselineCardsGrid');
@@ -863,7 +948,15 @@
         const { data: { session } } = await window.dbClient.auth.getSession();
         const companyId = window.userCompanyId || null;
 
-        // 1. Fetch Master Templates
+        if (companyId) {
+          try {
+            await window.dbClient.rpc('provision_company_baseline_register', { p_company_id: companyId });
+          } catch (e) {
+            console.warn('[BRA] Provisioning notice:', e.message);
+          }
+        }
+
+        // Fetch master templates
         const { data: templates, error: tErr } = await window.dbClient
           .from('baseline_ra_templates')
           .select('*')
@@ -872,7 +965,7 @@
         if (tErr) throw tErr;
         dbBaselineTemplates = templates || [];
 
-        // 2. Fetch Company Completed Reviews to Compute Dynamic Expiration Dates
+        // Fetch active tenant reviews
         if (companyId) {
           const { data: reviews } = await window.dbClient
             .from('company_baseline_assessments')
@@ -881,7 +974,8 @@
           companyBaselineReviews = reviews || [];
         }
 
-        renderBaselineCards(dbBaselineTemplates);
+        updateBaselineCategoryCounts();
+        applyBaselineFilters();
 
       } catch (err) {
         console.warn('Error loading baseline templates:', err);
@@ -890,107 +984,212 @@
       }
     }
 
-    function renderBaselineCards(templates) {
-      const grid = document.getElementById('baselineCardsGrid');
-      const empty = document.getElementById('baselineEmptyState');
-      const searchInput = document.getElementById('baselineSearchInput');
-      const topActionBtn = document.getElementById('btnConductAction');
+    function updateBaselineCategoryCounts() {
+      const counts = { 'All': dbBaselineTemplates.length };
+      dbBaselineTemplates.forEach(t => {
+        counts[t.category] = (counts[t.category] || 0) + 1;
+      });
+      document.querySelectorAll('#baselineCategoryPills [data-count]').forEach(el => {
+        const cat = el.getAttribute('data-count');
+        el.textContent = counts[cat] || 0;
+      });
+    }
 
-      if (!grid) return;
-
-      const hasNoCards = !templates || templates.length === 0;
-
-      if (hasNoCards) {
-        grid.classList.add('hidden');
-        if (empty) empty.classList.remove('hidden');
-
-        // Blur and disable search input
-        if (searchInput) {
-          searchInput.disabled = true;
-          searchInput.classList.add('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+    function filterBaselineByCategory(cat) {
+      activeBaselineCategory = cat;
+      document.querySelectorAll('.baseline-pill').forEach(btn => {
+        const isMatch = btn.getAttribute('data-category') === cat;
+        if (isMatch) {
+          btn.className = "baseline-pill active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary text-white border border-primary transition-all shadow-sm shrink-0";
+        } else {
+          btn.className = "baseline-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-primary/40 transition-all shrink-0";
         }
+      });
+      applyBaselineFilters();
+    }
 
-        // Blur and disable button on baseline view
-        if (currentActiveView === 'baseline' && topActionBtn) {
-          topActionBtn.disabled = true;
-          topActionBtn.classList.add('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
+    function applyBaselineFilters() {
+      const q = (document.getElementById('baselineSearchInput')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('baselineStatusFilter')?.value || 'All';
+
+      const filtered = dbBaselineTemplates.filter(t => {
+        const matchCat = (activeBaselineCategory === 'All') || (t.category === activeBaselineCategory);
+
+        const matchSearch = !q ||
+          (t.title || '').toLowerCase().includes(q) ||
+          (t.category || '').toLowerCase().includes(q) ||
+          (t.regulation_reference || '').toLowerCase().includes(q);
+
+        const meta = computeBaselineStatus(t);
+        const matchStatus = (statusFilter === 'All') || (meta.status === statusFilter);
+
+        return matchCat && matchSearch && matchStatus;
+      });
+
+      // Update empty state text to match active filter
+      const emptyTitle = document.getElementById('baselineEmptyTitle');
+      const emptyDesc = document.getElementById('baselineEmptyDesc');
+      if (emptyTitle && emptyDesc) {
+        if (statusFilter !== 'All') {
+          emptyTitle.textContent = `No ${statusFilter} Assessments`;
+          emptyDesc.textContent = `There are currently no baseline profiles marked as "${statusFilter}" under this category.`;
+        } else if (q) {
+          emptyTitle.textContent = 'No Search Results';
+          emptyDesc.textContent = `No baseline risk profiles match "${q}". Check spelling or clear your query.`;
+        } else {
+          emptyTitle.textContent = 'No Matching Baseline Assessments';
+          emptyDesc.textContent = 'No statutory baseline profiles found under this category filter.';
         }
-        return;
       }
 
-      // Restore when cards exist
-      if (empty) empty.classList.add('hidden');
-      grid.classList.remove('hidden');
+      renderBaselineCards(filtered);
+    }
 
-      if (searchInput) {
-        searchInput.disabled = false;
-        searchInput.classList.remove('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
-      }
-
-      if (topActionBtn) {
-        topActionBtn.disabled = false;
-        topActionBtn.classList.remove('opacity-40', 'blur-[0.5px]', 'cursor-not-allowed', 'pointer-events-none');
-      }
+    function computeBaselineStatus(tmpl) {
+      // Find all signed reviews for this template, newest first
+      const reviews = companyBaselineReviews
+        .filter(r => (r.template_id === tmpl.id || r.title === tmpl.title) && r.designated_person_signature)
+        .sort((a, b) => new Date(b.assessment_date || b.created_at) - new Date(a.assessment_date || a.created_at));
 
       const now = new Date();
 
-      grid.innerHTML = templates.map((tmpl, idx) => {
-        const hazardsList = parseHazards(tmpl.hazards_register);
-        const hazardsCount = hazardsList.length;
-        const category = tmpl.category || 'Estate Safety';
-        const reg = tmpl.regulation_reference || 'OHS Act & Regulations';
+      if (reviews.length === 0) {
+        return {
+          status: 'Not Started',
+          badgeClass: 'bg-slate-100 text-slate-700 border-slate-200 font-medium',
+          dueDateText: '—',
+          isPast: false,
+          historyCount: 0,
+          activeReview: null
+        };
+      }
 
-        const review = companyBaselineReviews.find(r => r.template_id === tmpl.id || r.title === tmpl.title);
+      const latest = reviews[0];
+      const dueDate = latest.review_due_date ? new Date(latest.review_due_date) : null;
+      let status = 'Active';
+      let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold';
 
-        let statusText = 'Pending Review';
-        let statusBadge = 'bg-slate-100 text-slate-700 border-slate-200';
-        let dueDateLabel = 'Not established';
+      if (dueDate) {
+        const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 0) {
+          status = 'Expired';
+          badgeClass = 'bg-red-100 text-red-800 border-red-200 font-bold';
+        } else if (diffDays <= 30) {
+          status = 'Upcoming Review';
+          badgeClass = 'bg-amber-100 text-amber-800 border-amber-200 font-bold animate-pulse';
+        }
+      }
 
-        if (review && review.review_due_date) {
-          const dueDate = new Date(review.review_due_date);
-          dueDateLabel = review.review_due_date;
-          const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+      return {
+        status,
+        badgeClass,
+        dueDateText: latest.review_due_date || '—',
+        isPast: false,
+        historyCount: reviews.length - 1,
+        activeReview: latest,
+        allReviews: reviews
+      };
+    }
 
-          if (diffDays <= 0) {
-            statusText = 'Expired';
-            statusBadge = 'bg-red-100 text-red-800 border-red-200 font-bold';
-          } else if (diffDays <= 30) {
-            statusText = 'Review Due Soon';
-            statusBadge = 'bg-amber-100 text-amber-800 border-amber-200 font-bold animate-pulse';
-          } else {
-            statusText = 'Active';
-            statusBadge = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold';
-          }
+    function applyBaselineFilters() {
+      const q = (document.getElementById('baselineSearchInput')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('baselineStatusFilter')?.value || 'Current';
+
+      const filtered = dbBaselineTemplates.filter(t => {
+        const matchCat = (activeBaselineCategory === 'All') || (t.category === activeBaselineCategory);
+
+        const matchSearch = !q ||
+          (t.title || '').toLowerCase().includes(q) ||
+          (t.category || '').toLowerCase().includes(q) ||
+          (t.regulation_reference || '').toLowerCase().includes(q);
+
+        const meta = computeBaselineStatus(t);
+
+        let matchStatus = false;
+        if (statusFilter === 'Current') {
+          matchStatus = meta.status !== 'Past Risk Assessment'; // Default: Not Started, Active, Upcoming Review, Expired
+        } else if (statusFilter === 'Past Risk Assessment') {
+          matchStatus = meta.historyCount > 0;
+        } else {
+          matchStatus = meta.status === statusFilter;
         }
 
+        return matchCat && matchSearch && matchStatus;
+      });
+
+      // Update empty state text
+      const emptyTitle = document.getElementById('baselineEmptyTitle');
+      const emptyDesc = document.getElementById('baselineEmptyDesc');
+      if (emptyTitle && emptyDesc) {
+        if (statusFilter !== 'Current') {
+          emptyTitle.textContent = `No ${statusFilter} Assessments`;
+          emptyDesc.textContent = `There are currently no baseline profiles matching "${statusFilter}" under this category.`;
+        } else if (q) {
+          emptyTitle.textContent = 'No Search Results';
+          emptyDesc.textContent = `No baseline risk profiles match "${q}".`;
+        } else {
+          emptyTitle.textContent = 'No Matching Baseline Assessments';
+          emptyDesc.textContent = 'No statutory baseline profiles found under this category filter.';
+        }
+      }
+
+      renderBaselineCards(filtered);
+    }
+
+    function renderBaselineCards(templates) {
+      const grid = document.getElementById('baselineCardsGrid');
+      const empty = document.getElementById('baselineEmptyState');
+      if (!grid) return;
+
+      if (!templates || templates.length === 0) {
+        grid.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+
+      if (empty) empty.classList.add('hidden');
+      grid.classList.remove('hidden');
+
+      grid.innerHTML = templates.map((tmpl, idx) => {
+        const category = tmpl.category || 'Estate Safety';
+        const reg = tmpl.regulation_reference || 'OHS Act 85 of 1993';
+        const meta = computeBaselineStatus(tmpl);
+
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
+            <div class="flex-1 flex flex-col">
+              <div class="flex items-center justify-between gap-2 mb-2.5">
                 <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-primary text-[10px] font-bold uppercase tracking-wider border border-blue-100">
                   ${category}
                 </span>
-                <span class="text-[11px] font-mono text-slate-400">BRA-${String(idx + 1).padStart(2, '0')}</span>
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">BRA-${String(idx + 1).padStart(2, '0')}</span>
               </div>
-              <h3 class="font-serif text-lg font-bold text-foreground mb-1 leading-snug">${tmpl.title}</h3>
-              <p class="text-xs text-muted font-medium mb-3 line-clamp-2" title="${reg}">${reg}</p>
-              
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 text-xs space-y-1 text-slate-600">
-                <div class="flex justify-between items-center">
-                  <span>Hazards Controlled:</span>
-                  <span class="font-semibold text-slate-800">${hazardsCount} Scenarios</span>
+              <h3 class="font-serif text-[17px] font-bold text-foreground mb-1.5 leading-snug line-clamp-2 min-h-[3rem] flex items-start">${tmpl.title}</h3>
+              <p class="text-xs text-muted font-medium mb-3 line-clamp-3 min-h-[3.6rem] leading-relaxed" title="${reg}">${reg}</p>
+            </div>
+
+            <!-- Pinned Metadata Block -->
+            <div class="bg-slate-50/90 p-3 rounded-xl border border-slate-100 mb-3 text-xs space-y-1.5 text-slate-600 mt-auto">
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-slate-500">Status:</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] border ${meta.badgeClass}">
+                    ${meta.status}
+                  </span>
+                  ${meta.historyCount > 0 ? `<span class="px-1.5 py-0.2 rounded text-[10px] bg-slate-200 text-slate-700 font-medium cursor-help" title="${meta.historyCount} past annual reviews on file">+${meta.historyCount} Prior</span>` : ''}
                 </div>
-                <div class="flex justify-between items-center">
-                  <span>Review Due Date:</span>
-                  <span class="font-semibold text-slate-800">${dueDateLabel}</span>
-                </div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-slate-500">Review Due Date:</span>
+                <span class="font-semibold text-slate-800">${meta.dueDateText}</span>
               </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-              <span class="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider border ${statusBadge}">
-                ● ${statusText}
-              </span>
+            <!-- Action Buttons -->
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0">
+              <button onclick="openInspectBaselineModal('${tmpl.id}')" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                Inspect Register
+              </button>
               <button onclick="exportBaselineTemplatePdf('${tmpl.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm cursor-pointer">
                 📄 Export PDF
               </button>
@@ -998,6 +1197,74 @@
           </div>
         `;
       }).join('');
+    }
+
+    function openInspectBaselineModal(templateId) {
+      const tmpl = dbBaselineTemplates.find(t => t.id === templateId);
+      if (!tmpl) return;
+
+      const review = companyBaselineReviews.find(r => r.template_id === tmpl.id || r.title === tmpl.title);
+      const hazards = parseHazards(tmpl.hazards_register);
+
+      document.getElementById('inspectModalCategory').textContent = `${tmpl.category || 'Estate Safety'} • Statutory Baseline`;
+      document.getElementById('inspectModalTitle').textContent = tmpl.title;
+      document.getElementById('inspectModalReg').textContent = `Regulatory Reference: ${tmpl.regulation_reference || 'OHS Act 85 of 1993'}`;
+      document.getElementById('inspectModalSignatory').innerHTML = `Assigned Legal Signatory: <strong>${review?.designated_person_name || 'Managing Director / 16.2 Appointee'}</strong>`;
+
+      const exportBtn = document.getElementById('inspectModalExportBtn');
+      if (exportBtn) {
+        exportBtn.onclick = () => exportBaselineTemplatePdf(tmpl.id);
+      }
+
+      const tbody = document.getElementById('inspectModalTableBody');
+      if (tbody) {
+        tbody.innerHTML = hazards.map(h => {
+          const inherent = typeof h.inherent_risk === 'object' ? `${h.inherent_risk?.rating || 'High'} (${h.inherent_risk?.severity || ''})` : (h.inherent_risk || 'High');
+          const residual = typeof h.residual_risk === 'object' ? `${h.residual_risk?.rating || 'Low'} (${h.residual_risk?.severity || ''})` : (h.residual_risk || 'Low');
+          const inherentClass = String(inherent).includes('High') || String(inherent).includes('Critical') ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200';
+          const residualClass = String(residual).includes('Low') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200';
+          const controlsText = h.additional_controls || h.control_measures || h.existing_controls || '';
+
+          return `
+            <tr class="hover:bg-slate-50/60 transition-colors align-top">
+              <td class="p-3 font-mono font-bold text-primary">
+                ${h.hazard_id || 'HAZ'}
+                <div class="font-sans font-medium text-slate-500 text-[10px] mt-1">${h.action_when || 'Daily Operation'}</div>
+              </td>
+              <td class="p-3">
+                <div class="font-semibold text-slate-900">${h.hazard || ''}</div>
+                <div class="text-[11px] text-slate-500 mt-1">${h.consequence || ''}</div>
+                <div class="text-[10px] text-slate-400 mt-1"><strong>Exposed:</strong> ${h.who_harmed || 'Operational Personnel'}</div>
+              </td>
+              <td class="p-3 text-center">
+                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${inherentClass}">
+                  ${inherent}
+                </span>
+              </td>
+              <td class="p-3 leading-relaxed">
+                <div class="text-slate-800 font-medium">${controlsText}</div>
+                <div class="mt-2 text-[10px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-200/80">
+                  <strong>Action By:</strong> ${h.action_by || 'Appointed 16.2 / Supervisor'}
+                </div>
+              </td>
+              <td class="p-3 text-center">
+                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${residualClass}">
+                  ${residual}
+                </span>
+              </td>
+              <td class="p-3 text-[10px] text-slate-500">
+                ${Array.isArray(h.audit_verification_records) ? h.audit_verification_records.join('<br>• ') : 'SIZA v6.0 / OHS'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('inspectBaselineModal')?.classList.remove('hidden');
+    }
+
+    function closeInspectBaselineModal() {
+      document.getElementById('inspectBaselineModal')?.classList.add('hidden');
     }
 
     // MODAL: OPEN BASELINE REVIEW
@@ -1121,25 +1388,25 @@
 
       function renderHeader() {
         doc.setFont('times', 'bold');
-        doc.setFontSize(15);
+        doc.setFontSize(14);
         doc.setTextColor(30, 58, 95);
-        doc.text(companyName.toUpperCase(), margin, 14);
+        doc.text(companyName.toUpperCase(), margin, 13);
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(8);
         doc.setTextColor(100, 116, 139);
-        doc.text(`STATUTORY BASELINE RISK ASSESSMENT: ${tmpl.title.toUpperCase()}`, margin, 20);
-        doc.text(`Page ${pageNumber}`, pageWidth - margin, 14, { align: 'right' });
+        doc.text(`STATUTORY BASELINE RISK ASSESSMENT: ${tmpl.title.toUpperCase()}`, margin, 18);
+        doc.text(`Page ${pageNumber}`, pageWidth - margin, 13, { align: 'right' });
 
         doc.setDrawColor(30, 58, 95);
-        doc.setLineWidth(0.6);
-        doc.line(margin, 23, pageWidth - margin, 23);
+        doc.setLineWidth(0.5);
+        doc.line(margin, 21, pageWidth - margin, 21);
       }
 
       renderHeader();
-      let y = 27;
+      let y = 24;
 
-      // Clean Enclosed Meta Box
+      // Metadata Block
       const metaBoxH = 12;
       doc.setFillColor(248, 250, 252);
       doc.setDrawColor(203, 213, 225);
@@ -1147,44 +1414,40 @@
       doc.rect(margin, y, contentWidth, metaBoxH, 'FD');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.2);
+      doc.setFontSize(7);
       doc.setTextColor(71, 85, 105);
-      doc.text(`COMPANY: ${companyName.toUpperCase()}`, margin + 3, y + 5);
-      doc.text(`DATE OF ASSESSMENT: ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 85, y + 5);
-      doc.text(`REVIEW DUE DATE: ${review?.review_due_date || 'Annual Review Scheduled'}`, margin + 85, y + 9.5);
+      doc.text(`COMPANY: ${companyName.toUpperCase()}`, margin + 3, y + 4.5);
+      doc.text(`CATEGORY: ${tmpl.category || 'General Operations'}`, margin + 3, y + 9);
+      doc.text(`ASSESSMENT DATE: ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 85, y + 4.5);
+      doc.text(`REVIEW DUE DATE: ${review?.review_due_date || 'Annual Review Scheduled'}`, margin + 85, y + 9);
 
-      const stdLines = doc.splitTextToSize(`STANDARD: ${tmpl.regulation_reference || 'OHS Act 85 of 1993'}`, contentWidth - 170);
-      doc.text(stdLines, margin + 165, y + 5);
+      const stdLines = doc.splitTextToSize(`STATUTORY REF: ${tmpl.regulation_reference || 'OHS Act 85 of 1993'}`, contentWidth - 180);
+      doc.text(stdLines, margin + 180, y + 4.5);
       y += metaBoxH + 4;
 
-      // Table Header Row (Widths total 269mm = contentWidth)
-      const colW = [44, 60, 70, 45, 26, 24];
-      const headerH = 7.5;
+      // 6-Column Statutory Headers (Widths sum to 269mm = contentWidth)
+      const colW = [22, 60, 68, 24, 65, 30];
+      const headerH = 7;
 
-      doc.setFillColor(241, 245, 249);
-      doc.setDrawColor(203, 213, 225);
-      doc.setLineWidth(0.3);
-      doc.rect(margin, y, contentWidth, headerH, 'FD');
+      doc.setFillColor(30, 58, 95);
+      doc.rect(margin, y, contentWidth, headerH, 'F');
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(6.5);
-      doc.setTextColor(30, 58, 95);
+      doc.setTextColor(255, 255, 255);
 
       let curX = margin;
       const headers = [
-        "WHAT ARE THE HAZARDS?",
-        "WHO MIGHT BE HARMED & HOW?",
-        "WHAT ARE YOU ALREADY DOING?",
-        "DO YOU NEED ADDITIONAL CONTROLS?",
-        "ACTION BY",
-        "WHEN?"
+        "HAZARD ID",
+        "HAZARDOUS ACTIVITY",
+        "POTENTIAL HARM / CONSEQUENCE",
+        "INHERENT",
+        "CONTROL MEASURES (RHCA / DMR)",
+        "AUDIT STANDARD"
       ];
 
       headers.forEach((h, i) => {
-        // Vertical divider
-        if (i > 0) doc.line(curX, y, curX, y + headerH);
-        const wrappedH = doc.splitTextToSize(h, colW[i] - 3);
-        doc.text(wrappedH, curX + 1.5, y + 4.5);
+        doc.text(h, curX + 1.5, y + 4.5);
         curX += colW[i];
       });
       y += headerH;
@@ -1192,29 +1455,37 @@
       const hazards = parseHazards(tmpl.hazards_register);
 
       hazards.forEach(h => {
-        const c0 = doc.splitTextToSize(String(h.hazard || ''), colW[0] - 3);
-        const c1 = doc.splitTextToSize(String(h.who_harmed || h.consequence || ''), colW[1] - 3);
-        const c2 = doc.splitTextToSize(String(h.existing_controls || h.controls || ''), colW[2] - 3);
-        const c3 = doc.splitTextToSize(String(h.additional_controls || 'None'), colW[3] - 3);
-        const c4 = doc.splitTextToSize(String(h.action_by || 'Employer & H&S Rep'), colW[4] - 3);
-        const c5 = doc.splitTextToSize(String(h.action_when || 'Immediately'), colW[5] - 3);
+        const inherentRating = typeof h.inherent_risk === 'object' 
+          ? (h.inherent_risk?.rating || 'High') 
+          : String(h.inherent_risk || 'High');
+        
+        const controlsText = h.additional_controls || h.control_measures || h.existing_controls || '';
+        const auditStandard = Array.isArray(h.audit_verification_records) 
+          ? h.audit_verification_records[0] 
+          : 'SIZA v6.0 / OHS';
+
+        const c0 = doc.splitTextToSize(String(h.hazard_id || 'HAZ'), colW[0] - 3);
+        const c1 = doc.splitTextToSize(String(h.hazard || ''), colW[1] - 3);
+        const c2 = doc.splitTextToSize(String(h.consequence || h.potential_harm || ''), colW[2] - 3);
+        const c3 = doc.splitTextToSize(inherentRating, colW[3] - 3);
+        const c4 = doc.splitTextToSize(String(controlsText), colW[4] - 3);
+        const c5 = doc.splitTextToSize(String(auditStandard), colW[5] - 3);
 
         const maxLines = Math.max(c0.length, c1.length, c2.length, c3.length, c4.length, c5.length);
-        const rowH = Math.max(maxLines * 3.0 + 3, 7.5);
+        const rowH = Math.max(maxLines * 3.2 + 3, 7.5);
 
-        if (y + rowH > bottomLimit - 24) {
+        if (y + rowH > bottomLimit - 22) {
           doc.addPage();
           pageNumber++;
           renderHeader();
-          y = 28;
+          y = 25;
         }
 
-        // Outer Row Box
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
         doc.rect(margin, y, contentWidth, rowH, 'S');
 
-        // Draw Vertical Column Dividers to Prevent Text Collision
+        // Column lines
         let lineX = margin;
         for (let i = 0; i < colW.length - 1; i++) {
           lineX += colW[i];
@@ -1227,6 +1498,8 @@
 
         let cellX = margin;
         [c0, c1, c2, c3, c4, c5].forEach((lines, idx) => {
+          if (idx === 0 || idx === 3 || idx === 5) doc.setFont('helvetica', 'bold');
+          else doc.setFont('helvetica', 'normal');
           doc.text(lines, cellX + 1.5, y + 3.5);
           cellX += colW[idx];
         });
@@ -1234,43 +1507,106 @@
         y += rowH;
       });
 
-      // Bottom Sign-off Box
-      if (y + 24 > bottomLimit) {
+      // Statutory Declaration & Sign-Off Box (Matches Operational Box Architecture)
+      const signBoxH = 36;
+      if (y + signBoxH + 16 > bottomLimit) {
         doc.addPage();
         pageNumber++;
         renderHeader();
-        y = 28;
+        y = 25;
       }
 
-      y += 4;
+      y += 5;
+      const intervalMonths = tmpl.review_interval_months || 12;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(71, 85, 105);
-      doc.text("ANNUAL STATUTORY REVIEW DECLARATION", margin, y);
+      doc.setFontSize(8);
+      doc.setTextColor(30, 58, 95);
+      doc.text(`STATUTORY REVIEW DECLARATION & SIGN-OFF (OHS ACT SECTION 8 • ${intervalMonths}-MONTH AUDIT CYCLE)`, margin, y);
       y += 3.5;
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6);
+      doc.setFontSize(6.2);
       doc.setTextColor(100, 116, 139);
-      doc.text("This baseline risk assessment is subject to statutory review annually or whenever there is an operational change in machinery, process, or facilities.", margin, y);
-      y += 7;
+      doc.text(`This baseline risk assessment is subject to statutory review every ${intervalMonths} months, or whenever operational changes occur in machinery, facility processes, or estate infrastructure.`, margin, y);
+      y += 3.5;
 
-      // Render Officer Signature if reviewed
+      // Outer Enclosed Verification Box (Landscape Span)
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.5);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, y, contentWidth, signBoxH, 'S');
+
+      // 1. Column 1 (Left): Appointee Details
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text("STATUTORY APPOINTEE VERIFICATION", margin + 4, y + 6);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Sec. 16(2) Appointee:  ${review?.designated_person_name || 'Managing Director / 16.2 Appointee'}`, margin + 4, y + 14);
+      doc.text(`Assessment Date:      ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 4, y + 21);
+      doc.text(`Next Review Due:       ${review?.review_due_date || 'Annual Statutory Review'}`, margin + 4, y + 28);
+
+      // 2. Column 2 (Middle): Centered Appointee Signature
+      const sigCenterX = margin + (contentWidth / 2);
       if (review && review.designated_person_signature) {
-        doc.addImage(review.designated_person_signature, 'PNG', margin + 5, y - 6, 40, 12);
+        doc.addImage(review.designated_person_signature, 'PNG', sigCenterX - 22, y + 4, 44, 18);
+      }
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.4);
+      doc.line(sigCenterX - 26, y + 25, sigCenterX + 26, y + 25);
+
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Verified Appointee Digital Signature", sigCenterX, y + 30, { align: 'center' });
+
+      // 3. Column 3 (Right): Rectangular Official Legal Verified Stamp
+      const stampCenterX = margin + contentWidth - 42;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text(companyName.toUpperCase(), stampCenterX, y + 6.5, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.setTextColor(51, 65, 85);
+
+      let stampLineY = y + 11;
+      if (comp.postal_address) {
+        doc.text(comp.postal_address, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.5;
+      }
+      if (comp.vat_number) {
+        doc.text(`VAT / Reg Nr: ${comp.vat_number}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.5;
+      }
+      if (comp.phone) {
+        doc.text(`Tel: ${comp.phone}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.5;
+      }
+      if (comp.contact_email) {
+        doc.text(`Email: ${comp.contact_email}`, stampCenterX, stampLineY, { align: 'center' });
+        stampLineY += 3.5;
       }
 
-      doc.setDrawColor(148, 163, 184);
-      doc.setLineWidth(0.3);
-      doc.line(margin, y, margin + 70, y);
-      doc.line(margin + 90, y, margin + 140, y);
-      doc.line(margin + 160, y, margin + 240, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.2);
+      doc.setTextColor(100, 116, 139);
+      doc.text("OFFICIAL VERIFIED LEGAL STAMP", stampCenterX, y + signBoxH - 4.5, { align: 'center' });
 
-      doc.text(`Officer: ${review?.designated_person_name || 'Designated Safety Officer'}`, margin, y + 3.5);
-      doc.text(`Reviewed: ${review?.assessment_date || new Date().toISOString().split('T')[0]}`, margin + 90, y + 3.5);
-      doc.text(`Official Stamp: ${companyName.toUpperCase()}`, margin + 160, y + 3.5);
+      y += signBoxH + 5;
 
-      doc.save(`Baseline_Risk_Assessment_${tmpl.title.replace(/\s+/g, '_')}.pdf`);
+      // Legal Compliance Footer Note
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.setTextColor(148, 163, 184);
+      const legalNote = "STATUTORY DECLARATION: This document serves as a binding Baseline Risk Assessment conducted in terms of Section 8(2)(d) of the Occupational Health and Safety Act 85 of 1993, DMR 2015, and SIZA Health & Safety v6.0 audit requirements.";
+      doc.text(doc.splitTextToSize(legalNote, contentWidth), margin, y);
+
+      doc.save(`Statutory_BRA_${tmpl.title.replace(/\s+/g, '_')}.pdf`);
     }
 
     // -------------------------------------------------------------------------
@@ -1297,68 +1633,9 @@
       }
     }
 
-    function renderAssessmentsTable(records) {
-      const tbody = document.getElementById('raTableBody');
-      const empty = document.getElementById('raEmptyState');
-      if (!tbody) return;
-
-      if (!records || records.length === 0) {
-        tbody.innerHTML = '';
-        if (empty) empty.classList.remove('hidden');
-        return;
-      }
-
-      if (empty) empty.classList.add('hidden');
-
-      const now = new Date();
-
-      tbody.innerHTML = records.map(ra => {
-        const dueDate = ra.review_due_date ? new Date(ra.review_due_date) : null;
-        let displayStatus = 'Active';
-        let statusClass = 'bg-emerald-100 text-emerald-800';
-
-        if (dueDate) {
-          const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-          if (diffDays <= 0) {
-            displayStatus = 'Expired';
-            statusClass = 'bg-red-100 text-red-800 font-bold';
-          } else if (diffDays <= 14) {
-            displayStatus = 'Critical';
-            statusClass = 'bg-amber-100 text-amber-800 font-bold animate-pulse';
-          }
-        }
-
-        const displayTitle = ra.title || 'Operational Task';
-
-        return `
-          <tr class="hover:bg-slate-50/60 transition-colors">
-            <td class="px-6 py-4">
-              <div class="font-semibold text-slate-800">${displayTitle}</div>
-            </td>
-            <td class="px-6 py-4 text-slate-600">
-              <div>${ra.work_area}</div>
-              ${ra.equipment_id ? `<span class="text-[11px] font-mono text-slate-400">ID: ${ra.equipment_id}</span>` : ''}
-            </td>
-            <td class="px-6 py-4 text-slate-600">
-              <div class="text-slate-800 font-medium">${ra.assessor_name}</div>
-            </td>
-            <td class="px-6 py-4 text-slate-500 text-xs">${ra.assessment_date}</td>
-            <td class="px-6 py-4 text-slate-500 text-xs font-semibold">${ra.review_due_date || 'N/A'}</td>
-            <td class="px-6 py-4">
-              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusClass}">
-                ${displayStatus}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-right">
-              <button onclick="downloadAssessmentPdfById('${ra.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-primary hover:text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
-                📄 Review PDF
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
+    // -------------------------------------------------------------------------
+    // 1. OPERATIONAL ASSESSMENTS ENGINE (90-DAY QUARTERLY TASK REVIEWS)
+    // -------------------------------------------------------------------------
     async function fetchCompanyAssessments() {
       const loading = document.getElementById('raLoadingState');
       const tableCard = document.getElementById('raTableCard');
@@ -1375,14 +1652,9 @@
           .single();
 
         window.userCompanyId = profile?.company_id || null;
+        if (!window.userCompanyId) return;
 
-        if (!window.userCompanyId) {
-          if (loading) loading.classList.add('hidden');
-          if (tableCard) tableCard.classList.remove('hidden');
-          if (empty) empty.classList.remove('hidden');
-          return;
-        }
-
+        // Query active operational assessments for this farm
         const { data, error } = await window.dbClient
           .from('company_risk_assessments')
           .select('*')
@@ -1390,15 +1662,239 @@
           .order('assessment_date', { ascending: false });
 
         if (error) throw error;
-        loggedAssessments = data || [];
 
+        loggedAssessments = data || [];
         renderAssessmentsTable(loggedAssessments);
 
       } catch (err) {
-        console.error('Error fetching company risk assessments:', err);
+        console.error('Error loading operational assessments:', err);
       } finally {
         if (loading) loading.classList.add('hidden');
         if (tableCard) tableCard.classList.remove('hidden');
+      }
+    }
+
+    function computeOperationalStatusMap(records) {
+      const sorted = [...records].sort((a, b) => new Date(b.assessment_date || b.created_at) - new Date(a.assessment_date || a.created_at));
+      const seenGroups = new Set();
+      const statusMap = new Map();
+      const now = new Date();
+
+      sorted.forEach(ra => {
+        const groupKey = `${ra.template_id || ra.title}_${(ra.equipment_id || '').trim().toLowerCase()}_${(ra.work_area || '').trim().toLowerCase()}`;
+
+        if (seenGroups.has(groupKey)) {
+          statusMap.set(ra.id, {
+            status: 'Past Risk Assessment',
+            badgeClass: 'bg-slate-100 text-slate-600 border-slate-300 font-medium',
+            isCurrent: false
+          });
+        } else {
+          seenGroups.add(groupKey);
+          const dueDate = ra.review_due_date ? new Date(ra.review_due_date) : null;
+
+          if (!dueDate) {
+            statusMap.set(ra.id, {
+              status: 'Active',
+              badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold',
+              isCurrent: true
+            });
+          } else {
+            const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+            if (diffDays <= 0) {
+              statusMap.set(ra.id, {
+                status: 'Expired',
+                badgeClass: 'bg-red-100 text-red-800 border-red-200 font-bold',
+                isCurrent: true
+              });
+            } else if (diffDays <= 14) {
+              statusMap.set(ra.id, {
+                status: 'Upcoming Review',
+                badgeClass: 'bg-amber-100 text-amber-800 border-amber-200 font-bold animate-pulse',
+                isCurrent: true
+              });
+            } else {
+              statusMap.set(ra.id, {
+                status: 'Active',
+                badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold',
+                isCurrent: true
+              });
+            }
+          }
+        }
+      });
+
+      return statusMap;
+    }
+
+    function applyOperationalFilters() {
+      const searchInput = (document.getElementById('raSearchInput')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('raStatusFilter')?.value || 'Current';
+      const statusMap = computeOperationalStatusMap(loggedAssessments);
+
+      const filtered = loggedAssessments.filter(ra => {
+        const matchesSearch = !searchInput || 
+          (ra.title || '').toLowerCase().includes(searchInput) ||
+          (ra.work_area || '').toLowerCase().includes(searchInput) ||
+          (ra.equipment_id || '').toLowerCase().includes(searchInput) ||
+          (ra.assessor_name || '').toLowerCase().includes(searchInput);
+
+        const meta = statusMap.get(ra.id) || { status: 'Active', isCurrent: true };
+
+        let matchesStatus = false;
+        if (statusFilter === 'Current') {
+          matchesStatus = meta.isCurrent;
+        } else {
+          matchesStatus = meta.status === statusFilter;
+        }
+
+        return matchesSearch && matchesStatus;
+      });
+
+      // Dynamic empty state message for operational table
+      const emptyTitle = document.getElementById('raEmptyTitle');
+      const emptyDesc = document.getElementById('raEmptyDesc');
+      if (emptyTitle && emptyDesc) {
+        if (loggedAssessments.length === 0) {
+          emptyTitle.textContent = 'No operational risk assessments logged yet.';
+          emptyDesc.textContent = 'Click "+ Conduct Assessment" above to log your first assessment.';
+        } else if (statusFilter !== 'Current') {
+          emptyTitle.textContent = `No ${statusFilter} Assessments`;
+          emptyDesc.textContent = `There are currently no operational risk assessments with the status "${statusFilter}".`;
+        } else if (searchInput) {
+          emptyTitle.textContent = 'No Matching Assessments Found';
+          emptyDesc.textContent = `No records match "${searchInput}". Check your query or clear the search.`;
+        } else {
+          emptyTitle.textContent = 'No Active Operational Assessments';
+          emptyDesc.textContent = 'No current operational assessments found.';
+        }
+      }
+
+      renderAssessmentsTable(filtered, statusMap);
+    }
+
+    function renderAssessmentsTable(records, statusMap = null) {
+      const tbody = document.getElementById('raTableBody');
+      const empty = document.getElementById('raEmptyState');
+      if (!tbody) return;
+
+      if (!records || records.length === 0) {
+        tbody.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+
+      if (empty) empty.classList.add('hidden');
+      const resolvedMap = statusMap || computeOperationalStatusMap(loggedAssessments);
+
+      tbody.innerHTML = records.map(ra => {
+        const meta = resolvedMap.get(ra.id) || { status: 'Active', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+
+        return `
+          <tr class="hover:bg-slate-50/70 transition-colors ${meta.status === 'Past Risk Assessment' ? 'opacity-70 bg-slate-50/40' : ''}">
+            <td class="px-6 py-4 font-semibold text-slate-800">
+              ${ra.title || 'Operational Task'}
+            </td>
+            <td class="px-6 py-4 text-slate-600">
+              <div>${ra.work_area || 'General Estate'}</div>
+              ${ra.equipment_id ? `<span class="text-[11px] font-mono text-slate-400">ID: ${ra.equipment_id}</span>` : ''}
+            </td>
+            <td class="px-6 py-4 text-slate-700 font-medium">
+              ${ra.assessor_name || 'Designated Assessor'}
+            </td>
+            <td class="px-6 py-4 text-xs text-slate-500">
+              ${ra.assessment_date || ''}
+            </td>
+            <td class="px-6 py-4 text-xs text-slate-600 font-semibold">
+              ${ra.review_due_date || '90 Days'}
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${meta.badgeClass}">
+                ${meta.status}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right whitespace-nowrap">
+              <button type="button" onclick="downloadAssessmentPdfById('${ra.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                📄 Review PDF
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleModuleSelect(templateId) {
+      const tmpl = dbTemplates.find(t => t.id === templateId);
+      const tbody = document.getElementById('modalHazardTableBody');
+      const ppeBox = document.getElementById('modalPpeList');
+      const preBox = document.getElementById('modalPreUseList');
+
+      if (!tmpl) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-muted">Select an equipment module above to load its hazard register.</td></tr>`;
+        if (ppeBox) ppeBox.innerHTML = `<p class="text-muted italic">Select a module to load mandatory PPE items.</p>`;
+        if (preBox) preBox.innerHTML = `<p class="text-muted italic">Select a module to load physical inspection checks.</p>`;
+        return;
+      }
+
+      const hazards = Array.isArray(tmpl.hazards) ? tmpl.hazards : parseHazards(tmpl.hazards);
+      if (tbody) {
+        tbody.innerHTML = hazards.map((h, i) => `
+          <tr data-hazard-index="${i}" class="align-top border-b border-slate-100 hover:bg-slate-50/50">
+            <td class="p-2.5">
+              <div class="font-semibold text-slate-800 hazard-name">${h.hazard || h.title || 'Operational Hazard'}</div>
+              <div class="text-[10px] text-muted hazard-consequence mt-0.5">${h.consequence || h.harm || ''}</div>
+            </td>
+            <td class="p-2.5 text-center">
+              <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
+                <select id="init_l_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                  <option value="1">L:1</option><option value="2">L:2</option><option value="3" selected>L:3</option><option value="4">L:4</option>
+                </select>
+                <select id="init_s_${i}" onchange="updateRowScore(${i}, 'init')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                  <option value="1">S:1</option><option value="2">S:2</option><option value="3" selected>S:3</option><option value="4">S:4</option>
+                </select>
+              </div>
+              <div><span id="init_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-800">9 (High)</span></div>
+            </td>
+            <td class="p-2.5 text-[11px] text-slate-600 hazard-controls leading-relaxed">
+              ${h.controls || h.control_measures || 'Standard operating controls enforced.'}
+            </td>
+            <td class="p-2.5 text-center">
+              <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-1">
+                <select id="res_l_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                  <option value="1" selected>L:1</option><option value="2">L:2</option><option value="3">L:3</option><option value="4">L:4</option>
+                </select>
+                <select id="res_s_${i}" onchange="updateRowScore(${i}, 'res')" class="rounded px-1 py-0.5 text-[10px] bg-white border border-slate-300 outline-none">
+                  <option value="1">S:1</option><option value="2" selected>S:2</option><option value="3">S:3</option><option value="4">S:4</option>
+                </select>
+              </div>
+              <div><span id="res_pill_${i}" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">2 (Low)</span></div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      const ppe = Array.isArray(tmpl.required_ppe) ? tmpl.required_ppe : [];
+      if (ppeBox) {
+        ppeBox.innerHTML = ppe.length > 0 
+          ? ppe.map((item, idx) => `
+              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer">
+                <input type="checkbox" id="ppe_check_${idx}" class="rounded text-primary focus:ring-0">
+                <span class="text-slate-700 leading-snug">${item}</span>
+              </label>
+            `).join('')
+          : `<p class="text-muted italic">Standard PPE required.</p>`;
+      }
+
+      const pre = Array.isArray(tmpl.pre_use_checks) ? tmpl.pre_use_checks : [];
+      if (preBox) {
+        preBox.innerHTML = pre.length > 0
+          ? pre.map((c, idx) => `
+              <label class="flex items-center gap-2 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer">
+                <input type="checkbox" id="pre_check_${idx}" class="rounded text-primary focus:ring-0">
+                <span class="text-slate-700 leading-snug">${c}</span>
+              </label>
+            `).join('')
+          : `<p class="text-muted italic">Standard visual equipment check required.</p>`;
       }
     }
 
@@ -1947,24 +2443,12 @@
     }
 
     // SEARCH FILTERS
-    document.getElementById('raSearchInput')?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      const filtered = loggedAssessments.filter(ra => 
-        (ra.title || '').toLowerCase().includes(q) ||
-        (ra.work_area || '').toLowerCase().includes(q) ||
-        (ra.equipment_id || '').toLowerCase().includes(q)
-      );
-      renderAssessmentsTable(filtered);
+    document.getElementById('raSearchInput')?.addEventListener('input', () => {
+      applyOperationalFilters();
     });
 
-    document.getElementById('baselineSearchInput')?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      const filtered = dbBaselineTemplates.filter(b => 
-        (b.title || '').toLowerCase().includes(q) ||
-        (b.category || '').toLowerCase().includes(q) ||
-        (b.regulation_reference || '').toLowerCase().includes(q)
-      );
-      renderBaselineCards(filtered);
+    document.getElementById('baselineSearchInput')?.addEventListener('input', () => {
+      applyBaselineFilters();
     });
 
     document.addEventListener('DOMContentLoaded', () => {
