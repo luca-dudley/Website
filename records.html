@@ -900,6 +900,85 @@
     }
 
     // =========================================================================
+    // NEW: DUAL CO-BRANDING — SPONSOR RESOLUTION & ASSET LOADING
+    // =========================================================================
+
+    /**
+     * Fetches a remote partner logo and converts it to a base64 data URL for
+     * synchronous embedding in jsPDF. Degrades gracefully (returns null) on
+     * network failure or CORS rejection — callers must render text-only branding
+     * when this returns null so a broken image never blocks certificate generation.
+     */
+    async function loadImageAsBase64(url) {
+      if (!url) return null;
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+
+        const base64Data = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('FileReader failed'));
+          reader.readAsDataURL(blob);
+        });
+
+        // Load into an HTML Image to extract natural aspect ratio
+        const img = new Image();
+        img.src = base64Data;
+        await new Promise((resolve) => { img.onload = resolve; });
+
+        return {
+          data: base64Data,
+          aspect: (img.naturalWidth || 1) / (img.naturalHeight || 1)
+        };
+      } catch (err) {
+        console.warn('[PDF] Partner logo failed to load, falling back to text-only:', err);
+        return null;
+      }
+    }
+
+    /**
+     * Resolves whether the module being printed belongs to a sponsored crop pack
+     * for the currently signed-in company. Enforces Strict Sponsorship Isolation:
+     * - Returns null immediately for neutral/core tags (General Safety, Machinery &
+     *   Workshop, Pumping & Irrigation) via getCropFromSubTag()'s null contract.
+     * - Returns null if the company isn't actively sponsored for that specific crop
+     *   (e.g. Retail Enterprise farms, or farms sponsored for a different crop).
+     * - Any failure (missing video row, RPC error, etc.) safely defaults to null
+     *   so PDFs never crash — they just render generic Simple Solutions branding.
+     */
+    async function getSponsorForModuleTitle(rawTitle) {
+      try {
+        const cleanTitle = (rawTitle || '')
+          .trim()
+          .replace(/\s*\(video induction\)\s*/i, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!cleanTitle) return null;
+
+        const { data: videoRow } = await window.dbClient
+          .from('videos')
+          .select('sub_tag')
+          .ilike('title', `%${cleanTitle}%`)
+          .limit(1)
+          .maybeSingle();
+
+        const subTag = videoRow?.sub_tag || null;
+        if (!subTag || typeof window.getCropFromSubTag !== 'function') return null;
+
+        const cropName = window.getCropFromSubTag(subTag);
+        if (!cropName || typeof window.getSponsorEntry !== 'function') return null;
+
+        return window.getSponsorEntry(window.currentCompanyData, cropName) || null;
+      } catch (err) {
+        console.warn('[PDF] Sponsor resolution failed, defaulting to generic branding:', err);
+        return null;
+      }
+    }
+
+    // =========================================================================
     // REWORKED INDIVIDUAL CERTIFICATE (WITH LIVE DYNAMIC STAMP)
     // =========================================================================
     async function generateIndividualCertificatePDF(employeeName, employeeNumber, moduleTitle, completionDate, supervisorName) {
@@ -939,6 +1018,8 @@
       const comp = await getFreshCompanyInfo();
       const companyName = comp.name || document.getElementById('topbar-company-name')?.textContent || 'Simple Solutions';
 
+      const sponsorEntry = await getSponsorForModuleTitle(moduleTitle);
+      const sponsorLogoBase64 = sponsorEntry ? await loadImageAsBase64(sponsorEntry.partner_logo_url) : null;
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pageWidth = 297;
@@ -966,18 +1047,60 @@
       doc.rect(8, pageHeight - 8 - cSize, cSize, cSize, 'F');
       doc.rect(pageWidth - 8 - cSize, pageHeight - 8 - cSize, cSize, cSize, 'F');
 
-      // 3. Prominent Company Header
-      doc.setFont('times', 'bold');
-      doc.setFontSize(26);
-      doc.setTextColor(30, 58, 95);
-      doc.text(companyName.toUpperCase(), pageWidth / 2, 28, { align: 'center' });
+      // 3. Prominent Company Header (Dual Co-Branding when sponsored)
+      if (sponsorEntry) {
+        // Partner logo pinned top-right, inside the outer border, clear of the
+        // centered title text — does not affect any coordinate below y=44.
+        if (sponsorLogoBase64) {
+          try {
+            // Fit inside a 28mm wide x 14mm high box while keeping natural proportions
+            const maxW = 28;
+            const maxH = 14;
+            const aspect = sponsorLogoBase64.aspect || 1;
+            let renderW = maxW;
+            let renderH = maxW / aspect;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text('INTERNAL OPERATIONAL TRAINING RECORD', pageWidth / 2, 36, { align: 'center' });
+            if (renderH > maxH) {
+              renderH = maxH;
+              renderW = maxH * aspect;
+            }
 
-      // Geometric Divider Line
+            const xPos = (pageWidth - 18) - renderW; // Right-aligned to margin
+            const yPos = 14 + (maxH - renderH) / 2;   // Centered vertically
+
+            doc.addImage(sponsorLogoBase64.data, 'PNG', xPos, yPos, renderW, renderH, undefined, 'FAST');
+          } catch (e) {
+            console.warn('[PDF] Failed to embed partner logo, continuing text-only:', e);
+          }
+        }
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(26);
+        doc.setTextColor(30, 58, 95);
+        doc.text(companyName.toUpperCase(), pageWidth / 2, 28, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text(
+          `SPONSORED BY ${sponsorEntry.partner_name.toUpperCase()} • SIZA v6.0 / GLOBALG.A.P. IFA v6 SUPPLY CHAIN AUDIT RECORD`,
+          pageWidth / 2, 36, { align: 'center' }
+        );
+      } else {
+        // Case B: strictly generic, unchanged from the original default look
+        doc.setFont('times', 'bold');
+        doc.setFontSize(26);
+        doc.setTextColor(30, 58, 95);
+        doc.text(companyName.toUpperCase(), pageWidth / 2, 28, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text('INTERNAL OPERATIONAL TRAINING RECORD', pageWidth / 2, 36, { align: 'center' });
+      }
+
+      // Geometric Divider Line — position unchanged, so every element after this
+      // (recipient block at y=60/74/82/97/111, sigY=158, stamp box) stays aligned
       doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(0.8);
       doc.line(30, 44, pageWidth - 30, 44);
@@ -1164,6 +1287,10 @@
       const rawTitle = (moduleTitle || '').trim();
       const cleanTitle = rawTitle.replace(/\s*\(video induction\)\s*/i, '').replace(/\s+/g, ' ').trim();
 
+      // NEW: Resolve crop sponsorship for this module (Case A vs Case B)
+      const sponsorEntry = await getSponsorForModuleTitle(cleanTitle);
+      const sponsorLogoBase64 = sponsorEntry ? await loadImageAsBase64(sponsorEntry.partner_logo_url) : null;
+
       // Safely unpack arrays stored as JSON, arrays, or objects (jsonb can come back parsed or as a string)
       const parseCurriculumArray = (val) => {
         if (!val) return [];
@@ -1254,7 +1381,30 @@
       // PAGE 1: CURRICULUM, STAMP & SUPERVISOR CONFIRMATION
       // =======================================================================
       
-      // 1. Clean Minimal Header
+      // 1. Clean Minimal Header (Dual Co-Branding when sponsored)
+      if (sponsorEntry && sponsorLogoBase64) {
+        try {
+          // Fit inside a 26mm wide x 13mm high box while keeping natural proportions
+          const maxW = 26;
+          const maxH = 13;
+          const aspect = sponsorLogoBase64.aspect || 1;
+          let renderW = maxW;
+          let renderH = maxW / aspect;
+
+          if (renderH > maxH) {
+            renderH = maxH;
+            renderW = maxH * aspect;
+          }
+
+          const xPos = (pageWidth - 18) - renderW; // Right-aligned to margin
+          const yPos = 7 + (maxH - renderH) / 2;    // Centered vertically
+
+          doc.addImage(sponsorLogoBase64.data, 'PNG', xPos, yPos, renderW, renderH, undefined, 'FAST');
+        } catch (e) {
+          console.warn('[PDF] Failed to embed partner logo, continuing text-only:', e);
+        }
+      }
+
       doc.setFont('times', 'bold');
       doc.setFontSize(22);
       doc.setTextColor(30, 58, 95);
@@ -1263,7 +1413,12 @@
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
       doc.setTextColor(100, 116, 139);
-      doc.text('GROUP TRAINING RECORD & INDUCTION LOG', 16, 26);
+      doc.text(
+        sponsorEntry
+          ? `SPONSORED BY ${sponsorEntry.partner_name.toUpperCase()} • SIZA v6.0 / GLOBALG.A.P. IFA v6 SUPPLY CHAIN AUDIT RECORD`
+          : 'GROUP TRAINING RECORD & INDUCTION LOG',
+        16, 26
+      );
 
       doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(0.8);

@@ -164,6 +164,59 @@ function renderPartnerFooterChain(companyObj, elementId) {
   el.classList.remove('hidden');
 }
 
+function renderTopbarSponsorPill() {
+  const container = document.getElementById('topbar-sponsor-pill-container');
+  const labelEl = document.getElementById('topbar-sponsor-label');
+  const countEl = document.getElementById('topbar-sponsor-count');
+  const itemsContainer = document.getElementById('topbar-sponsor-items');
+  if (!container || !labelEl || !itemsContainer) return;
+
+  const sponsors = Array.isArray(window.currentCompanySponsors) ? window.currentCompanySponsors : [];
+
+  if (sponsors.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  // Label: "1 Sponsor" or "2 Sponsors"
+  labelEl.textContent = sponsors.length === 1 ? '1 Sponsor' : `${sponsors.length} Sponsors`;
+  if (countEl) countEl.textContent = `${sponsors.length} Active`;
+
+  itemsContainer.innerHTML = sponsors.map(s => {
+    const fallbackLetter = (s.partner_name || 'P').charAt(0).toUpperCase();
+    const logoHtml = s.partner_logo_url
+      ? `<img src="${s.partner_logo_url}" alt="${s.partner_name}" class="w-8 h-8 rounded-lg object-contain bg-slate-50 border border-slate-100 p-1">`
+      : `<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20">${fallbackLetter}</div>`;
+
+    return `
+      <div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors">
+        ${logoHtml}
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-slate-800 truncate">${s.partner_name}</p>
+          <p class="text-[10px] text-muted truncate">${s.crop} Crop Pack Subsidized</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.classList.remove('hidden');
+}
+
+function toggleSponsorDropdown(event) {
+  event.stopPropagation();
+  const dropdown = document.getElementById('topbar-sponsor-dropdown');
+  if (dropdown) dropdown.classList.toggle('hidden');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('topbar-sponsor-dropdown');
+  const btn = document.getElementById('topbar-sponsor-btn');
+  if (dropdown && !dropdown.classList.contains('hidden') && !btn?.contains(e.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
+
 window.getCropFromSubTag = getCropFromSubTag;
 window.fetchCompanySponsorPartners = fetchCompanySponsorPartners;
 window.getSponsorEntry = getSponsorEntry;
@@ -172,6 +225,8 @@ window.isCropPurchased = isCropPurchased;
 window.isCropUnlocked = isCropUnlocked;
 window.isCompanySubsidized = isCompanySubsidized;
 window.renderPartnerFooterChain = renderPartnerFooterChain;
+window.renderTopbarSponsorPill = renderTopbarSponsorPill;
+window.toggleSponsorDropdown = toggleSponsorDropdown;
 
 // 2. DOM MULTI-PAGE INJECTION ENGINE
 async function injectProfileModalContainer() {
@@ -475,6 +530,23 @@ async function handleClaimGrowerCode() {
       );
       if (!confirmed) {
         setStatus('Cancelled - your bolt-on billing is unchanged.', false);
+        return;
+      }
+    }
+
+    // Warn Retail Enterprise users if they are about to lose un-subsidized crop packs
+    const wasRetailEnterprise = window.currentCompanyData?.tier === 'enterprise' 
+      && !isCompanySubsidized(window.currentCompanyData);
+
+    if (wasRetailEnterprise) {
+      const confirmed = confirm(
+        `Notice: You are currently on Retail Enterprise (R450/mo) with full access to ALL crop packs.\n\n` +
+        `Claiming this processor subsidy will transition your account to the Subsidized plan (R337.50/mo).\n` +
+        `Under this plan, only your sponsored crop pack(s) and purchased bolt-ons remain unlocked. Other specialized packs will be locked.\n\n` +
+        `Do you want to proceed?`
+      );
+      if (!confirmed) {
+        setStatus('Subsidy link cancelled. Your plan remains unchanged.', false);
         return;
       }
     }
@@ -820,6 +892,7 @@ async function loadUserProfile(userId) {
     await fetchCompanySponsorPartners(window.userCompanyId);
     renderLinkedGrowerCodes(companyObj);
     renderPartnerFooterChain(companyObj, 'partnerChainStrip');
+    renderTopbarSponsorPill();
 
     const currentPlanName = document.getElementById('current-plan-name');
     if (currentPlanName) currentPlanName.textContent = window.currentCompanyTier.toUpperCase();
@@ -1058,26 +1131,23 @@ function executeVaultPaystackUpgrade() {
           { display_name: "Target Tier", variable_name: "target_tier", value: pendingVaultUpgrade.targetTier }
         ]
       },
-      onSuccess: (transaction) => {
-        console.log('[Paystack Engine] Payment success. Reference:', transaction.reference);
+      onSuccess: async (transaction) => {
+        console.log('[Paystack Engine] Payment authorized. Ref:', transaction.reference);
 
-        // Instant Supabase Company Activation
-        window.dbClient
-          .from('companies')
-          .update({
-            tier: pendingVaultUpgrade.targetTier,
-            subscription_status: 'active',
-            paystack_subscription_code: transaction.subscription_code || transaction.reference
-          })
-          .eq('id', window.userCompanyId)
-          .then(({ error }) => {
-            if (!error) {
-              alert(`Success! Your organization has been upgraded to ${pendingVaultUpgrade.targetTier.toUpperCase()}.`);
-              window.location.reload();
-            } else {
-              console.error('Failed updating tier in Supabase:', error);
-            }
+        try {
+          const { data, error } = await window.dbClient.rpc('upgrade_company_tier', {
+            p_target_tier: pendingVaultUpgrade.targetTier,
+            p_paystack_ref: transaction.reference
           });
+
+          if (error) throw error;
+
+          alert(`Success! Your organization has been upgraded to ${pendingVaultUpgrade.targetTier.toUpperCase()}.`);
+          window.location.reload();
+        } catch (rpcErr) {
+          console.error('[Upgrade Error]:', rpcErr);
+          alert(`Upgrade error: ${rpcErr.message || 'Please contact support with Ref: ' + transaction.reference}`);
+        }
       },
       onCancel: () => {
         console.log('[Paystack Engine] Checkout modal closed by user.');

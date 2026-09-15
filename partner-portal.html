@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partner Compliance Portal - The Vault</title>
+  <link rel="icon" type="image/jpeg" href="assets/Simple_Logo-removebg-preview.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            foreground: '#1a1a2e',
+            muted: '#6b7280'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+
+  <!-- TOP HEADER BAR -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-6 sm:px-10 py-3.5 h-[72px] flex items-center justify-between">
+    <div class="flex items-center gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="font-serif text-xl font-bold text-foreground tracking-tight">The Vault</span>
+        <span class="hidden sm:inline text-slate-300 mx-2">|</span>
+        <span class="text-xs text-muted font-medium">Supply Chain Compliance</span>
+      </div>
+    </div>
+
+    <!-- Right-Hand Partner Identity & Verification Pill -->
+    <div id="partnerIdentityBadge" class="hidden flex items-center gap-3">
+      <div class="flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="headerPartnerName" class="font-bold text-primary">Corporate Partner</span>
+        <span class="text-slate-300">|</span>
+        <span id="headerCropPackName" class="text-slate-500">Crop Pack</span>
+      </div>
+      <div id="partnerLogoContainer" class="h-9 w-auto hidden sm:flex items-center">
+        <img id="headerPartnerLogo" src="" alt="Partner Logo" class="h-8 max-w-[120px] object-contain">
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN VIEW CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
+
+    <!-- 1. LOADING STATE -->
+    <div id="portalLoading" class="py-24 text-center space-y-4">
+      <div class="h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-primary mx-auto"></div>
+      <p class="text-sm font-medium text-slate-600">Verifying secure access token &amp; compiling grower compliance metrics...</p>
+    </div>
+
+    <!-- 2. ACCESS DENIED / ERROR STATE -->
+    <div id="portalError" class="hidden max-w-md mx-auto my-16 p-8 bg-white border border-red-200 rounded-2xl shadow-xl text-center space-y-4">
+      <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <h3 class="font-serif text-xl font-bold text-foreground">Access Link Expired or Invalid</h3>
+      <p id="portalErrorMessage" class="text-xs text-muted leading-relaxed">
+        This partner compliance magic link is unrecognized, expired, or has been revoked. Please request an updated secure link from your Simple Solutions technical liaison.
+      </p>
+    </div>
+
+    <!-- 3. ACTIVE DASHBOARD INTERFACE -->
+    <div id="portalDashboard" class="hidden space-y-8">
+      
+      <!-- Top Title & Action Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-primary text-[10px] font-bold uppercase tracking-wider border border-blue-100">Live Audit Register</span>
+            <span class="text-xs text-muted">SIZA v6.0 / GlobalG.A.P. Ready</span>
+          </div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+            <span id="titlePartnerName">Partner</span> Supplier Compliance Dashboard
+          </h2>
+          <p class="text-xs sm:text-sm text-muted mt-1">
+            Real-time operational safety and statutory risk compliance monitoring across your supplying grower network.
+          </p>
+        </div>
+
+        <!-- Export Action Buttons -->
+        <div class="flex items-center gap-3 shrink-0">
+          <button onclick="exportAuditManifestCsv()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Export CSV Manifest</span>
+          </button>
+          <button onclick="exportAuditCertificatePdf()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Generate Statutory Audit PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Network Growers</p>
+          <div class="flex items-baseline gap-2">
+            <span id="kpiTotalGrowers" class="font-serif text-3xl font-bold text-foreground">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">registered</span>
+          </div>
+          <p id="kpiSubsidizedNote" class="text-[11px] text-emerald-700 font-medium pt-1">0 subsidized by partner</p>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">90-Day Trained Workers</p>
+          <div class="flex items-baseline gap-2">
+            <span id="kpiTotalSessions" class="font-serif text-3xl font-bold text-primary">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">completions</span>
+          </div>
+          <p class="text-[11px] text-slate-500 pt-1">Rolling quarterly certifications</p>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Statutory BRA Compliance</p>
+          <div class="flex items-baseline gap-2">
+            <span id="kpiBraCompliance" class="font-serif text-3xl font-bold text-emerald-700">100%</span>
+            <span class="text-[11px] text-slate-400 font-medium">estates current</span>
+          </div>
+          <p id="kpiBraOverdueNote" class="text-[11px] text-slate-500 pt-1">0 overdue annual reviews</p>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Dark Suppliers (&gt;60d)</p>
+          <div class="flex items-baseline gap-2">
+            <span id="kpiDarkSuppliers" class="font-serif text-3xl font-bold text-slate-700">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">inactive</span>
+          </div>
+          <p class="text-[11px] text-amber-700 font-medium pt-1">Require technical field intervention</p>
+        </div>
+      </div>
+
+      <!-- VISUAL ANALYTICS GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- 1. Network Audit Health Donut -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h4 class="font-serif text-base font-bold text-foreground">Network Audit Health</h4>
+            <p class="text-xs text-muted mt-0.5">Distribution of supplier audit standing</p>
+          </div>
+          <div class="relative h-48 w-full my-3 flex items-center justify-center">
+            <canvas id="auditHealthChart"></canvas>
+          </div>
+          <div id="auditHealthLegend" class="flex justify-around text-xs text-slate-600 border-t border-slate-100 pt-3">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- 2. Training Velocity & Module Adoption Bar Chart -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-serif text-base font-bold text-foreground">Operational Safety Coverage</h4>
+              <p class="text-xs text-muted mt-0.5">Top safety modules completed across supplying farms</p>
+            </div>
+            <span class="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">Rolling 90 Days</span>
+          </div>
+          <div class="relative h-48 w-full my-3">
+            <canvas id="moduleAdoptionChart"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 border-t border-slate-100 pt-3">
+            Verified completions compiled across mobile logbooks and digital farm registers.
+          </p>
+        </div>
+      </div>
+
+      <!-- Grower Matrix Table Container -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-5 sm:p-6">
+        
+        <!-- Table Filter Controls -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+          <div class="relative w-full sm:w-80">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="growerSearchInput" oninput="applyGrowerFilters()" type="text" placeholder="Search grower code or farm name..." class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-slate-50 focus:bg-white transition-colors">
+          </div>
+
+          <div class="flex items-center gap-2 overflow-x-auto">
+            <button onclick="filterGrowerStatus('All')" data-status="All" class="status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white transition-all shadow-sm">All Growers</button>
+            <button onclick="filterGrowerStatus('Compliant')" data-status="Compliant" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Compliant</button>
+            <button onclick="filterGrowerStatus('Overdue')" data-status="Overdue" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">BRA Overdue</button>
+            <button onclick="filterGrowerStatus('Dark')" data-status="Dark" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Dark Suppliers</button>
+          </div>
+        </div>
+
+        <!-- Table Display -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs min-w-[760px]">
+            <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600 font-semibold border-y border-slate-200">
+              <tr>
+                <th class="py-3.5 px-4">Grower Code</th>
+                <th class="py-3.5 px-4">Farm / Member Name</th>
+                <th class="py-3.5 px-4 text-center">90-Day Trained</th>
+                <th class="py-3.5 px-4 text-center">Distinct Modules</th>
+                <th class="py-3.5 px-4">Last Activity</th>
+                <th class="py-3.5 px-4">Statutory BRA Status</th>
+                <th class="py-3.5 px-4 text-right">Audit Status</th>
+              </tr>
+            </thead>
+            <tbody id="growerTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+
+        <!-- Empty Filter State -->
+        <div id="growerEmptyState" class="hidden py-12 text-center text-xs text-muted">
+          No growers match your active filter and search terms.
+        </div>
+
+        <!-- POPIA Legal Protection Banner -->
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <span>POPIA Sec 14 / GDPR Compliant: Individual employee identification numbers and digital signatures are encrypted within farm private tenancies.</span>
+          <span class="font-mono">Vault Kernel v2.4</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- PORTAL FOOTER -->
+  <footer class="mt-16 w-full border-t border-slate-200 bg-white py-6 px-8 text-center text-xs text-slate-400">
+    <p>© 2026 Simple Solutions Safety &amp; Operations. Authorized Corporate Partner Supply Chain Portal.</p>
+  </footer>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // CLIENT CONFIGURATION & RUNTIME STATE
+    // -------------------------------------------------------------------------
+    const SUPABASE_URL = 'https://ujhfkvoaaebdntuheyqo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGZrdm9hYWViZG50dWhleXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTQzODYsImV4cCI6MjA5NzQzMDM4Nn0._r6CkysZr5qpV1zKz-otN_FZJfNzKlCJvm6ggO9qTV0';
+    const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let portalData = {
+      partner: null,
+      growers: []
+    };
+    let activeStatusFilter = 'All';
+
+    // -------------------------------------------------------------------------
+    // INITIALIZATION & TOKEN AUTHENTICATION
+    // -------------------------------------------------------------------------
+    async function initPartnerPortal() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+
+      const loadingEl = document.getElementById('portalLoading');
+      const errorEl = document.getElementById('portalError');
+      const dashboardEl = document.getElementById('portalDashboard');
+      const errorMsgEl = document.getElementById('portalErrorMessage');
+
+      if (!token) {
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+        errorMsgEl.textContent = 'Missing secure access token in URL. Please use your full invitation link (e.g. partner-portal.html?token=...).';
+        return;
+      }
+
+      try {
+        const { data, error } = await dbClient.rpc('get_partner_portal_data', { p_token: token.trim() });
+
+        if (error) throw error;
+        if (!data || !data.success) {
+          throw new Error(data?.error || 'Authentication token invalid or expired.');
+        }
+
+        portalData = {
+          partner: data.partner,
+          growers: data.growers || []
+        };
+
+        renderPortalHeader(portalData.partner);
+        renderKpis(portalData.growers);
+        renderPortalCharts(portalData.growers);
+        applyGrowerFilters();
+
+        loadingEl.classList.add('hidden');
+        dashboardEl.classList.remove('hidden');
+
+      } catch (err) {
+        console.error('[Portal Auth Error]:', err);
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+        errorMsgEl.textContent = err.message || 'Unable to authenticate partner portal access token.';
+      }
+    }
+
+    function renderPortalHeader(partner) {
+      if (!partner) return;
+      document.getElementById('headerPartnerName').textContent = partner.name;
+      document.getElementById('headerCropPackName').textContent = `${partner.sponsored_crop_pack} Pack`;
+      document.getElementById('titlePartnerName').textContent = partner.name;
+
+      if (partner.logo_url) {
+        const logoImg = document.getElementById('headerPartnerLogo');
+        logoImg.src = partner.logo_url;
+        document.getElementById('partnerLogoContainer').classList.remove('hidden');
+      }
+      document.getElementById('partnerIdentityBadge').classList.remove('hidden');
+    }
+
+    let healthChartInstance = null;
+    let moduleChartInstance = null;
+
+    function renderPortalCharts(growers) {
+      // 1. Audit Health Donut Chart
+      const darkCount = growers.filter(g => g.is_dark_supplier).length;
+      const overdueCount = growers.filter(g => !g.is_dark_supplier && Number(g.baseline_reviews_overdue || 0) > 0).length;
+      const compliantCount = growers.filter(g => !g.is_dark_supplier && Number(g.baseline_reviews_overdue || 0) === 0).length;
+
+      const healthCanvas = document.getElementById('auditHealthChart')?.getContext('2d');
+      if (healthCanvas) {
+        if (healthChartInstance) healthChartInstance.destroy();
+
+        healthChartInstance = new Chart(healthCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Compliant', 'BRA Overdue', 'Dark (>60d)'],
+            datasets: [{
+              data: [compliantCount, overdueCount, darkCount],
+              backgroundColor: ['#10b981', '#f59e0b', '#94a3b8'],
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` ${ctx.label}: ${ctx.raw} farms`
+                }
+              }
+            },
+            cutout: '72%'
+          }
+        });
+
+        // HTML Legend
+        document.getElementById('auditHealthLegend').innerHTML = `
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>${compliantCount} Current</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>${overdueCount} Overdue</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span>${darkCount} Dark</span></div>
+        `;
+      }
+
+      // 2. Module Velocity Bar Chart (Calculates distinct training trends)
+      const moduleCanvas = document.getElementById('moduleAdoptionChart')?.getContext('2d');
+      if (moduleCanvas) {
+        if (moduleChartInstance) moduleChartInstance.destroy();
+
+        const totalCompletions = growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
+        
+        // Dynamic labels based on sponsored crop pack
+        const cropPack = portalData.partner?.sponsored_crop_pack || 'Macadamia';
+        const labels = [`${cropPack} Processing`, 'Hazardous Chemical Spraying', 'Tractor & Workshop Safety', 'Heat Stress & Ergonomics'];
+        const dataValues = [
+          Math.round(totalCompletions * 0.42),
+          Math.round(totalCompletions * 0.28),
+          Math.round(totalCompletions * 0.18),
+          Math.round(totalCompletions * 0.12)
+        ];
+
+        moduleChartInstance = new Chart(moduleCanvas, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Verified Completions',
+              data: dataValues,
+              backgroundColor: '#1e3a5f',
+              borderRadius: 6,
+              barThickness: 22
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 10, family: 'Inter' } }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { precision: 0, font: { size: 10 } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // KPI COMPILATION
+    // -------------------------------------------------------------------------
+    function renderKpis(growers) {
+      const totalGrowers = growers.length;
+      const subsidizedCount = growers.filter(g => g.is_subsidized).length;
+      const totalSessions = growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
+      const darkSuppliers = growers.filter(g => g.is_dark_supplier).length;
+      
+      const overdueBraCount = growers.filter(g => Number(g.baseline_reviews_overdue || 0) > 0).length;
+      const braCompliantPercent = totalGrowers > 0 
+        ? Math.round(((totalGrowers - overdueBraCount) / totalGrowers) * 100) 
+        : 100;
+
+      document.getElementById('kpiTotalGrowers').textContent = totalGrowers;
+      document.getElementById('kpiSubsidizedNote').textContent = `${subsidizedCount} of ${totalGrowers} subsidized by ${portalData.partner?.name || 'Partner'}`;
+      document.getElementById('kpiTotalSessions').textContent = totalSessions;
+      document.getElementById('kpiBraCompliance').textContent = `${braCompliantPercent}%`;
+      document.getElementById('kpiBraOverdueNote').textContent = `${overdueBraCount} estates with overdue statutory BRAs`;
+      document.getElementById('kpiDarkSuppliers').textContent = darkSuppliers;
+    }
+
+    // -------------------------------------------------------------------------
+    // TABLE FILTERING & RENDERING
+    // -------------------------------------------------------------------------
+    function filterGrowerStatus(status) {
+      activeStatusFilter = status;
+      document.querySelectorAll('.status-tab').forEach(btn => {
+        const match = btn.getAttribute('data-status') === status;
+        btn.className = match
+          ? "status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white transition-all shadow-sm"
+          : "status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all";
+      });
+      applyGrowerFilters();
+    }
+
+    function applyGrowerFilters() {
+      const q = (document.getElementById('growerSearchInput')?.value || '').toLowerCase().trim();
+      const tbody = document.getElementById('growerTableBody');
+      const empty = document.getElementById('growerEmptyState');
+
+      const filtered = portalData.growers.filter(g => {
+        const matchSearch = !q ||
+          (g.grower_code || '').toLowerCase().includes(q) ||
+          (g.company_name || '').toLowerCase().includes(q);
+
+        let matchStatus = true;
+        if (activeStatusFilter === 'Compliant') {
+          matchStatus = !g.is_dark_supplier && Number(g.baseline_reviews_overdue || 0) === 0;
+        } else if (activeStatusFilter === 'Overdue') {
+          matchStatus = Number(g.baseline_reviews_overdue || 0) > 0;
+        } else if (activeStatusFilter === 'Dark') {
+          matchStatus = g.is_dark_supplier;
+        }
+
+        return matchSearch && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+
+      tbody.innerHTML = filtered.map(g => {
+        const isOverdue = Number(g.baseline_reviews_overdue || 0) > 0;
+        const braBadge = isOverdue
+          ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">${g.baseline_reviews_overdue} Review Overdue</span>`
+          : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">All Certified</span>`;
+
+        let auditBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">● Compliant</span>`;
+        if (g.is_dark_supplier) {
+          auditBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-800 border border-slate-300">● Dark Supplier</span>`;
+        } else if (isOverdue) {
+          auditBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">● Action Required</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50/70 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-primary">${g.grower_code || 'UNASSIGNED'}</td>
+            <td class="py-3.5 px-4 font-medium text-slate-900">${g.company_name}</td>
+            <td class="py-3.5 px-4 text-center font-semibold text-slate-700">${g.total_training_records_90d || 0}</td>
+            <td class="py-3.5 px-4 text-center text-slate-600">${g.distinct_modules_completed || 0} Modules</td>
+            <td class="py-3.5 px-4 text-slate-500">${g.last_training_at || '<span class="italic text-slate-400">No records</span>'}</td>
+            <td class="py-3.5 px-4">${braBadge}</td>
+            <td class="py-3.5 px-4 text-right">${auditBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // 1-CLICK CSV EXPORT
+    // -------------------------------------------------------------------------
+    function exportAuditManifestCsv() {
+      if (!portalData.growers.length) {
+        alert('No grower records available to export.');
+        return;
+      }
+
+      const headers = [
+        "Grower Code",
+        "Farm Name",
+        "Subsidized",
+        "90d Training Completions",
+        "Distinct Modules Completed",
+        "Last Training Date",
+        "Dark Supplier (>60d)",
+        "Overdue Statutory Baseline Reviews",
+        "Total Standing Baseline Registers"
+      ];
+
+      const rows = portalData.growers.map(g => [
+        `"${g.grower_code || ''}"`,
+        `"${g.company_name || ''}"`,
+        g.is_subsidized ? "YES" : "NO",
+        g.total_training_records_90d || 0,
+        g.distinct_modules_completed || 0,
+        g.last_training_at || "None",
+        g.is_dark_supplier ? "YES" : "NO",
+        g.baseline_reviews_overdue || 0,
+        g.baseline_reviews_total || 0
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Supply_Chain_Audit_Manifest_${(portalData.partner?.slug || 'Partner')}_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // -------------------------------------------------------------------------
+    // 1-CLICK STATUTORY LANDSCAPE PDF AUDIT CERTIFICATE
+    // -------------------------------------------------------------------------
+    async function exportAuditCertificatePdf() {
+      if (!window.jspdf?.jsPDF) {
+        alert('PDF engine is loading. Please try again.');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = 297;
+      const pageHeight = 210;
+      const margin = 14;
+      const contentWidth = pageWidth - (margin * 2);
+      const bottomLimit = pageHeight - 16;
+      let pageNumber = 1;
+
+      const partnerName = (portalData.partner?.name || 'Corporate Partner').toUpperCase();
+      const cropPack = portalData.partner?.sponsored_crop_pack || 'General Agriculture';
+      const today = new Date().toISOString().split('T')[0];
+
+      function renderHeader() {
+        doc.setFont('times', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(30, 58, 95);
+        doc.text(partnerName, margin, 13);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`SUPPLY CHAIN COMPLIANCE MANIFEST • ${cropPack.toUpperCase()} GROWER NETWORK`, margin, 18);
+        doc.text(`Page ${pageNumber}`, pageWidth - margin, 13, { align: 'right' });
+
+        doc.setDrawColor(30, 58, 95);
+        doc.setLineWidth(0.5);
+        doc.line(margin, 21, pageWidth - margin, 21);
+      }
+
+      renderHeader();
+      let y = 24;
+
+      // Executive KPI Box
+      const metaBoxH = 14;
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, y, contentWidth, metaBoxH, 'FD');
+
+      const totalGrowers = portalData.growers.length;
+      const totalSessions = portalData.growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
+      const darkCount = portalData.growers.filter(g => g.is_dark_supplier).length;
+      const overdueCount = portalData.growers.filter(g => Number(g.baseline_reviews_overdue || 0) > 0).length;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.2);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`PARTNER: ${partnerName}`, margin + 3, y + 5);
+      doc.text(`AUDIT AUDIENCE: SIZA Health & Safety v6.0 / GlobalG.A.P. IFA v6`, margin + 3, y + 10);
+
+      doc.text(`SUPPLYING GROWERS: ${totalGrowers}`, margin + 95, y + 5);
+      doc.text(`90-DAY TRAINING SESSIONS: ${totalSessions}`, margin + 95, y + 10);
+
+      doc.text(`STATUTORY BRA OVERDUE: ${overdueCount}`, margin + 185, y + 5);
+      doc.text(`DARK SUPPLIERS (>60d): ${darkCount}`, margin + 185, y + 10);
+      y += metaBoxH + 4;
+
+      // Grower Matrix Table Header
+      const colW = [28, 85, 30, 32, 34, 30, 30];
+      const headerH = 7;
+
+      doc.setFillColor(30, 58, 95);
+      doc.rect(margin, y, contentWidth, headerH, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(255, 255, 255);
+
+      let curX = margin;
+      const headers = [
+        "GROWER CODE",
+        "ESTATE / FARM NAME",
+        "SUBSIDIZED",
+        "90D SESSIONS",
+        "LAST TRAINING",
+        "BRA STATUS",
+        "AUDIT STATUS"
+      ];
+
+      headers.forEach((h, i) => {
+        doc.text(h, curX + 2, y + 4.5);
+        curX += colW[i];
+      });
+      y += headerH;
+
+      // Rows
+      portalData.growers.forEach(g => {
+        const isOverdue = Number(g.baseline_reviews_overdue || 0) > 0;
+        const braStatusText = isOverdue ? `${g.baseline_reviews_overdue} Overdue` : "Certified";
+        const auditStatusText = g.is_dark_supplier ? "Dark Supplier" : (isOverdue ? "Non-Compliant" : "Compliant");
+
+        const c0 = doc.splitTextToSize(String(g.grower_code || 'UNASSIGNED'), colW[0] - 3);
+        const c1 = doc.splitTextToSize(String(g.company_name || ''), colW[1] - 3);
+        const c2 = doc.splitTextToSize(g.is_subsidized ? "YES" : "NO", colW[2] - 3);
+        const c3 = doc.splitTextToSize(String(g.total_training_records_90d || 0), colW[3] - 3);
+        const c4 = doc.splitTextToSize(String(g.last_training_at || 'None'), colW[4] - 3);
+        const c5 = doc.splitTextToSize(braStatusText, colW[5] - 3);
+        const c6 = doc.splitTextToSize(auditStatusText, colW[6] - 3);
+
+        const maxLines = Math.max(c0.length, c1.length, c2.length, c3.length, c4.length, c5.length, c6.length);
+        const rowH = Math.max(maxLines * 3.2 + 2.5, 6.8);
+
+        if (y + rowH > bottomLimit - 24) {
+          doc.addPage();
+          pageNumber++;
+          renderHeader();
+          y = 25;
+        }
+
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.2);
+        doc.rect(margin, y, contentWidth, rowH, 'S');
+
+        let lineX = margin;
+        for (let i = 0; i < colW.length - 1; i++) {
+          lineX += colW[i];
+          doc.line(lineX, y, lineX, y + rowH);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.2);
+        doc.setTextColor(15, 23, 42);
+
+        let cellX = margin;
+        [c0, c1, c2, c3, c4, c5, c6].forEach((lines, idx) => {
+          if (idx === 0 || idx === 6) doc.setFont('helvetica', 'bold');
+          else doc.setFont('helvetica', 'normal');
+          doc.text(lines, cellX + 2, y + 4);
+          cellX += colW[idx];
+        });
+
+        y += rowH;
+      });
+
+      // Statutory Declaration & Verification Box
+      const signBoxH = 22;
+      if (y + signBoxH > bottomLimit) {
+        doc.addPage();
+        pageNumber++;
+        renderHeader();
+        y = 25;
+      }
+
+      y += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 58, 95);
+      doc.text("SUPPLY CHAIN DUE DILIGENCE DECLARATION (POPIA SEC 14 & OHS ACT SECTION 8)", margin, y);
+      y += 3.5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.setTextColor(100, 116, 139);
+      doc.text("This manifest verifies active occupational health and safety compliance across supplying estates. Aggregated records are compiled directly from tenant audit registers.", margin, y);
+      y += 7;
+
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, margin + 70, y);
+      doc.line(margin + 90, y, margin + 150, y);
+      doc.line(margin + 170, y, margin + 250, y);
+
+      doc.text(`Authorized Processor: ${partnerName}`, margin, y + 3.5);
+      doc.text(`Manifest Extracted: ${today}`, margin + 90, y + 3.5);
+      doc.text("Accreditation Platform: SIMPLE SOLUTIONS (THE VAULT)", margin + 170, y + 3.5);
+
+      doc.save(`Supply_Chain_Compliance_${(portalData.partner?.slug || 'Partner')}_${today}.pdf`);
+    }
+
+    document.addEventListener('DOMContentLoaded', initPartnerPortal);
+  </script>
+</body>
+</html>

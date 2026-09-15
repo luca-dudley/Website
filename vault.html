@@ -138,6 +138,28 @@
         <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
       </div>
 
+    <!-- Live Partner Subsidy Dropdown Pill -->
+    <div id="topbar-sponsor-pill-container" class="relative hidden">
+      <button id="topbar-sponsor-btn" onclick="toggleSponsorDropdown(event)" type="button" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all">
+        <span class="w-2 h-2 rounded-full bg-primary/70"></span>
+        <span id="topbar-sponsor-label">Sponsors</span>
+        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
+        <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Subsidies</span>
+          <span id="topbar-sponsor-count" class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">0 Active</span>
+        </div>
+        <div id="topbar-sponsor-items" class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+          <!-- Injected via profile-engine.js -->
+        </div>
+      </div>
+    </div>
+
       <!-- Functional Notification Dropdown -->
       <div class="relative">
         <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
@@ -451,7 +473,7 @@
 
       const { data: databaseVideos, error } = await window.dbClient
         .from('videos')
-        .select('id, title, description, category, language, thumbnail_url, total_seconds')
+        .select('id, title, description, category, language, thumbnail_url, partner_thumbnails, total_seconds')
         .order('title', { ascending: true });
 
       if (error) throw error;
@@ -517,7 +539,14 @@
 
         bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
         bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
-        bannerThumb.src = videoData.thumbnail || 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/Chemical_Spraying.svg';
+        bannerTitle.textContent = currentContinueWatchingProgress.video_title || videoData.title || 'Continue Watching';
+        bannerDesc.textContent = videoData.description || 'Resume your last in-progress training module.';
+        
+        const companyObj = window.currentCompanyData || null;
+        const cropName = getCropFromSubTag(videoData.subCategory || '');
+        const sponsorEntry = cropName ? getSponsorEntry(companyObj, cropName) : null;
+        
+        bannerThumb.src = resolveVideoThumbnail(videoData, sponsorEntry);
         bannerThumb.alt = `${bannerTitle.textContent} thumbnail`;
         bannerBtn.href = resumeUrl;
         visualLink.href = resumeUrl;
@@ -528,6 +557,22 @@
         console.error('Error rendering continue watching banner:', error);
         bannerBlock.classList.add('hidden');
       }
+    }
+
+    // Resolves pre-baked partner-branded SVG thumbnail if active; falls back to standard thumbnail
+    function resolveVideoThumbnail(video, sponsorEntry) {
+      const fallbackThumb = 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/General_Farm_Employees.svg';
+      
+      if (sponsorEntry?.partner_id && video?.partner_thumbnails && typeof video.partner_thumbnails === 'object') {
+        const partnerThumb = video.partner_thumbnails[sponsorEntry.partner_id];
+        if (partnerThumb && partnerThumb.trim() !== '') {
+          return partnerThumb;
+        }
+      }
+
+      return (video?.thumbnail_url && video.thumbnail_url.trim() !== '') 
+        ? video.thumbnail_url 
+        : fallbackThumb;
     }
 
     // 2. DYNAMIC SUPABASE FETCH & INJECTION ENGINE (WITH TENANT ISOLATION)
@@ -554,7 +599,7 @@
         // - For all other users / unlinked / generic accounts: ONLY fetch generic videos (company_id IS NULL)
         let query = window.dbClient
           .from('videos')
-          .select('id, title, description, category, sub_tag, language, thumbnail_url, total_seconds, company_id')
+          .select('id, title, description, category, sub_tag, language, thumbnail_url, partner_thumbnails, total_seconds, company_id')
           .order('title', { ascending: true });
 
         // Trial Farm / Custom Override (point 2, criterion 3): a company with
@@ -600,25 +645,20 @@
 
         databaseVideos.forEach(video => {
           const fallbackThumb = 'https://ujhfkvoaaebdntuheyqo.supabase.co/storage/v1/object/public/thumbnails/Simple/General_Farm_Employees.svg';
-          const validThumbnail = (video.thumbnail_url && video.thumbnail_url.trim() !== '') 
-            ? video.thumbnail_url 
-            : fallbackThumb;
-
           const subTag = video.sub_tag || 'General Safety';
           const subTagLower = subTag.toLowerCase().trim();
 
           // Tier Gating Logic: Lock specialized modules on Basic
           const isBasicLocked = (currentTier === 'basic') && (!unlockedBasicCategories.includes(subTagLower));
 
-          // Crop-Pack Gating Logic (Layer 2): Essential/Enterprise growers still need
-          // the specific crop pack (sponsored by a processor, or a purchased bolt-on)
-          // to access specialized crop modules. Layer 1 core content (machinery,
-          // general safety) is never crop-gated.
+          // Crop-Pack Gating Logic (Layer 2)
           const cropName = getCropFromSubTag(subTag);
           const isCropLocked = !isBasicLocked && !!cropName && !isCropUnlocked(companyObj, cropName, { hasCustomLibrary });
           const isLocked = isBasicLocked || isCropLocked;
 
+          // Single declaration for sponsorEntry & dynamic thumbnail resolution
           const sponsorEntry = cropName ? getSponsorEntry(companyObj, cropName) : null;
+          const validThumbnail = resolveVideoThumbnail(video, sponsorEntry);
 
           videoLibrary[video.id] = {
             title: video.title,
@@ -671,25 +711,19 @@
                     <span class="text-[11px] font-bold tracking-wide uppercase text-amber-300">${isCropLocked ? (cropName + ' Pack Locked') : 'Essential Module'}</span>
                   </div>
                 ` : `
-                  <!-- Sponsor pill (top-left): capped width + truncation to avoid colliding with top elements -->
+                  <!-- Sponsor Pill (Top-Left): Retained for clear brand endorsement -->
                   ${sponsorEntry ? `
-                    <div class="absolute top-2 left-2 max-w-[58%] bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-md border border-slate-200/80 z-20">
+                    <div class="absolute top-2 left-2 max-w-[65%] bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-md border border-slate-200/80 z-20">
                       <span class="text-[10px] font-semibold text-slate-700 truncate block">Sponsored by ${sponsorEntry.partner_name}</span>
                     </div>
                   ` : ''}
 
-                  <!-- Duration badge: dynamically positioned above the band when a co-branding band is present -->
-                  <div class="absolute right-2 ${sponsorEntry && sponsorEntry.partner_logo_url ? 'bottom-[calc(24%+8px)]' : 'bottom-2'} bg-black/80 text-white text-xs font-medium px-2 py-1 rounded z-20">
+                  <!-- Duration Badge: Clean default positioning -->
+                  <div class="absolute right-2 bottom-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded z-20">
                     ${formatDuration(video.total_seconds)}
                   </div>
 
-                  <!-- Full-width white masking band covering watermark, with centered partner logo -->
-                  ${sponsorEntry && sponsorEntry.partner_logo_url ? `
-                    <div class="absolute inset-x-0 bottom-0 h-[24%] min-h-[36px] bg-white flex items-center justify-center px-14 z-10 border-t border-slate-100">
-                      <img src="${sponsorEntry.partner_logo_url}" alt="${sponsorEntry.partner_name}" class="h-[60%] max-h-6 w-auto max-w-full object-contain">
-                    </div>
-                  ` : ''}
-
+                  <!-- Hover Play Overlay -->
                   <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
                     <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
                       <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
