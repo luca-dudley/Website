@@ -62,7 +62,7 @@ serve(async (req) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "Simple Solutions <onboarding@resend.dev>",
+            from: "Simple Solutions <compliance@simpleza.co.za>",
             reply_to: "simple.lucadudley@gmail.com",
             to: partner.contact_email,
             subject: `Monthly Supply Chain Compliance Digest - ${partner.name}`,

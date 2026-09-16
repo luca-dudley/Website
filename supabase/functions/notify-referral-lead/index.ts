@@ -84,7 +84,8 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev",
+        from: "The Vault Alerts <alerts@simpleza.co.za>",
+        reply_to: "simple.lucadudley@gmail.com",
         to: NOTIFICATION_RECIPIENTS,
         subject: `🌾 New Processor Referral: ${processorName} (${cropName})`,
         html: `
