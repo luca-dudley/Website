@@ -120,12 +120,65 @@
       <span class="font-serif text-[1.75rem] font-bold text-foreground tracking-tight">The Vault</span>
     </a>
 
+    <!-- Right-Hand Controls -->
     <div class="flex items-center gap-5 shrink-0">
       <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span id="topbar-company-name" class="font-medium">Simple Solutions</span>
         <span class="text-slate-300">|</span>
         <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
+      </div>
+
+      <!-- Live Partner Subsidy Dropdown Pill -->
+      <div id="topbar-sponsor-pill-container" class="relative hidden">
+        <button id="topbar-sponsor-btn" onclick="toggleSponsorDropdown(event)" type="button" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all">
+          <span class="w-2 h-2 rounded-full bg-primary/70"></span>
+          <span id="topbar-sponsor-label">Sponsors</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
+          <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Subsidies</span>
+            <span id="topbar-sponsor-count" class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">0 Active</span>
+          </div>
+          <div id="topbar-sponsor-items" class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <!-- Injected via profile-engine.js -->
+          </div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
+          </div>
+          <div class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0 text-sm">📄</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">SOP Library Unlocked</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Audit-grade Standard Operating Procedure documents are ready to export.</p>
+              </div>
+            </div>
+            <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+              <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 text-sm">🛡️</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-800">Compliance Tracking Live</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Digital sign-off logging and employee directories are actively syncing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="h-6 w-px bg-slate-300/80"></div>

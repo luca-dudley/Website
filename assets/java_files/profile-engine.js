@@ -89,6 +89,9 @@ async function fetchCompanySponsorPartners(companyId) {
       partner_logo_url: row.corporate_partners.logo_url,
       grower_code: row.grower_code
     }));
+
+  renderTopbarSponsorPill();
+
   return window.currentCompanySponsors;
 }
 
@@ -1019,6 +1022,9 @@ function applyTierRestrictions() {
 
   if (typeof updatePdfQuotaUI === 'function') updatePdfQuotaUI();
   if (typeof fetchAndRenderVault === 'function') fetchAndRenderVault();
+  if (Array.isArray(window.currentCompanySponsors) && window.currentCompanySponsors.length > 0) {
+    renderTopbarSponsorPill();
+  }
 }
 
 // DYNAMIC PLAN BUTTON LABELS & DISABLED STATES
