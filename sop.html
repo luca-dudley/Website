@@ -376,6 +376,68 @@
         </div>
       </div>
     </div>
+
+    <!-- ADD CROP PACK MODAL (Updated with Inline Grower Code Claim) -->
+    <div id="cropPackModal" onclick="closeCropPackModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+      <div onclick="event.stopPropagation()" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 py-5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-serif text-lg font-bold text-foreground">Crop Pack Locked</h3>
+              <p id="crop-modal-subtitle" class="text-xs text-muted">This module isn't part of your active crop packs.</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeCropPackModal()" class="p-1 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+          <p class="text-sm text-slate-600 leading-relaxed">
+            <strong id="crop-modal-title-text">This module</strong> is part of the <strong><span id="crop-modal-crop-name"></span></strong> crop pack. Choose an option below to unlock access:
+          </p>
+
+          <!-- OPTION 1: LINK GROWER CODE (Primary / Free) -->
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <p class="text-sm font-semibold text-emerald-900">Option 1 — Have a Processor Code?</p>
+            </div>
+            <p class="text-xs text-emerald-700 mb-3">If your packhouse or processor subsidizes The Vault, enter your grower code to unlock this crop instantly for free.</p>
+            <div class="flex gap-2">
+              <input type="text" id="modal-grower-code-input" placeholder="e.g. MM-10492" class="flex-1 px-3 py-2 text-xs border border-emerald-300 rounded-lg outline-none uppercase font-mono tracking-wider focus:border-emerald-600 bg-white">
+              <button type="button" onclick="handleModalClaimCode()" id="modal-claim-code-btn" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                Unlock Pack
+              </button>
+            </div>
+          </div>
+
+          <!-- OPTION 2: SELF-FUNDED BOLT-ON -->
+          <div class="rounded-xl border border-slate-200 p-4">
+            <p class="text-sm font-semibold text-foreground mb-1">Option 2 — Add the Pack Yourself</p>
+            <p class="text-xs text-muted mb-3">Unlock full streaming + SOP access for this crop for R80/mo, billed alongside your existing subscription.</p>
+            <button type="button" onclick="purchaseCropPackBoltOn()" id="crop-boltOn-btn" class="w-full bg-primary text-white py-2.5 rounded-lg font-medium text-xs hover:bg-primary/90 transition-colors shadow-sm">
+              Add Crop Pack — R80/mo
+            </button>
+          </div>
+
+          <!-- OPTION 3: REFERRAL LEAD -->
+          <div class="rounded-xl border border-slate-200 p-4">
+            <p class="text-sm font-semibold text-foreground mb-1">Option 3 — Refer Your Processor</p>
+            <p class="text-xs text-muted mb-2">Tell us who buys your crop — we'll reach out about sponsoring this pack for your farm at no cost to you.</p>
+            <input type="text" id="crop-modal-processor-input" placeholder="Processor / co-op name" class="w-full mb-2 px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-primary transition-colors bg-white">
+            <button type="button" onclick="submitProcessorReferral()" id="crop-refer-btn" class="w-full bg-slate-100 text-slate-700 py-2 rounded-lg font-medium text-xs hover:bg-slate-200 transition-colors border border-slate-200">
+              Refer Processor
+            </button>
+          </div>
+
+          <p id="crop-modal-status" class="text-xs text-center font-medium hidden"></p>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="assets/java_files/main.js"></script>
@@ -494,20 +556,22 @@
         const isCobranded = downloadUrl !== sop.doc_url;
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between${isLocked ? ' opacity-75' : ''}">
+          <div class="bg-white rounded-2xl border ${isLocked ? 'border-amber-300 bg-amber-50/10' : 'border-slate-200'} p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-3">
-                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold tracking-wide border border-slate-200">
-                  ${subTag}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full ${isLocked ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200'} text-[11px] font-semibold tracking-wide">
+                    ${subTag}
+                  </span>
+                  ${isLocked ? `
+                    <span class="inline-flex items-center gap-1 text-[10.5px] font-bold text-amber-700">
+                      🔒 Locked
+                    </span>
+                  ` : ''}
+                </div>
                 <span class="text-xs font-mono text-slate-400">SOP-${String(idx + 1).padStart(2, '0')}</span>
               </div>
-              ${isLocked ? `
-                <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full pl-2 pr-2.5 py-1 mb-3">
-                  <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                  <span class="text-[10px] font-semibold text-amber-800">${cropName} Pack Locked</span>
-                </div>
-              ` : ''}
+
               <h3 class="font-serif text-lg font-bold text-foreground mb-2">${sop.title}</h3>
               <p class="text-xs text-muted line-clamp-3 mb-4">${sop.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
             </div>
@@ -515,7 +579,11 @@
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
               <div class="flex flex-col min-w-0 flex-1">
                 <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
-                ${sponsorEntry ? `
+                ${isLocked ? `
+                  <span class="text-[10px] font-medium text-amber-700 mt-0.5">
+                    Requires ${cropName} Pack
+                  </span>
+                ` : sponsorEntry ? `
                   <span class="text-[10px] font-semibold text-emerald-700 mt-0.5 flex items-center gap-1.5 truncate" title="${sponsorEntry.partner_name} Co-branded">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                     <span class="truncate">${sponsorEntry.partner_name} Co-branded</span>
@@ -530,9 +598,9 @@
               ${isLocked ? `
                 <button
                   type="button"
-                  onclick="openProfileModal(); switchProfileTab('organization');"
-                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold hover:bg-slate-200 transition-all">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  onclick="handleCropPackLockClick('${sop.title.replace(/'/g, "\\'")}', '${cropName}')"
+                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                   <span>Unlock Pack</span>
                 </button>
               ` : `
@@ -552,6 +620,161 @@
           </div>
         `;
       }).join('');
+    }
+
+    // ------------------------------------------------------------------
+    // CROP-PACK LOCK MODAL ENGINE
+    // ------------------------------------------------------------------
+    let activeCropLock = { crop: null };
+
+    function handleCropPackLockClick(title, cropName) {
+      activeCropLock = { crop: cropName };
+      const titleEl = document.getElementById('crop-modal-title-text');
+      const cropEl = document.getElementById('crop-modal-crop-name');
+      const subtitleEl = document.getElementById('crop-modal-subtitle');
+      const status = document.getElementById('crop-modal-status');
+      const procInput = document.getElementById('crop-modal-processor-input');
+
+      if (titleEl) titleEl.textContent = `"${title}"`;
+      if (cropEl) cropEl.textContent = cropName;
+      if (subtitleEl) subtitleEl.textContent = `Locked — ${cropName} pack not active on your account.`;
+      if (status) {
+        status.classList.add('hidden');
+        status.textContent = '';
+      }
+      if (procInput) procInput.value = '';
+
+      const modal = document.getElementById('cropPackModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeCropPackModal() {
+      const modal = document.getElementById('cropPackModal');
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function setCropModalStatus(message, isError) {
+      const status = document.getElementById('crop-modal-status');
+      if (!status) return;
+      status.textContent = message;
+      status.className = `text-xs text-center font-medium ${isError ? 'text-red-600' : 'text-green-700'}`;
+      status.classList.remove('hidden');
+    }
+
+    async function handleModalClaimCode() {
+      const input = document.getElementById('modal-grower-code-input');
+      const btn = document.getElementById('modal-claim-code-btn');
+      const code = input?.value?.trim();
+
+      if (!code) {
+        setCropModalStatus('Please enter your grower code.', true);
+        return;
+      }
+
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = 'Verifying...';
+
+      try {
+        const { data, error } = await window.dbClient.rpc('claim_additional_grower_subsidy', {
+          p_grower_code: code
+        });
+
+        if (error) throw error;
+        if (!data || data.success !== true) {
+          throw new Error(data?.message || 'Invalid or already claimed code.');
+        }
+
+        setCropModalStatus(`✓ Unlocked! ${data.partner_name || 'Processor'} now sponsors your ${data.crop} pack. Refreshing...`, false);
+        setTimeout(() => window.location.reload(), 1200);
+
+      } catch (err) {
+        setCropModalStatus(err.message || 'Verification failed. Please check the code.', true);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    }
+
+    async function purchaseCropPackBoltOn() {
+      const crop = activeCropLock.crop;
+      if (!crop || typeof PaystackPop === 'undefined') return;
+
+      const { data: { session } } = await window.dbClient.auth.getSession();
+      const billingEmail = session?.user?.email;
+      if (!billingEmail) {
+        setCropModalStatus('Please log in again before adding a crop pack.', true);
+        return;
+      }
+
+      const btn = document.getElementById('crop-boltOn-btn');
+      btn.disabled = true;
+      btn.textContent = 'Opening secure payment...';
+
+      const popup = new PaystackPop();
+      popup.newTransaction({
+        key: 'pk_live_6e9ead28ba957dc643c949c5dc8164e3d62c0d09',
+        email: billingEmail,
+        amount: 8000,
+        plan: 'PLN_8n5qrpeh23evvnu',
+        currency: 'ZAR',
+        metadata: {
+          company_id: window.userCompanyId,
+          crop_pack: crop,
+          custom_fields: [{ display_name: 'Crop Pack', variable_name: 'crop_pack', value: crop }]
+        },
+        onSuccess: async (transaction) => {
+          try {
+            const { error } = await window.dbClient.rpc('purchase_crop_pack_addon', {
+              p_crop_name: crop,
+              p_paystack_ref: transaction.reference
+            });
+            if (error) throw error;
+            setCropModalStatus(`✓ ${crop} pack unlocked! Refreshing...`, false);
+            setTimeout(() => window.location.reload(), 1200);
+          } catch (err) {
+            console.error('[CropPack] Provisioning error:', err);
+            setCropModalStatus('Payment succeeded, but activation failed. Contact support.', true);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Add Crop Pack — R80/mo';
+          }
+        },
+        onCancel: () => {
+          btn.disabled = false;
+          btn.textContent = 'Add Crop Pack — R80/mo';
+        }
+      });
+    }
+
+    async function submitProcessorReferral() {
+      const crop = activeCropLock.crop;
+      const processorName = document.getElementById('crop-modal-processor-input')?.value?.trim();
+      if (!processorName) {
+        setCropModalStatus('Please enter a processor or co-op name.', true);
+        return;
+      }
+      const btn = document.getElementById('crop-refer-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      try {
+        const { error } = await window.dbClient.rpc('submit_processor_referral', {
+          p_crop_name: crop,
+          p_processor_name: processorName
+        });
+        if (error) throw error;
+        setCropModalStatus(`✓ Thanks — we'll be in touch about sponsoring ${crop} for your farm.`, false);
+      } catch (err) {
+        console.error('[ProcessorReferral] Error:', err);
+        setCropModalStatus('Something went wrong sending your referral. Please try again.', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Refer Processor';
+      }
     }
 
     // Search filter handler
