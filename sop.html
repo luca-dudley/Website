@@ -508,37 +508,45 @@
                   <span class="text-[10px] font-semibold text-amber-800">${cropName} Pack Locked</span>
                 </div>
               ` : ''}
-              ${sponsorEntry ? `
-                <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-2.5 py-1 mb-3">
-                  <span class="text-[10px] font-semibold text-slate-700">Sponsored by ${sponsorEntry.partner_name}${isCobranded ? ' • Co-branded Doc' : ''}</span>
-                </div>
-              ` : ''}
               <h3 class="font-serif text-lg font-bold text-foreground mb-2">${sop.title}</h3>
               <p class="text-xs text-muted line-clamp-3 mb-4">${sop.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-              <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div class="flex flex-col min-w-0 flex-1">
+                <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
+                ${sponsorEntry ? `
+                  <span class="text-[10px] font-semibold text-emerald-700 mt-0.5 flex items-center gap-1.5 truncate" title="${sponsorEntry.partner_name} Co-branded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span class="truncate">${sponsorEntry.partner_name} Co-branded</span>
+                  </span>
+                ` : `
+                  <span class="text-[10px] font-medium text-slate-400 mt-0.5">
+                    Standard Document
+                  </span>
+                `}
+              </div>
+
               ${isLocked ? `
                 <button
                   type="button"
                   onclick="openProfileModal(); switchProfileTab('organization');"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold hover:bg-slate-200 transition-all">
+                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold hover:bg-slate-200 transition-all">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                  Unlock Pack
+                  <span>Unlock Pack</span>
                 </button>
               ` : `
-              <a 
-                href="${downloadUrl}" 
-                download 
-                target="_blank"
-                onclick="if(typeof gtag==='function'){gtag('event','download_sop',{sop_title:'${sop.title.replace(/'/g, "\\'")}',cobranded:${isCobranded}});}"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span>Download SOP</span>
-              </a>
+                <a 
+                  href="${downloadUrl}" 
+                  download 
+                  target="_blank"
+                  onclick="if(typeof gtag==='function'){gtag('event','download_sop',{sop_title:'${sop.title.replace(/'/g, "\\'")}',cobranded:${isCobranded}});}"
+                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <span>Download SOP</span>
+                </a>
               `}
             </div>
           </div>
