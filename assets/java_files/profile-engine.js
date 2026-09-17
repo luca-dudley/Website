@@ -154,17 +154,60 @@ function isCropUnlocked(companyObj, cropName, opts = {}) {
 // Layer 3: renders "Industry Compliance Partners: X, Y × Simple Solutions"
 // into a footer element. Reads window.currentCompanySponsors (populated by
 // fetchCompanySponsorPartners) rather than companyObj — see note above.
-function renderPartnerFooterChain(companyObj, elementId) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  const list = Array.isArray(window.currentCompanySponsors) ? window.currentCompanySponsors : [];
-  const partnerNames = [...new Set(list.map(e => e?.partner_name).filter(Boolean))];
-  if (partnerNames.length === 0) {
-    el.classList.add('hidden');
+function renderPartnerFooterChain(companyObj, stripElementId = 'partnerChainStrip') {
+  const strip = document.getElementById(stripElementId);
+  if (!strip) return;
+
+  // Retrieve active sponsors from the global partner list
+  const sponsors = window.currentCompanySponsors || [];
+  if (!sponsors || sponsors.length === 0) {
+    strip.classList.add('hidden');
     return;
   }
-  el.textContent = `Subsidized & Enabled by: ${partnerNames.join(', ')}`;
-  el.classList.remove('hidden');
+
+  // Deduplicate by partner name / id
+  const uniquePartners = [];
+  const seen = new Set();
+  for (const s of sponsors) {
+    const key = s.partner_name || s.name;
+    if (key && !seen.has(key)) {
+      seen.add(key);
+      uniquePartners.push(s);
+    }
+  }
+
+  if (uniquePartners.length === 0) {
+    strip.classList.add('hidden');
+    return;
+  }
+
+  const partnerPills = uniquePartners.map(p => {
+    const partnerName = p.partner_name || p.name || 'Partner';
+    const logoUrl = p.logo_url || p.partner_logo_url;
+    
+    const logoHtml = logoUrl 
+      ? `<img src="${logoUrl}" alt="${partnerName}" class="w-full h-full object-contain">`
+      : `<span class="text-[9px] font-bold text-slate-700">${partnerName.charAt(0)}</span>`;
+
+    return `
+      <span class="inline-flex items-center gap-1.5 font-semibold text-white">
+        <span class="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+          ${logoHtml}
+        </span>
+        <span>${partnerName}</span>
+      </span>
+    `;
+  }).join('<span class="text-slate-400 mx-1">•</span>');
+
+  strip.innerHTML = `
+    <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+      <span class="text-slate-300 font-normal">Subsidized &amp; Enabled by:</span>
+      <div class="inline-flex flex-wrap items-center justify-center gap-1.5">
+        ${partnerPills}
+      </div>
+    </div>
+  `;
+  strip.classList.remove('hidden');
 }
 
 function renderTopbarSponsorPill() {
