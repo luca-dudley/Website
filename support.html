@@ -135,6 +135,28 @@
         <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
       </div>
 
+      <!-- Live Partner Subsidy Dropdown Pill -->
+      <div id="topbar-sponsor-pill-container" class="relative hidden">
+        <button id="topbar-sponsor-btn" onclick="toggleSponsorDropdown(event)" type="button" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all">
+          <span class="w-2 h-2 rounded-full bg-primary/70"></span>
+          <span id="topbar-sponsor-label">Sponsors</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
+          <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Subsidies</span>
+            <span id="topbar-sponsor-count" class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">0 Active</span>
+          </div>
+          <div id="topbar-sponsor-items" class="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+            <!-- Injected via profile-engine.js -->
+          </div>
+        </div>
+      </div>
+
       <div class="relative">
         <button id="notification-bell-btn" onclick="toggleNotificationDropdown(event)" class="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 transition-colors shadow-sm" title="Notifications">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -238,24 +260,55 @@
 
   <!-- 3. MAIN CONTENT CONTAINER -->
   <main id="mainContent" class="ml-0 lg:ml-64 p-4 sm:p-8 min-h-[calc(100vh-72px)] flex flex-col justify-between">
-    <div class="mx-auto mt-4 max-w-xl w-full rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 text-center shadow-sm">
-      <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6l6 6v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v5h5" />
+    <!-- Native Support Form Card -->
+    <div class="mx-auto mt-4 max-w-xl w-full rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       </div>
-      <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-1">Open Support Ticket</h2>
-      <p class="mt-4 text-sm leading-6 text-muted">
-        Need help with your account, experiencing technical difficulties, or want to suggest a brand-new training module? Choose an option below to submit directly to our team.
+      
+      <h2 class="font-serif text-2xl font-bold text-foreground text-center mb-1">Open Support Ticket</h2>
+      <p class="text-xs text-muted text-center max-w-md mx-auto mb-6">
+        Have a technical question, suggestion, or billing inquiry? Submit below for a direct response from our team.
       </p>
-      <div class="mt-6 flex flex-col gap-3">
-        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Technical%20Support" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg bg-primary px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 shadow-sm">
-          Open Technical Support Ticket
-        </a>
-        <a href="https://forms.clickup.com/90121325199/f/2kxucjmf-672/J7XWSLVIVDAYLL2N7B?Request%20Type=Video%20Module%20Request" target="_blank" rel="noopener noreferrer" class="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3.5 text-sm font-medium text-slate-700 transition-colors hover:border-primary hover:bg-slate-50 hover:text-primary">
-          Open Video Request Ticket
-        </a>
+
+      <form id="supportTicketForm" onsubmit="handleSupportSubmit(event)" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Request Type</label>
+          <select id="ticketType" required class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary">
+            <option value="technical_support">Technical Support / Bug Report</option>
+            <option value="video_request">Video Module / SOP Request</option>
+            <option value="audit_compliance">Audit &amp; Compliance Help</option>
+            <option value="billing_inquiry">Billing &amp; Subscription Inquiry</option>
+            <option value="crop_subsidy">Crop Pack Subsidy &amp; Sponsor Inquiry</option>
+            <option value="general">General Feedback / Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Subject</label>
+          <input type="text" id="ticketSubject" required placeholder="Brief summary of the issue..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Message</label>
+          <textarea id="ticketMessage" rows="4" required placeholder="Describe your inquiry, farm details, or error encountered..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary resize-none"></textarea>
+        </div>
+
+        <button type="submit" id="supportSubmitBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-primary/90 disabled:opacity-50">
+          <span>Submit Support Ticket</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </form>
+
+      <!-- Success Banner -->
+      <div id="supportSuccessBanner" class="hidden mt-4 p-5 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-1.5">
+        <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <p class="text-xs font-bold text-emerald-800">Support Ticket Dispatched</p>
+        <p class="text-[11px] text-emerald-600">Your ticket has been logged and sent to the team. We will reply to your registered email shortly.</p>
       </div>
     </div>
 
@@ -265,9 +318,9 @@
         <!-- Brand Summary -->
         <div class="max-w-sm space-y-3">
           <div class="flex items-center gap-3">
-            <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 p-1">
-              <img src="assets/Simple_Logo-removebg-preview.png" alt="Simple Solutions logo" class="h-full w-full object-contain">
-            </div>
+              <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white p-1.5 shadow-sm shrink-0">
+                <img src="assets/Simple_Logo.jpg" alt="Simple Solutions logo" class="h-full w-full object-contain rounded-full">
+              </div>
             <div>
               <p class="text-base font-semibold tracking-tight">Simple Solutions</p>
               <p class="text-[10px] uppercase tracking-[0.25em] text-slate-300">Safety & Compliance</p>
@@ -308,5 +361,74 @@
 
   <script src="assets/java_files/main.js"></script>
   <script src="assets/java_files/profile-engine.js"></script>
+  <script>
+    async function handleSupportSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('supportSubmitBtn');
+      const banner = document.getElementById('supportSuccessBanner');
+      const form = document.getElementById('supportTicketForm');
+
+      btn.disabled = true;
+      btn.innerHTML = `<span>Submitting ticket...</span>`;
+
+      try {
+        // profile-engine.js initializes the Supabase client as window.dbClient or window.supabaseClient
+        const client = window.dbClient || window.supabaseClient;
+        if (!client) throw new Error("Database client not initialized.");
+
+        const { data: { user }, error: authErr } = await client.auth.getUser();
+        if (authErr || !user) throw new Error("Please log in to submit a ticket.");
+
+        // 1. Fetch only existing profile columns + company name
+        const { data: profile } = await client
+          .from('profiles')
+          .select(`
+            first_name,
+            last_name,
+            company_id,
+            companies ( name )
+          `)
+          .eq('id', user.id)
+          .maybeSingle();
+
+        // 2. Assemble name from first_name and last_name
+        const fullName = [profile?.first_name, profile?.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
+        const companyName = profile?.companies?.name || '';
+        const displayName = fullName 
+          ? (companyName ? `${fullName} (${companyName})` : fullName)
+          : user.email.split('@')[0];
+
+        // 3. user.email comes directly from auth, not profiles
+        const payload = {
+          user_id: user.id,
+          company_id: profile?.company_id || null,
+          user_name: displayName,
+          user_email: user.email,
+          ticket_type: document.getElementById('ticketType').value,
+          subject: document.getElementById('ticketSubject').value.trim(),
+          message: document.getElementById('ticketMessage').value.trim()
+        };
+
+        const { error: insertErr } = await client
+          .from('support_tickets')
+          .insert(payload);
+
+        if (insertErr) throw insertErr;
+
+        form.reset();
+        form.classList.add('hidden');
+        banner.classList.remove('hidden');
+      } catch (err) {
+        console.error('[Support Ticket Error]:', err);
+        alert(err.message || 'Failed to submit ticket. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = `<span>Submit Support Ticket</span>`;
+      }
+    }
+  </script>
 </body>
 </html>

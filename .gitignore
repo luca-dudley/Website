@@ -1,0 +1,14 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Supabase CLI cache & temp files
+supabase/.temp/
+supabase/.branches/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.tar.gz
+*.zip
