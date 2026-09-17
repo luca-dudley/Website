@@ -35,7 +35,7 @@ serve(async (req) => {
 
     const { data: partners, error: pErr } = await supabase
       .from("corporate_partners")
-      .select("id, name, contact_email, slug, sponsored_crop_pack");
+      .select("id, name, contact_email, slug, sponsored_crop_pack, logo_url");
 
     if (pErr) throw pErr;
 
@@ -96,10 +96,14 @@ serve(async (req) => {
                             <td style="background-color: #1e3a5f; padding: 28px 36px; text-align: left;">
                               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
-                                  <td style="width: 44px; vertical-align: middle;">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.15); border: 1.5px solid rgba(255, 255, 255, 0.3); text-align: center; line-height: 40px; font-family: Georgia, serif; font-size: 19px; font-weight: bold; color: #ffffff;">
-                                      S
-                                    </div>
+                                  <td style="width: 46px; vertical-align: middle;">
+                                    <table cellpadding="0" cellspacing="0" border="0" style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.4); border-collapse: separate; overflow: hidden;">
+                                      <tr>
+                                        <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle; padding: 0;">
+                                          <img src="https://www.simpleza.co.za/assets/Simple_Logo-removebg-preview.png" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain; display: block; margin: 0 auto; border: 0; outline: none;" alt="Simple Solutions" />
+                                        </td>
+                                      </tr>
+                                    </table>
                                   </td>
                                   <td style="padding-left: 14px; vertical-align: middle;">
                                     <span style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; font-family: Georgia, serif; display: block; line-height: 1.2;">The Vault</span>
