@@ -256,7 +256,8 @@
 
     let portalData = {
       partner: null,
-      growers: []
+      growers: [],
+      modules: []
     };
     let activeStatusFilter = 'All';
 
@@ -289,7 +290,8 @@
 
         portalData = {
           partner: data.partner,
-          growers: data.growers || []
+          growers: data.growers || [],
+          modules: data.modules || []
         };
 
         renderPortalHeader(portalData.partner);
