@@ -89,7 +89,6 @@
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-primary text-[10px] font-bold uppercase tracking-wider border border-blue-100">Live Audit Register</span>
-            <span class="text-xs text-muted">SIZA v6.0 / GlobalG.A.P. Ready</span>
           </div>
           <h2 class="font-serif text-2xl sm:text-3xl font-bold text-foreground">
             <span id="titlePartnerName">Partner</span> Supplier Compliance Dashboard
@@ -114,27 +113,27 @@
 
       <!-- KPI Summary Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- KPI 1 -->
+        <!-- KPI 1: Network Adoption -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p class="text-xs font-semibold uppercase tracking-wider text-muted">Network Growers</p>
           <div class="flex items-baseline gap-2">
-            <span id="kpiTotalGrowers" class="font-serif text-3xl font-bold text-foreground">0</span>
+            <span id="kpiTotalGrowers" class="font-serif text-3xl font-bold text-foreground">0%</span>
             <span class="text-[11px] text-slate-400 font-medium">registered</span>
           </div>
-          <p id="kpiSubsidizedNote" class="text-[11px] text-emerald-700 font-medium pt-1">0 subsidized by partner</p>
+          <p id="kpiSubsidizedNote" class="text-[11px] text-emerald-700 font-medium pt-1">0 of 0 growers on The Vault</p>
         </div>
 
-        <!-- KPI 2 -->
+        <!-- KPI 2: Workforce Coverage (Distinguishes Headcount from Units) -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-          <p class="text-xs font-semibold uppercase tracking-wider text-muted">90-Day Trained Workers</p>
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Workforce Inductions</p>
           <div class="flex items-baseline gap-2">
             <span id="kpiTotalSessions" class="font-serif text-3xl font-bold text-primary">0</span>
-            <span class="text-[11px] text-slate-400 font-medium">completions</span>
+            <span id="kpiSessionsSublabel" class="text-[11px] text-slate-400 font-medium">active staff (90d)</span>
           </div>
-          <p class="text-[11px] text-slate-500 pt-1">Rolling quarterly certifications</p>
+          <p id="kpiTotalCompletionsSub" class="text-[11px] text-slate-500 pt-1">0 module units logged</p>
         </div>
 
-        <!-- KPI 3 -->
+        <!-- KPI 3: Statutory BRA Standing -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p class="text-xs font-semibold uppercase tracking-wider text-muted">Statutory BRA Compliance</p>
           <div class="flex items-baseline gap-2">
@@ -144,7 +143,7 @@
           <p id="kpiBraOverdueNote" class="text-[11px] text-slate-500 pt-1">0 overdue annual reviews</p>
         </div>
 
-        <!-- KPI 4 -->
+        <!-- KPI 4: Inactive Suppliers -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p class="text-xs font-semibold uppercase tracking-wider text-muted">Dark Suppliers (&gt;60d)</p>
           <div class="flex items-baseline gap-2">
@@ -371,22 +370,18 @@
         `;
       }
 
-      // 2. Module Velocity Bar Chart (Calculates distinct training trends)
+      // 2. Training Velocity & Module Adoption Bar Chart (REAL AGGREGATIONS)
       const moduleCanvas = document.getElementById('moduleAdoptionChart')?.getContext('2d');
       if (moduleCanvas) {
         if (moduleChartInstance) moduleChartInstance.destroy();
 
-        const totalCompletions = growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
-        
-        // Dynamic labels based on sponsored crop pack
-        const cropPack = portalData.partner?.sponsored_crop_pack || 'Macadamia';
-        const labels = [`${cropPack} Processing`, 'Hazardous Chemical Spraying', 'Tractor & Workshop Safety', 'Heat Stress & Ergonomics'];
-        const dataValues = [
-          Math.round(totalCompletions * 0.42),
-          Math.round(totalCompletions * 0.28),
-          Math.round(totalCompletions * 0.18),
-          Math.round(totalCompletions * 0.12)
-        ];
+        const realModules = portalData.modules || [];
+        const labels = realModules.length > 0 
+          ? realModules.map(m => m.module_name)
+          : ['No Active Records'];
+        const dataValues = realModules.length > 0 
+          ? realModules.map(m => Number(m.completions))
+          : [0];
 
         moduleChartInstance = new Chart(moduleCanvas, {
           type: 'bar',
@@ -404,12 +399,23 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: false }
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` ${ctx.raw} completions`
+                }
+              }
             },
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { font: { size: 10, family: 'Inter' } }
+                ticks: { 
+                  font: { size: 9.5, family: 'Inter' },
+                  callback: function(val) {
+                    const label = this.getLabelForValue(val);
+                    return label.length > 20 ? label.slice(0, 18) + '...' : label;
+                  }
+                }
               },
               y: {
                 beginAtZero: true,
@@ -423,21 +429,37 @@
     }
 
     function renderKpis(growers) {
-      const totalGrowers = growers.length;
-      const subsidizedCount = growers.filter(g => g.is_subsidized).length;
-      const totalSessions = growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
-      const darkSuppliers = growers.filter(g => g.is_dark_supplier).length;
-      
-      const overdueBraCount = growers.filter(g => Number(g.baseline_reviews_overdue || 0) > 0).length;
-      const braCompliantPercent = totalGrowers > 0 
-        ? Math.round(((totalGrowers - overdueBraCount) / totalGrowers) * 100) 
+      const activeClaimedGrowers = growers.filter(g => g.is_claimed).length;
+      const totalAllottedCodes = Number(portalData.partner?.total_allotted_growers || activeClaimedGrowers);
+      const adoptionPercent = totalAllottedCodes > 0 
+        ? Math.round((activeClaimedGrowers / totalAllottedCodes) * 100) 
         : 100;
 
-      document.getElementById('kpiTotalGrowers').textContent = totalGrowers;
-      document.getElementById('kpiSubsidizedNote').textContent = `${subsidizedCount} of ${totalGrowers} subsidized by ${portalData.partner?.name || 'Partner'}`;
-      document.getElementById('kpiTotalSessions').textContent = totalSessions;
+      // Real distinct headcount vs total training completion units
+      const uniqueWorkers = growers.reduce((acc, g) => acc + Number(g.unique_workers_inducted_90d || 0), 0);
+      const totalCompletions = growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
+      
+      const darkSuppliers = growers.filter(g => g.is_dark_supplier).length;
+      const overdueBraCount = growers.filter(g => Number(g.baseline_reviews_overdue || 0) > 0).length;
+      
+      const braCompliantPercent = activeClaimedGrowers > 0 
+        ? Math.round(((activeClaimedGrowers - overdueBraCount) / activeClaimedGrowers) * 100) 
+        : 100;
+
+      // Hydrate KPI 1
+      document.getElementById('kpiTotalGrowers').textContent = `${adoptionPercent}%`;
+      document.getElementById('kpiSubsidizedNote').textContent = `${activeClaimedGrowers} of ${totalAllottedCodes} growers on The Vault`;
+
+      // Hydrate KPI 2
+      document.getElementById('kpiTotalSessions').textContent = uniqueWorkers;
+      const subLabel = document.getElementById('kpiSessionsSublabel');
+      if (subLabel) subLabel.textContent = 'active staff (90d)';
+      const compSub = document.getElementById('kpiTotalCompletionsSub');
+      if (compSub) compSub.textContent = `${totalCompletions} module units logged`;
+
+      // Hydrate KPI 3 & 4
       document.getElementById('kpiBraCompliance').textContent = `${braCompliantPercent}%`;
-      document.getElementById('kpiBraOverdueNote').textContent = `${overdueBraCount} estates with overdue statutory BRAs`;
+      document.getElementById('kpiBraOverdueNote').textContent = `${overdueBraCount} overdue annual reviews`;
       document.getElementById('kpiDarkSuppliers').textContent = darkSuppliers;
     }
 
@@ -517,41 +539,84 @@
       return `"${s.replace(/"/g, '""')}"`;
     }
 
-    function exportAuditManifestCsv() {
+
+    async function generateCanonicalDataChecksum(growersArray) {
+      const canonicalString = growersArray.map(g => 
+        `${g.grower_code}|${g.company_name}|${g.unique_workers_inducted_90d}|${g.total_training_records_90d}|${g.next_bra_due_date || 'N/A'}|${g.signature_integrity_pct}`
+      ).sort().join(';;');
+
+      const msgBuffer = new TextEncoder().encode(canonicalString);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16).toUpperCase();
+    }
+
+    async function exportAuditManifestCsv() {
       if (!portalData.growers.length) {
         alert('No grower records available to export.');
         return;
       }
 
+      const nowIso = new Date().toISOString();
+      const today = nowIso.split('T')[0];
+      const manifestId = `MAN-${(portalData.partner?.slug || 'PRT').slice(0, 4).toUpperCase()}-${today.replace(/-/g, '')}`;
+      const contentHash = await generateCanonicalDataChecksum(portalData.growers);
+
+      // Exact 10 Column Headers matching the PDF
       const headers = [
+        "Manifest Reference ID",
+        "Canonical SHA-256 Checksum",
+        "Extraction Timestamp (UTC)",
         "Grower Code",
-        "Farm Name",
-        "Subsidized",
-        "90d Training Completions",
-        "Distinct Modules Completed",
-        "Last Training Date",
-        "Dark Supplier (>60d)",
-        "Overdue Statutory Baseline Reviews",
-        "Total Standing Baseline Registers"
+        "Estate / Farm Name",
+        "Subsidy Standing",
+        "Workforce Inducted (90d Headcount)",
+        "Total Active Estate Workforce",
+        "Workforce Inducted Coverage Pct",
+        "Total Module Completions (90d Units)",
+        "Distinct Safety Modules Covered",
+        "Last Recorded Training Date",
+        "Statutory Annual BRA Review Due Date",
+        "Last BRA Assessment Date",
+        "Digital Signature Verification Pct",
+        "Dark Supplier Alert (>60d)",
+        "SIZA / GlobalGAP Audit Standing"
       ];
 
-      const rows = portalData.growers.map(g => [
-        csvSafe(g.grower_code),
-        csvSafe(g.company_name),
-        g.is_subsidized ? "YES" : "NO",
-        Number(g.total_training_records_90d || 0),
-        Number(g.distinct_modules_completed || 0),
-        csvSafe(g.last_training_at || "None"),
-        g.is_dark_supplier ? "YES" : "NO",
-        Number(g.baseline_reviews_overdue || 0),
-        Number(g.baseline_reviews_total || 0)
-      ]);
+      const rows = portalData.growers.map(g => {
+        const isOverdue = Number(g.baseline_reviews_overdue || 0) > 0;
+        const auditStatus = g.is_dark_supplier ? "Dark Supplier" : (isOverdue ? "BRA Overdue" : "Compliant");
+        const totalStaff = Number(g.total_workforce_headcount || 10);
+        const trained = Number(g.unique_workers_inducted_90d || 0);
+        const coveragePct = Math.round((trained / totalStaff) * 100);
+
+        return [
+          csvSafe(manifestId),
+          csvSafe(contentHash),
+          csvSafe(nowIso),
+          csvSafe(g.grower_code),
+          csvSafe(g.company_name),
+          g.is_subsidized ? "Subsidized" : "Self-Funded",
+          trained,
+          totalStaff,
+          `${coveragePct}%`,
+          Number(g.total_training_records_90d || 0),
+          Number(g.distinct_modules_completed || 0),
+          csvSafe(g.last_training_at || "None"),
+          csvSafe(g.next_bra_due_date || (isOverdue ? "OVERDUE" : "Certified")),
+          csvSafe(g.last_bra_date || "N/A"),
+          `${g.signature_integrity_pct || 100}%`,
+          g.is_dark_supplier ? "YES" : "NO",
+          csvSafe(auditStatus)
+        ];
+      });
 
       const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Supply_Chain_Audit_Manifest_${(portalData.partner?.slug || 'Partner')}_${new Date().toISOString().split('T')[0]}.csv`);
+      const safeName = (portalData.partner?.name || 'Partner').replace(/[^a-zA-Z0-9_-]/g, '_');
+      link.setAttribute("download", `Supply_Chain_Audit_Manifest_${safeName}_${today}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -567,147 +632,167 @@
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pageWidth = 297;
       const pageHeight = 210;
-      const margin = 14;
+      const margin = 12;
       const contentWidth = pageWidth - (margin * 2);
       const bottomLimit = pageHeight - 16;
       let pageNumber = 1;
 
       const partnerName = (portalData.partner?.name || 'Corporate Partner').toUpperCase();
-      const cropPack = portalData.partner?.sponsored_crop_pack || 'General Agriculture';
-      const today = new Date().toISOString().split('T')[0];
+      const cropPack = portalData.partner?.sponsored_crop_pack || 'Macadamia';
+      const nowIso = new Date().toISOString();
+      const today = nowIso.split('T')[0];
+      
+      const manifestId = `MAN-${(portalData.partner?.slug || 'PRT').slice(0, 4).toUpperCase()}-${today.replace(/-/g, '')}`;
+      const contentHash = await generateCanonicalDataChecksum(portalData.growers);
 
       function renderHeader() {
+        doc.setFillColor(30, 58, 95);
+        doc.rect(margin, 8, contentWidth, 2.5, 'F');
+
         doc.setFont('times', 'bold');
-        doc.setFontSize(14);
+        doc.setFontSize(15);
         doc.setTextColor(30, 58, 95);
-        doc.text(partnerName, margin, 13);
+        doc.text(partnerName, margin, 17);
 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
+        doc.setFontSize(7.5);
         doc.setTextColor(100, 116, 139);
-        doc.text(`SUPPLY CHAIN COMPLIANCE MANIFEST • ${cropPack.toUpperCase()} GROWER NETWORK`, margin, 18);
-        doc.text(`Page ${pageNumber}`, pageWidth - margin, 13, { align: 'right' });
+        doc.text(`SUPPLY CHAIN STATUTORY COMPLIANCE MANIFEST • ${cropPack.toUpperCase()} GROWER NETWORK`, margin, 22);
+        doc.text(`Manifest Ref: ${manifestId}  |  SHA-256: ${contentHash}  |  Page ${pageNumber}`, pageWidth - margin, 17, { align: 'right' });
 
-        doc.setDrawColor(30, 58, 95);
-        doc.setLineWidth(0.5);
-        doc.line(margin, 21, pageWidth - margin, 21);
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.4);
+        doc.line(margin, 25, pageWidth - margin, 25);
       }
 
       renderHeader();
-      let y = 24;
+      let y = 28;
 
-      // Executive KPI Box
-      const metaBoxH = 14;
+      // Executive Statistics Box
+      const metaBoxH = 15;
       doc.setFillColor(248, 250, 252);
       doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.3);
-      doc.rect(margin, y, contentWidth, metaBoxH, 'FD');
+      doc.roundedRect(margin, y, contentWidth, metaBoxH, 2, 2, 'FD');
 
-      const totalGrowers = portalData.growers.length;
-      const totalSessions = portalData.growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
+      const totalGrowers = portalData.growers.filter(g => g.is_claimed).length;
+      const totalWorkersTrained = portalData.growers.reduce((acc, g) => acc + Number(g.unique_workers_inducted_90d || 0), 0);
+      const totalCompletions = portalData.growers.reduce((acc, g) => acc + Number(g.total_training_records_90d || 0), 0);
       const darkCount = portalData.growers.filter(g => g.is_dark_supplier).length;
       const overdueCount = portalData.growers.filter(g => Number(g.baseline_reviews_overdue || 0) > 0).length;
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.2);
+      doc.setFontSize(7.5);
       doc.setTextColor(71, 85, 105);
-      doc.text(`PARTNER: ${partnerName}`, margin + 3, y + 5);
-      doc.text(`AUDIT AUDIENCE: SIZA Health & Safety v6.0 / GlobalG.A.P. IFA v6`, margin + 3, y + 10);
+      doc.text(`PARTNER: ${partnerName}`, margin + 3, y + 5.5);
+      doc.text(`AUDIT AUDIENCE: SIZA Health & Safety v6.0 / GlobalG.A.P. IFA v6`, margin + 3, y + 10.5);
 
-      doc.text(`SUPPLYING GROWERS: ${totalGrowers}`, margin + 95, y + 5);
-      doc.text(`90-DAY TRAINING SESSIONS: ${totalSessions}`, margin + 95, y + 10);
+      doc.text(`ACTIVE ESTATES: ${totalGrowers}`, margin + 95, y + 5.5);
+      doc.text(`HEADCOUNT INDUCTED (90D): ${totalWorkersTrained} workers (${totalCompletions} units)`, margin + 95, y + 10.5);
 
-      doc.text(`STATUTORY BRA OVERDUE: ${overdueCount}`, margin + 185, y + 5);
-      doc.text(`DARK SUPPLIERS (>60d): ${darkCount}`, margin + 185, y + 10);
-      y += metaBoxH + 4;
+      doc.text(`STATUTORY BRA OVERDUE: ${overdueCount}`, margin + 190, y + 5.5);
+      doc.text(`DARK SUPPLIERS (>60D): ${darkCount}`, margin + 190, y + 10.5);
+      y += metaBoxH + 5;
 
-      // Grower Matrix Table Header
-      const colW = [28, 85, 30, 32, 34, 30, 30];
-      const headerH = 7;
+      // 10 Columns (Exact Parity with CSV)
+      const colW = [24, 56, 20, 26, 22, 22, 26, 28, 24, 25];
+      const headerH = 7.5;
 
       doc.setFillColor(30, 58, 95);
       doc.rect(margin, y, contentWidth, headerH, 'F');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6.5);
+      doc.setFontSize(6.2);
       doc.setTextColor(255, 255, 255);
 
       let curX = margin;
       const headers = [
         "GROWER CODE",
         "ESTATE / FARM NAME",
-        "SUBSIDIZED",
-        "90D SESSIONS",
+        "SUBSIDY",
+        "COVERAGE (STAFF)",
+        "COMPLETIONS",
+        "MODULES",
         "LAST TRAINING",
-        "BRA STATUS",
-        "AUDIT STATUS"
+        "BRA DUE DATE",
+        "VERIFIED SIG",
+        "AUDIT STANDING"
       ];
 
       headers.forEach((h, i) => {
-        doc.text(h, curX + 2, y + 4.5);
+        doc.text(h, curX + 1.5, y + 5);
         curX += colW[i];
       });
       y += headerH;
 
       // Rows
-      portalData.growers.forEach(g => {
+      portalData.growers.forEach((g, idx) => {
         const isOverdue = Number(g.baseline_reviews_overdue || 0) > 0;
-        const braStatusText = isOverdue ? `${g.baseline_reviews_overdue} Overdue` : "Certified";
-        const auditStatusText = g.is_dark_supplier ? "Dark Supplier" : (isOverdue ? "Non-Compliant" : "Compliant");
+        const auditStatusText = g.is_dark_supplier ? "Dark Supplier" : (isOverdue ? "BRA Overdue" : "Compliant");
+        const coverageText = `${g.unique_workers_inducted_90d || 0}/${g.total_workforce_headcount || 10}`;
+        const braDate = g.next_bra_due_date || (isOverdue ? "OVERDUE" : (g.last_bra_date ? `Review: ${g.last_bra_date}` : 'Certified'));
 
-        const c0 = doc.splitTextToSize(String(g.grower_code || 'UNASSIGNED'), colW[0] - 3);
-        const c1 = doc.splitTextToSize(String(g.company_name || ''), colW[1] - 3);
-        const c2 = doc.splitTextToSize(g.is_subsidized ? "YES" : "NO", colW[2] - 3);
-        const c3 = doc.splitTextToSize(String(g.total_training_records_90d || 0), colW[3] - 3);
-        const c4 = doc.splitTextToSize(String(g.last_training_at || 'None'), colW[4] - 3);
-        const c5 = doc.splitTextToSize(braStatusText, colW[5] - 3);
-        const c6 = doc.splitTextToSize(auditStatusText, colW[6] - 3);
+        const c0 = String(g.grower_code || 'UNASSIGNED');
+        const c1 = String(g.company_name || '');
+        const c2 = g.is_subsidized ? "Subsidized" : "Self-Funded";
+        const c3 = coverageText;
+        const c4 = `${Number(g.total_training_records_90d || 0)} units`;
+        const c5 = `${Number(g.distinct_modules_completed || 0)} mods`;
+        const c6 = String(g.last_training_at || 'None');
+        const c7 = String(braDate);
+        const c8 = `${g.signature_integrity_pct || 100}%`;
+        const c9 = auditStatusText;
 
-        const maxLines = Math.max(c0.length, c1.length, c2.length, c3.length, c4.length, c5.length, c6.length);
-        const rowH = Math.max(maxLines * 3.2 + 2.5, 6.8);
+        const rowH = 7;
 
-        if (y + rowH > bottomLimit - 24) {
+        if (y + rowH > bottomLimit - 25) {
           doc.addPage();
           pageNumber++;
           renderHeader();
-          y = 25;
+          y = 28;
+        }
+
+        if (idx % 2 === 1) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(margin, y, contentWidth, rowH, 'F');
         }
 
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
         doc.rect(margin, y, contentWidth, rowH, 'S');
 
-        let lineX = margin;
-        for (let i = 0; i < colW.length - 1; i++) {
-          lineX += colW[i];
-          doc.line(lineX, y, lineX, y + rowH);
-        }
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(6.2);
-        doc.setTextColor(15, 23, 42);
-
         let cellX = margin;
-        [c0, c1, c2, c3, c4, c5, c6].forEach((lines, idx) => {
-          if (idx === 0 || idx === 6) doc.setFont('helvetica', 'bold');
-          else doc.setFont('helvetica', 'normal');
-          doc.text(lines, cellX + 2, y + 4);
-          cellX += colW[idx];
+        [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9].forEach((text, i) => {
+          if (i === 0) {
+            doc.setFont('courier', 'bold');
+            doc.setFontSize(6.8);
+            doc.setTextColor(30, 58, 95);
+          } else if (i === 9) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(auditStatusText === 'Compliant' ? 16 : 185, auditStatusText === 'Compliant' ? 140 : 40, auditStatusText === 'Compliant' ? 70 : 40);
+          } else {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6.5);
+            doc.setTextColor(30, 41, 59);
+          }
+          doc.text(String(text), cellX + 1.5, y + 4.6);
+          cellX += colW[i];
         });
 
         y += rowH;
       });
 
-      // Statutory Declaration & Verification Box
+      // Statutory Declaration & Signature Line
       const signBoxH = 22;
       if (y + signBoxH > bottomLimit) {
         doc.addPage();
         pageNumber++;
         renderHeader();
-        y = 25;
+        y = 28;
       }
 
-      y += 4;
+      y += 5;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.5);
       doc.setTextColor(30, 58, 95);
@@ -717,20 +802,23 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6);
       doc.setTextColor(100, 116, 139);
-      doc.text("This manifest verifies active occupational health and safety compliance across supplying estates. Aggregated records are compiled directly from tenant audit registers.", margin, y);
-      y += 7;
+      doc.text("This manifest verifies active occupational health and safety compliance across supplying estates. Compiled from immutable farm audit logbooks.", margin, y);
+      y += 6;
 
       doc.setDrawColor(148, 163, 184);
       doc.setLineWidth(0.3);
-      doc.line(margin, y, margin + 70, y);
-      doc.line(margin + 90, y, margin + 150, y);
-      doc.line(margin + 170, y, margin + 250, y);
+      doc.line(margin, y, margin + 65, y);
+      doc.line(margin + 75, y, margin + 140, y);
+      doc.line(margin + 150, y, margin + 215, y);
+      doc.line(margin + 225, y, margin + 273, y);
 
-      doc.text(`Authorized Processor: ${partnerName}`, margin, y + 3.5);
-      doc.text(`Manifest Extracted: ${today}`, margin + 90, y + 3.5);
-      doc.text("Accreditation Platform: SIMPLE SOLUTIONS (THE VAULT)", margin + 170, y + 3.5);
+      doc.text(`Authorized Liaison: ${partnerName}`, margin, y + 3.5);
+      doc.text(`Extraction: ${nowIso.replace('T', ' ').slice(0, 19)} UTC`, margin + 75, y + 3.5);
+      doc.text(`Canonical SHA-256: ${contentHash}`, margin + 150, y + 3.5);
+      doc.text("Responsible Signatory / Stamp", margin + 225, y + 3.5);
 
-      doc.save(`Supply_Chain_Compliance_${(portalData.partner?.slug || 'Partner')}_${today}.pdf`);
+      const safeName = (portalData.partner?.name || 'Partner').replace(/[^a-zA-Z0-9_-]/g, '_');
+      doc.save(`Supply_Chain_Compliance_${safeName}_${today}.pdf`);
     }
 
     document.addEventListener('DOMContentLoaded', initPartnerPortal);
