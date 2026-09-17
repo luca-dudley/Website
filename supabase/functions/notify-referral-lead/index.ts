@@ -1,147 +1,165 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const REFERRAL_WEBHOOK_SECRET = Deno.env.get("REFERRAL_WEBHOOK_SECRET") || "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+  "";
+
 const NOTIFICATION_RECIPIENTS = [
   "simple.lucadudley@gmail.com",
 ];
 
+function timingSafeEqual(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  const enc = new TextEncoder();
+  const bufA = enc.encode(a), bufB = enc.encode(b);
+  let diff = 0;
+  for (let i = 0; i < bufA.length; i++) diff |= bufA[i] ^ bufB[i];
+  return diff === 0;
+}
+
+function escapeHtml(s: unknown): string {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c] || c));
+}
+
 serve(async (req) => {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+    });
+  }
+
+  // 1. Strict Auth Guard
+  const webhookHeader = req.headers.get("x-webhook-secret") || "";
+  const authHeader = req.headers.get("Authorization")?.replace("Bearer ", "") ||
+    "";
+
+  const isAuthorized =
+    (REFERRAL_WEBHOOK_SECRET.length > 0 &&
+      timingSafeEqual(webhookHeader, REFERRAL_WEBHOOK_SECRET)) ||
+    (SUPABASE_SERVICE_ROLE_KEY.length > 0 &&
+      timingSafeEqual(authHeader, SUPABASE_SERVICE_ROLE_KEY));
+
+  if (!isAuthorized) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const payload = await req.json();
-    const record = payload.record; // The inserted row from processor_referral_leads
 
-    if (!record) {
-      return new Response(
-        JSON.stringify({ error: "No record found in payload" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+    // 2. Ignore non-insert events
+    if (payload.type && payload.type !== "INSERT") {
+      return new Response(JSON.stringify({ status: "ignored_non_insert" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
-    // Initialize Supabase Admin client to fetch farm & user context
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    const record = payload.record;
+    if (!record) {
+      return new Response(JSON.stringify({ error: "Missing record payload" }), {
+        status: 400,
+      });
+    }
+
+    // 3. Raw values for validation
+    const rawEmail = String(record.contact_email || "").trim();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail);
+    const replyToAddress = isValidEmail
+      ? rawEmail
+      : "simple.lucadudley@gmail.com";
+
+    // 4. Sanitize all user-controlled text for HTML rendering
+    const processorName = escapeHtml(
+      record.processor_name || "Unknown Processor",
+    );
+    const contactPerson = escapeHtml(record.contact_person || "Not provided");
+    const contactEmail = escapeHtml(rawEmail || "Not provided");
+    const contactPhone = escapeHtml(record.contact_phone || "Not provided");
+    const cropName = escapeHtml(record.crop_name || "Unspecified Crop");
+    const referralNotes = escapeHtml(record.notes || "None provided").replace(
+      /\n/g,
+      "<br/>",
     );
 
-    // 1. Fetch Company Name
-    let companyName = "Unknown Estate / Packhouse";
-    if (record.company_id) {
-      const { data: comp } = await supabaseAdmin
-        .from("companies")
-        .select("name")
-        .eq("id", record.company_id)
-        .maybeSingle();
-      if (comp?.name) companyName = comp.name;
-    }
+    if (RESEND_API_KEY) {
+      const emailRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "The Vault Alerts <alerts@simpleza.co.za>",
+          reply_to: replyToAddress,
+          to: NOTIFICATION_RECIPIENTS,
+          subject: `🌾 New Processor Referral: ${processorName} (${cropName})`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 32px 12px;">
+                <tr>
+                  <td align="center">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+                      <tr>
+                        <td style="background-color: #1e3a5f; padding: 24px 32px;">
+                          <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-family: Georgia, serif;">New Corporate Referral Lead</h2>
+                          <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">The Vault Commercial Pipeline</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 32px;">
+                          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 20px;">
+                            <tr>
+                              <td style="padding: 16px;">
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b;"><strong>Target Processor:</strong> ${processorName}</p>
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b;"><strong>Crop Pack:</strong> ${cropName}</p>
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b;"><strong>Contact Person:</strong> ${contactPerson}</p>
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b;"><strong>Email:</strong> ${contactEmail}</p>
+                                <p style="margin: 0; font-size: 12px; color: #64748b;"><strong>Phone:</strong> ${contactPhone}</p>
+                              </td>
+                            </tr>
+                          </table>
+                          <div style="font-size: 13px; color: #334155; line-height: 1.5; padding: 12px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <strong>Notes / Submission Context:</strong><br/>
+                            ${referralNotes}
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+          `,
+        }),
+      });
 
-    // 2. Fetch User Profile
-    let userName = "Unknown User";
-    let userEmail = "Not available";
-    if (record.user_id) {
-      const { data: prof } = await supabaseAdmin
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", record.user_id)
-        .maybeSingle();
-
-      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
-        record.user_id,
-      );
-      if (prof) {
-        userName = `${prof.first_name || ""} ${prof.last_name || ""}`.trim();
+      if (!emailRes.ok) {
+        const errText = await emailRes.text();
+        console.error("[Resend Error in notify-referral-lead]:", errText);
       }
-      if (authUser?.user?.email) userEmail = authUser.user.email;
-    }
-
-    const cropName = record.crop_name || "General";
-    const processorName = record.processor_name || "Unspecified Processor";
-
-    // 3. Send Email via Resend
-    if (!RESEND_API_KEY) {
-      console.warn(
-        "[Referral Function] RESEND_API_KEY missing. Lead logged to console only:",
-      );
-      console.log({
-        companyName,
-        userName,
-        userEmail,
-        cropName,
-        processorName,
-      });
-      return new Response(JSON.stringify({ status: "logged_no_email_key" }), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "The Vault Alerts <alerts@simpleza.co.za>",
-        reply_to: "simple.lucadudley@gmail.com",
-        to: NOTIFICATION_RECIPIENTS,
-        subject: `🌾 New Processor Referral: ${processorName} (${cropName})`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
-            <h2 style="color: #1e3a5f; margin-top: 0;">New Processor Sponsorship Lead</h2>
-            <p style="font-size: 14px; color: #475569;">A grower on The Vault just requested processor sponsorship for a locked crop pack:</p>
-            
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
-              <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td style="padding: 10px 0; font-weight: bold; color: #1e3a5f; width: 140px;">Processor / Co-op:</td>
-                <td style="padding: 10px 0; color: #0f172a; font-weight: bold; font-size: 15px;">${processorName}</td>
-              </tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td style="padding: 10px 0; font-weight: bold; color: #1e3a5f;">Crop Pack:</td>
-                <td style="padding: 10px 0; color: #0f172a;">${cropName}</td>
-              </tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td style="padding: 10px 0; font-weight: bold; color: #1e3a5f;">Estate / Company:</td>
-                <td style="padding: 10px 0; color: #0f172a;">${companyName}</td>
-              </tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td style="padding: 10px 0; font-weight: bold; color: #1e3a5f;">Referred By:</td>
-                <td style="padding: 10px 0; color: #0f172a;">${userName} (<a href="mailto:${userEmail}">${userEmail}</a>)</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; font-weight: bold; color: #1e3a5f;">Timestamp:</td>
-                <td style="padding: 10px 0; color: #64748b;">${
-          new Date().toLocaleString("en-ZA", {
-            timeZone: "Africa/Johannesburg",
-          })
-        } SAST</td>
-              </tr>
-            </table>
-
-            <div style="background-color: #f8fafc; padding: 14px; border-radius: 8px; font-size: 12px; color: #64748b; border: 1px solid #cbd5e1;">
-              <strong>Action Item:</strong> Contact the commercial rep or farm liaison at <em>${processorName}</em> to pitch the 25% subsidy bulk program for ${companyName} and their grower base.
-            </div>
-          </div>
-        `,
-      }),
-    });
-
-    if (!emailRes.ok) {
-      const errBody = await emailRes.text();
-      throw new Error(`Resend API Error: ${errBody}`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
+      status: 200,
     });
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("[Referral Function Error]:", errorMessage);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ error: err?.message || String(err) }),
+      { status: 500 },
+    );
   }
 });

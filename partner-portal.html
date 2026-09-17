@@ -422,9 +422,6 @@
       }
     }
 
-    // -------------------------------------------------------------------------
-    // KPI COMPILATION
-    // -------------------------------------------------------------------------
     function renderKpis(growers) {
       const totalGrowers = growers.length;
       const subsidizedCount = growers.filter(g => g.is_subsidized).length;
@@ -444,9 +441,6 @@
       document.getElementById('kpiDarkSuppliers').textContent = darkSuppliers;
     }
 
-    // -------------------------------------------------------------------------
-    // TABLE FILTERING & RENDERING
-    // -------------------------------------------------------------------------
     function filterGrowerStatus(status) {
       activeStatusFilter = status;
       document.querySelectorAll('.status-tab').forEach(btn => {
@@ -515,9 +509,14 @@
       }).join('');
     }
 
-    // -------------------------------------------------------------------------
-    // 1-CLICK CSV EXPORT
-    // -------------------------------------------------------------------------
+    function csvSafe(val) {
+      let s = String(val ?? '');
+      // Neutralize Excel/Sheets formula injection (=, +, -, @)
+      if (/^[=+\-@]/.test(s)) s = "'" + s;
+      // RFC-4180 quote escaping (replace " with "")
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+
     function exportAuditManifestCsv() {
       if (!portalData.growers.length) {
         alert('No grower records available to export.');
@@ -537,15 +536,15 @@
       ];
 
       const rows = portalData.growers.map(g => [
-        `"${g.grower_code || ''}"`,
-        `"${g.company_name || ''}"`,
+        csvSafe(g.grower_code),
+        csvSafe(g.company_name),
         g.is_subsidized ? "YES" : "NO",
-        g.total_training_records_90d || 0,
-        g.distinct_modules_completed || 0,
-        g.last_training_at || "None",
+        Number(g.total_training_records_90d || 0),
+        Number(g.distinct_modules_completed || 0),
+        csvSafe(g.last_training_at || "None"),
         g.is_dark_supplier ? "YES" : "NO",
-        g.baseline_reviews_overdue || 0,
-        g.baseline_reviews_total || 0
+        Number(g.baseline_reviews_overdue || 0),
+        Number(g.baseline_reviews_total || 0)
       ]);
 
       const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -558,9 +557,6 @@
       document.body.removeChild(link);
     }
 
-    // -------------------------------------------------------------------------
-    // 1-CLICK STATUTORY LANDSCAPE PDF AUDIT CERTIFICATE
-    // -------------------------------------------------------------------------
     async function exportAuditCertificatePdf() {
       if (!window.jspdf?.jsPDF) {
         alert('PDF engine is loading. Please try again.');

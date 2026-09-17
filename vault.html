@@ -985,8 +985,15 @@
 
       const { data: { session } } = await window.dbClient.auth.getSession();
       const billingEmail = session?.user?.email;
-      if (!billingEmail) {
+      const userId = session?.user?.id;
+
+      if (!billingEmail || !userId) {
         setCropModalStatus('Please log in again before adding a crop pack.', true);
+        return;
+      }
+
+      if (!window.userCompanyId) {
+        setCropModalStatus('Unable to identify your organization account. Contact support.', true);
         return;
       }
 
@@ -1001,39 +1008,56 @@
         amount: 8000,
         plan: 'PLN_8n5qrpeh23evvnu',
         currency: 'ZAR',
-        // company_id + crop_pack in metadata: the paystack-webhook Edge Function
-        // (see COMMERCIAL_FLOWS.md) reads these off the subscription.create
-        // event to know which crop_pack_addon_subscriptions row to attach the
-        // resulting paystack_subscription_code to - Paystack doesn't hand the
-        // subscription code back synchronously in this onSuccess callback,
-        // only the one-time transaction reference.
         metadata: {
           company_id: window.userCompanyId,
+          user_id: userId,
+          crop_name: crop,
           crop_pack: crop,
           custom_fields: [{ display_name: 'Crop Pack', variable_name: 'crop_pack', value: crop }]
         },
         onSuccess: async (transaction) => {
-          try {
-            const { error } = await window.dbClient.rpc('purchase_crop_pack_addon', {
-              p_crop_name: crop,
-              p_paystack_ref: transaction.reference
-            });
-            if (error) throw error;
-            setCropModalStatus(`✓ ${crop} pack unlocked! Refreshing your library...`, false);
-            setTimeout(() => window.location.reload(), 1200);
-          } catch (err) {
-            console.error('[CropPack] Provisioning error:', err);
-            setCropModalStatus('Payment succeeded, but activation failed. Contact support.', true);
-          } finally {
-            btn.disabled = false;
-            btn.textContent = 'Add Crop Pack — R80/mo';
-          }
+          setCropModalStatus(`Payment authorized (ref: ${transaction.reference}). Confirming with bank...`, false);
+          await pollForCropPackConfirmation(crop, transaction.reference);
         },
         onCancel: () => {
           btn.disabled = false;
           btn.textContent = 'Add Crop Pack — R80/mo';
         }
       });
+    }
+
+    async function pollForCropPackConfirmation(cropName, paystackRef, attempt = 0) {
+      const MAX_ATTEMPTS = 8;
+      const POLL_DELAY_MS = 2000;
+
+      const { data: company } = await window.dbClient
+        .from('companies')
+        .select('purchased_crop_packs')
+        .eq('id', window.userCompanyId)
+        .single();
+
+      const purchased = Array.isArray(company?.purchased_crop_packs) ? company.purchased_crop_packs : [];
+
+      if (purchased.includes(cropName)) {
+        setCropModalStatus(`✓ ${cropName} pack confirmed & unlocked! Refreshing...`, false);
+        setTimeout(() => window.location.reload(), 1000);
+        return;
+      }
+
+      if (attempt >= MAX_ATTEMPTS) {
+        setCropModalStatus(
+          `Payment received (ref: ${paystackRef}), but verification is taking a moment. Please refresh the page in 30 seconds.`,
+          false
+        );
+        const btn = document.getElementById('crop-boltOn-btn');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Add Crop Pack — R80/mo';
+        }
+        return;
+      }
+
+      setTimeout(() => pollForCropPackConfirmation(cropName, paystackRef, attempt + 1), POLL_DELAY_MS);
     }
 
     // NOTE: submit_processor_referral is a SECURITY DEFINER RPC (see accompanying
