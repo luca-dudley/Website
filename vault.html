@@ -329,11 +329,14 @@
               <option value="Machinery & Workshop">Machinery & Workshop</option>
               <option value="Macadamia Processing">Macadamia Processing</option>
               <option value="Banana Processing">Banana Processing</option>
+              <option value="Citrus Processing">Citrus Processing</option>
+              <option value="Vehicles & Fleet">Vehicles & Fleet</option>
               <option value="Pumping & Irrigation">Pumping & Irrigation</option>
             </select>
             <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
               <option value="all">All Languages</option>
-              <option value="zu">English &amp; Zulu</option>
+              <option value="English &amp; Zulu">English &amp; Zulu</option>
+              <option value="English &amp; Afrikaans">English &amp; Afrikaans</option>
             </select>
           </div>
         </div>
@@ -697,8 +700,12 @@
             badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/60';
           } else if (subTag === 'Banana Processing') {
             badgeClass = 'bg-yellow-50 text-yellow-800 border-yellow-200/60';
+          } else if (subTag === 'Citrus Processing') {
+            badgeClass = 'bg-orange-50 text-orange-800 border-orange-200/60'
           } else if (subTag === 'Machinery & Workshop') {
             badgeClass = 'bg-blue-50 text-blue-700 border-blue-200/60';
+          } else if (subTag === 'Vehicles & Fleet') {
+            badgeClass = 'bg-indigo-50 text-indigo-700 border-indigo-200/60';
           } else if (subTag === 'Pumping & Irrigation') {
             badgeClass = 'bg-cyan-50 text-cyan-700 border-cyan-200/60';
           }
@@ -715,7 +722,7 @@
                data-title="${video.title.toLowerCase()}" 
                data-category="${(video.category || 'agriculture').toLowerCase()}" 
                data-subcategory="${subTagLower}" 
-               data-language="${(video.language || 'zu').toLowerCase()}">
+               data-language="${(video.language || '').toLowerCase()}">
               
               <div class="relative aspect-video bg-slate-800 border-b border-slate-700 overflow-hidden">
                 <img src="${validThumbnail}" 
