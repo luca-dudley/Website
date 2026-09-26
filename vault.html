@@ -76,6 +76,16 @@
       background: #9ca3af;
     }
 
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
     #sidebar,
     #mainContent {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,7 +143,7 @@
       <!-- Live Company Tier Pill -->
       <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="topbar-company-name">Simple Solutions</span>
+        <span id="topbar-company-name" class="truncate max-w-[140px]">Simple Solutions</span>
         <span class="text-slate-300">|</span>
         <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
       </div>
@@ -149,7 +159,7 @@
       </button>
 
       <!-- Dropdown Menu -->
-      <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
+      <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
         <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Subsidies</span>
           <span id="topbar-sponsor-count" class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">0 Active</span>
@@ -167,7 +177,7 @@
           <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
 
-        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-[calc(100vw-2rem)] max-w-sm bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
           <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
             <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
             <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
@@ -304,7 +314,7 @@
                       <span id="continueWatchingModule">Training</span>
                     </span>
                   </div>
-                  <a id="bannerResumeBtn" href="#" class="inline-flex self-start w-fit text-center bg-white text-primary font-medium py-2 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
+                  <a id="bannerResumeBtn" href="#" class="inline-flex w-full sm:w-auto text-center justify-center bg-white text-primary font-medium py-2.5 px-6 rounded-md hover:bg-gray-100 transition-colors">Resume Training</a>
                 </div>
               </div>
             </div>
@@ -321,9 +331,9 @@
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
-              <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 sm:text-sm transition-colors">
+              <input type="text" id="searchInput" placeholder="Search modules..." class="block w-full pl-10 pr-3 py-2.5 min-h-[44px] border border-slate-200 rounded-lg leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 text-sm transition-colors">
             </div>
-            <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+            <select id="categoryFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2.5 min-h-[44px] text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
               <option value="all">All Sub-Categories</option>
               <option value="General Safety">General Safety</option>
               <option value="Machinery & Workshop">Machinery & Workshop</option>
@@ -333,7 +343,7 @@
               <option value="Vehicles & Fleet">Vehicles & Fleet</option>
               <option value="Pumping & Irrigation">Pumping & Irrigation</option>
             </select>
-            <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
+            <select id="languageFilter" class="block w-full sm:w-auto pl-3 pr-8 py-2.5 min-h-[44px] text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 bg-slate-50 focus:bg-white text-slate-700 cursor-pointer">
               <option value="all">All Languages</option>
               <option value="English &amp; Zulu">English &amp; Zulu</option>
               <option value="English &amp; Afrikaans">English &amp; Afrikaans</option>
@@ -347,7 +357,7 @@
     </div>
 
     <!-- ANCHORED ROUNDED FOOTER -->
-    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+    <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-5 sm:px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
       <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
         <!-- Brand Summary -->
         <div class="max-w-sm space-y-3">
@@ -427,9 +437,9 @@
             <p class="text-sm font-semibold text-emerald-900">Option 1 — Have a Processor Code?</p>
           </div>
           <p class="text-xs text-emerald-700 mb-3">If your packhouse or processor subsidizes The Vault, enter your grower code to unlock this crop instantly for free.</p>
-          <div class="flex gap-2">
-            <input type="text" id="modal-grower-code-input" placeholder="e.g. MM-10492" class="flex-1 px-3 py-2 text-xs border border-emerald-300 rounded-lg outline-none uppercase font-mono tracking-wider focus:border-emerald-600 bg-white">
-            <button type="button" onclick="handleModalClaimCode()" id="modal-claim-code-btn" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="modal-grower-code-input" placeholder="e.g. MM-10492" class="w-full sm:flex-1 px-3 py-2 text-xs border border-emerald-300 rounded-lg outline-none uppercase font-mono tracking-wider focus:border-emerald-600 bg-white min-h-[40px]">
+            <button type="button" onclick="handleModalClaimCode()" id="modal-claim-code-btn" class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-sm whitespace-nowrap min-h-[40px]">
               Unlock Pack
             </button>
           </div>

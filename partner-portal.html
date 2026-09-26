@@ -29,31 +29,40 @@
       }
     }
   </script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
   <!-- TOP HEADER BAR -->
-  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-6 sm:px-10 py-3.5 h-[72px] flex items-center justify-between">
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/90 bg-[#f8fafc] backdrop-blur px-4 sm:px-10 py-3.5 h-[72px] flex items-center justify-between">
     <div class="flex items-center gap-3.5">
-      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm shrink-0">
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
         </svg>
       </div>
       <div>
-        <span class="font-serif text-xl font-bold text-foreground tracking-tight">The Vault</span>
+        <span class="font-serif text-lg sm:text-xl font-bold text-foreground tracking-tight">The Vault</span>
         <span class="hidden sm:inline text-slate-300 mx-2">|</span>
-        <span class="text-xs text-muted font-medium">Supply Chain Compliance</span>
+        <span class="text-xs text-muted font-medium hidden xs:inline">Supply Chain Compliance</span>
       </div>
     </div>
 
     <!-- Right-Hand Partner Identity & Verification Pill -->
     <div id="partnerIdentityBadge" class="hidden flex items-center gap-3">
-      <div class="flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="headerPartnerName" class="font-bold text-primary">Corporate Partner</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 sm:px-3.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm max-w-[200px] sm:max-w-none">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+        <span id="headerPartnerName" class="font-bold text-primary truncate max-w-[90px] sm:max-w-none">Corporate Partner</span>
         <span class="text-slate-300">|</span>
-        <span id="headerCropPackName" class="text-slate-500">Crop Pack</span>
+        <span id="headerCropPackName" class="text-slate-500 truncate max-w-[70px] sm:max-w-none">Crop Pack</span>
       </div>
       <div id="partnerLogoContainer" class="h-9 w-auto hidden sm:flex items-center">
         <img id="headerPartnerLogo" src="" alt="Partner Logo" class="h-8 max-w-[120px] object-contain">
@@ -99,12 +108,12 @@
         </div>
 
         <!-- Export Action Buttons -->
-        <div class="flex items-center gap-3 shrink-0">
-          <button onclick="exportAuditManifestCsv()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all shadow-sm">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+          <button onclick="exportAuditManifestCsv()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all shadow-sm w-full sm:w-auto min-h-[44px]">
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span>Export CSV Manifest</span>
           </button>
-          <button onclick="exportAuditCertificatePdf()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+          <button onclick="exportAuditCertificatePdf()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm w-full sm:w-auto min-h-[44px]">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span>Generate Statutory Audit PDF</span>
           </button>
@@ -195,14 +204,14 @@
         <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           <div class="relative w-full sm:w-80">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input id="growerSearchInput" oninput="applyGrowerFilters()" type="text" placeholder="Search grower code or farm name..." class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-slate-50 focus:bg-white transition-colors">
+            <input id="growerSearchInput" oninput="applyGrowerFilters()" type="text" placeholder="Search grower code or farm name..." class="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-xs border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-slate-50 focus:bg-white transition-colors">
           </div>
 
-          <div class="flex items-center gap-2 overflow-x-auto">
-            <button onclick="filterGrowerStatus('All')" data-status="All" class="status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white transition-all shadow-sm">All Growers</button>
-            <button onclick="filterGrowerStatus('Compliant')" data-status="Compliant" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Compliant</button>
-            <button onclick="filterGrowerStatus('Overdue')" data-status="Overdue" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">BRA Overdue</button>
-            <button onclick="filterGrowerStatus('Dark')" data-status="Dark" class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Dark Suppliers</button>
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            <button onclick="filterGrowerStatus('All')" data-status="All" class="status-tab active px-3.5 py-2 shrink-0 whitespace-nowrap min-h-[38px] rounded-lg text-xs font-semibold bg-primary text-white transition-all shadow-sm">All Growers</button>
+            <button onclick="filterGrowerStatus('Compliant')" data-status="Compliant" class="status-tab px-3.5 py-2 shrink-0 whitespace-nowrap min-h-[38px] rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Compliant</button>
+            <button onclick="filterGrowerStatus('Overdue')" data-status="Overdue" class="status-tab px-3.5 py-2 shrink-0 whitespace-nowrap min-h-[38px] rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">BRA Overdue</button>
+            <button onclick="filterGrowerStatus('Dark')" data-status="Dark" class="status-tab px-3.5 py-2 shrink-0 whitespace-nowrap min-h-[38px] rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Dark Suppliers</button>
           </div>
         </div>
 
@@ -230,9 +239,9 @@
         </div>
 
         <!-- POPIA Legal Protection Banner -->
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-slate-400 gap-1 sm:gap-4">
           <span>POPIA Sec 14 / GDPR Compliant: Individual employee identification numbers and digital signatures are encrypted within farm private tenancies.</span>
-          <span class="font-mono">Vault Kernel v2.4</span>
+          <span class="font-mono shrink-0">Vault Kernel v2.4</span>
         </div>
 
       </div>
@@ -242,7 +251,7 @@
   </main>
 
   <!-- PORTAL FOOTER -->
-  <footer class="mt-16 w-full border-t border-slate-200 bg-white py-6 px-8 text-center text-xs text-slate-400">
+  <footer class="mt-16 w-full border-t border-slate-200 bg-white py-6 px-5 sm:px-8 text-center text-xs text-slate-400">
     <p>© 2026 Simple Solutions Safety &amp; Operations. Authorized Corporate Partner Supply Chain Portal.</p>
   </footer>
 

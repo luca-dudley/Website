@@ -54,10 +54,11 @@ const setActiveSidebarButton = (buttons, activeButton) => {
   }
 
   const closeMobileSidebar = () => {
-    if (!sidebar || window.innerWidth >= 1024) return;
+    if (!sidebar) return;
     sidebar.classList.add('-translate-x-full');
     sidebarBackdrop?.classList.add('hidden');
     mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('overflow-hidden');
   };
 
   const openMobileSidebar = () => {
@@ -65,6 +66,7 @@ const setActiveSidebarButton = (buttons, activeButton) => {
     sidebar.classList.remove('-translate-x-full');
     sidebarBackdrop?.classList.remove('hidden');
     mobileMenuBtn?.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('overflow-hidden');
   };
 
   if (mobileMenuBtn && sidebar) {
@@ -78,6 +80,19 @@ const setActiveSidebarButton = (buttons, activeButton) => {
   }
 
   sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeMobileSidebar();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+      closeMobileSidebar();
+      document.body.classList.remove('overflow-hidden');
+    }
+  });
 
   if (sidebarNavButtons.length > 0 && sidebar && mobileMenuBtn) {
     sidebarNavButtons.forEach((button) => {

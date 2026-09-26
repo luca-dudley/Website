@@ -75,6 +75,16 @@
       background: #9ca3af;
     }
 
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
     #sidebar,
     #mainContent {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -132,7 +142,7 @@
     <div class="flex items-center gap-5 shrink-0">
       <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="topbar-company-name" class="font-medium">Simple Solutions</span>
+        <span id="topbar-company-name" class="font-medium truncate max-w-[140px]">Simple Solutions</span>
         <span class="text-slate-300">|</span>
         <span id="topbar-tier-tag" class="font-bold text-primary uppercase text-[10px] tracking-wide">Enterprise</span>
       </div>
@@ -148,7 +158,7 @@
         </button>
 
         <!-- Dropdown Menu -->
-        <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
+        <div id="topbar-sponsor-dropdown" class="hidden absolute right-0 sm:left-0 sm:right-auto mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5">
           <div class="px-4 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Subsidies</span>
             <span id="topbar-sponsor-count" class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">0 Active</span>
@@ -165,7 +175,7 @@
           <span id="bell-unread-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
 
-        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-[calc(100vw-2rem)] max-w-sm bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
           <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
             <span class="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</span>
             <button onclick="markAllNotificationsRead()" class="text-[11px] font-medium text-primary hover:underline">Mark all read</button>
@@ -271,7 +281,7 @@
   <main id="mainContent" class="ml-0 lg:ml-64 min-h-[calc(100vh-72px)] flex flex-col justify-between relative">
     
     <!-- FULL-PAGE BLURRED CONTENT WRAPPER -->
-    <div id="pageContentWrapper" class="p-8 flex-1 flex flex-col justify-between transition-all duration-300">
+    <div id="pageContentWrapper" class="p-4 sm:p-8 flex-1 flex flex-col justify-between transition-all duration-300">
       <div class="max-w-6xl mx-auto w-full">
         <!-- Top Title & Search Controls -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -285,7 +295,7 @@
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input id="sopSearchInput" type="text" placeholder="Search SOP module..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
+              <input id="sopSearchInput" type="text" placeholder="Search SOP module..." class="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-sm border border-slate-200 rounded-xl focus:ring-primary focus:border-primary outline-none bg-white transition-colors shadow-sm">
             </div>
           </div>
         </div>
@@ -307,7 +317,7 @@
       </div>
 
       <!-- FOOTER -->
-      <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
+      <footer class="mt-16 w-full max-w-7xl mx-auto rounded-2xl bg-[#1e3a5f] px-5 sm:px-8 py-8 text-white shadow-md border border-slate-700/30 shrink-0">
         <div class="flex flex-col lg:flex-row lg:justify-between gap-8">
           <div class="max-w-sm space-y-3">
             <div class="flex items-center gap-3">
@@ -556,7 +566,7 @@
         const isCobranded = downloadUrl !== sop.doc_url;
 
         return `
-          <div class="bg-white rounded-2xl border ${isLocked ? 'border-amber-300 bg-amber-50/10' : 'border-slate-200'} p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="bg-white rounded-2xl border ${isLocked ? 'border-amber-300 bg-amber-50/10' : 'border-slate-200'} p-4 sm:p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
@@ -576,7 +586,7 @@
               <p class="text-xs text-muted line-clamp-3 mb-4">${sop.description || 'Standard safe operating procedure guidelines, pre-operational inspections, mandatory PPE, and hazardous control measures.'}</p>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div class="flex flex-col min-w-0 flex-1">
                 <span class="text-[11px] text-slate-500 font-medium">Format: <strong>Word (.docx)</strong></span>
                 ${isLocked ? `
@@ -599,7 +609,7 @@
                 <button
                   type="button"
                   onclick="handleCropPackLockClick('${sop.title.replace(/'/g, "\\'")}', '${cropName}')"
-                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                  class="w-full sm:w-auto shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                   <span>Unlock Pack</span>
                 </button>
@@ -609,7 +619,7 @@
                   download 
                   target="_blank"
                   onclick="if(typeof gtag==='function'){gtag('event','download_sop',{sop_title:'${sop.title.replace(/'/g, "\\'")}',cobranded:${isCobranded}});}"
-                  class="shrink-0 whitespace-nowrap inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
+                  class="w-full sm:w-auto shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm">
                   <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>

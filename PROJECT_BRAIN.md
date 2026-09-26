@@ -254,6 +254,27 @@ tailwind.config = {
 - **Closer Protocol Configuration**:
   - Verified `.agents/agents/closer/agent.md` protocol to maintain and update this `PROJECT_BRAIN.md` at the conclusion of every development session.
 
+### Mobile Optimization & Responsive Audit Pass (2026-09-26)
+- **Eliminated Horizontal Overflow & Blowout (< 768px Viewports)**:
+  - Fixed scaling overflow in `index.html` on the featured Essential Vault card (`scale-100 lg:scale-105 hover:scale-[1.02] lg:hover:scale-[1.07]`), preventing viewport blowout on 360px–414px mobile devices.
+  - Ensured `<meta name="viewport" content="width=device-width, initial-scale=1.0">` is uniformly enforced across all 11 HTML entry points.
+- **Top Bars & Dynamic Controls**:
+  - Re-anchored topbar dropdowns (`topbar-sponsor-dropdown`, `notification-dropdown`) across `vault.html`, `records.html`, `sop.html`, `risk-assessments.html`, `support.html`, and `module.html` to fluid widths (`w-[calc(100vw-2rem)] max-w-xs sm:w-72` and `w-[calc(100vw-2rem)] max-w-sm`) to prevent clipping off-screen.
+  - Added smooth text truncation (`truncate max-w-[140px]`) to company names in desktop and tablet headers.
+  - Truncated partner identity badge elements in `partner-portal.html` (`truncate max-w-[90px]`, `truncate max-w-[70px]`, `max-w-[200px] sm:max-w-none`).
+- **Sidebar & Mobile Drawer Behavior**:
+  - Inserted missing `#sidebar-backdrop` into `risk-assessments.html` for clean overlay dimming and backdrop-click closing.
+  - In `js/main.js`: Bound body scroll locking (`document.body.classList.add/remove('overflow-hidden')`) upon drawer open/close. Added `Escape` key close listener and window `resize` handler that auto-dismisses drawer when scaling up to desktop (>= 1024px).
+- **Search Bars, Filters & Tab Strips**:
+  - Refactored search inputs and filter `<select>` dropdowns across all catalog and table pages to stack full-width vertically on mobile with 44px touch targets (`py-2.5 min-h-[44px]`).
+  - Added cross-browser `.no-scrollbar` styling rules across all views and applied horizontal scroll strips (`flex overflow-x-auto no-scrollbar gap-2 pb-1/pb-2`) to category pills, baseline filters, and status tabs.
+- **Data Grids, Cards & Data Tables**:
+  - Refactored dynamic SOP cards in `sop.html` and Baseline Assessment cards in `risk-assessments.html` with responsive inner padding (`p-4 sm:p-6`) and full-width, touch-friendly action buttons (`w-full sm:w-auto min-h-[38px]`).
+  - Ensured wide compliance tables (`records.html`, `risk-assessments.html`, `partner-portal.html`) are isolated within dedicated horizontal scroll containers (`w-full overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0`).
+- **Modals & Overlays**:
+  - Refactored `#profileModal` in `profile-modal.html`: modal container converted to fluid responsive flex layout (`p-0 sm:p-4`, `h-full sm:h-[600px] flex flex-col sm:flex-row`), navigation converted to horizontally scrollable tab bar (`flex overflow-x-auto no-scrollbar flex-nowrap shrink-0 border-b`), headings responsive (`text-2xl sm:text-3xl`), and close button offset adjusted.
+  - Refactored `#vaultUpgradeReviewModal`, `#newAssessmentModal`, `#baselineReviewModal`, and `#inspectBaselineModal` footers to `flex flex-col-reverse sm:flex-row items-stretch sm:items-center` with full-width primary action buttons on mobile.
+
 ### Upcoming Priority Tasks
 1. **Citrus Processing Pack**: Finalize dedicated SOP documentation and master risk assessment templates for citrus harvesting, packing, and cold-storage operations.
 2. **Paystack Bolt-On Automation**: Verify live webhook processing of `charge.success` events for `PLN_8n5qrpeh23evvnu` across production testing farms.
