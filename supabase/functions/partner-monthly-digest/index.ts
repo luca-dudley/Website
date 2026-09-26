@@ -100,7 +100,7 @@ serve(async (req) => {
                                     <table cellpadding="0" cellspacing="0" border="0" style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.4); border-collapse: separate; overflow: hidden;">
                                       <tr>
                                         <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle; padding: 0;">
-                                          <img src="https://www.simpleza.co.za/assets/Simple_Logo-removebg-preview.png" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain; display: block; margin: 0 auto; border: 0; outline: none;" alt="Simple Solutions" />
+                                          <img src="https://www.simpleza.co.za/assets/branding/Simple_Logo-removebg-preview.png" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain; display: block; margin: 0 auto; border: 0; outline: none;" alt="Simple Solutions" />
                                         </td>
                                       </tr>
                                     </table>

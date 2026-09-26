@@ -1,4 +1,4 @@
-// assets/java_files/profile-engine.js
+// js/profile-engine.js
 
 // 1. INITIALIZE GLOBAL REPO INSTANCES
 const supabaseUrl = 'https://ujhfkvoaaebdntuheyqo.supabase.co';

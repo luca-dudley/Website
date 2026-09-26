@@ -36,7 +36,7 @@ Key capabilities include:
 
 ### Tech Stack
 - **Markup**: Semantic Vanilla HTML5.
-- **Scripts**: Native ECMAScript 6+ modules (`/assets/java_files/main.js`, `/assets/java_files/profile-engine.js`, and inline scoped DOM controllers).
+- **Scripts**: Native ECMAScript 6+ modules (`/js/main.js`, `/js/profile-engine.js`, and inline scoped DOM controllers).
 - **Styling**: Tailwind CSS delivered via official CDN script (`https://cdn.tailwindcss.com`) with custom brand configurations.
 - **No Client Frameworks**: Strictly **no React, no Vue, no Svelte, and no Angular**. All dynamic DOM manipulation uses native browser APIs (`document.querySelector`, `addEventListener`, template literals, and Canvas 2D contexts).
 
@@ -66,8 +66,8 @@ tailwind.config = {
    - jsPDF UMD (`https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js` on audit/export routes).
    - Chart.js (`https://cdn.jsdelivr.net/npm/chart.js` on analytics and partner routes).
 2. **Body Termination Loading Order**:
-   - `assets/java_files/main.js`: Responsive navigation, mobile backdrop toggle, collapsible sidebar (`lg:ml-64` to `lg:ml-20`).
-   - `assets/java_files/profile-engine.js`: Profile modal injector, session bootstrap, multi-tenant state resolution, crop-pack gating, and Paystack billing engine.
+   - `js/main.js`: Responsive navigation, mobile backdrop toggle, collapsible sidebar (`lg:ml-64` to `lg:ml-20`).
+   - `js/profile-engine.js`: Profile modal injector, session bootstrap, multi-tenant state resolution, crop-pack gating, and Paystack billing engine.
    - Route-specific scripts: Executed on `DOMContentLoaded` or after `profile-engine.js` has established `window.dbClient`.
 
 ### Shared Component Injection
@@ -188,8 +188,8 @@ tailwind.config = {
 | [`systems.html`](file:///home/luca/dev/the-vault-web/systems.html) | Enterprise showcase illustrating PM suites, Procurement architecture, and Construction ERP workflows with screenshot modal galleries. | Static HTML/CSS, Vanilla JS gallery engine. |
 | [`profile-modal.html`](file:///home/luca/dev/the-vault-web/profile-modal.html) | Master profile & organization management modal dynamically fetched and injected into all authenticated pages by `profile-engine.js`. | Injected into DOM; controlled by `profile-engine.js`. |
 | [`404.html`](file:///home/luca/dev/the-vault-web/404.html) | Custom error page for invalid routes. | Static Tailwind HTML. |
-| [`assets/java_files/main.js`](file:///home/luca/dev/the-vault-web/assets/java_files/main.js) | Sidebar layout controller, mobile menu toggles, and active navigation route synchronization. | Native DOM manipulation. |
-| [`assets/java_files/profile-engine.js`](file:///home/luca/dev/the-vault-web/assets/java_files/profile-engine.js) | Core platform engine: session lifecycle, dynamic modal injection, multi-tenant state resolution, crop-pack gating, seat limits, and Paystack upgrade handlers. | Supabase Client, Paystack Inline v2, Storage API, DOM APIs. |
+| [`js/main.js`](file:///home/luca/dev/the-vault-web/js/main.js) | Sidebar layout controller, mobile menu toggles, and active navigation route synchronization. | Native DOM manipulation. |
+| [`js/profile-engine.js`](file:///home/luca/dev/the-vault-web/js/profile-engine.js) | Core platform engine: session lifecycle, dynamic modal injection, multi-tenant state resolution, crop-pack gating, seat limits, and Paystack upgrade handlers. | Supabase Client, Paystack Inline v2, Storage API, DOM APIs. |
 | [`supabase/config.toml`](file:///home/luca/dev/the-vault-web/supabase/config.toml) | Supabase CLI local and edge function configuration specifying function entrypoints and JWT verification rules. | Supabase CLI. |
 | [`supabase/functions/paystack-webhook/index.ts`](file:///home/luca/dev/the-vault-web/supabase/functions/paystack-webhook/index.ts) | Deno edge function verifying HMAC SHA512 signatures, handling Paystack events, and invoking `purchase_crop_pack_addon`. | Deno, Supabase Admin Client, Paystack API. |
 | [`supabase/functions/notify-referral-lead/index.ts`](file:///home/luca/dev/the-vault-web/supabase/functions/notify-referral-lead/index.ts) | Deno edge function dispatching transactional emails via Resend when a grower submits a processor referral. | Deno, Resend API. |
@@ -237,6 +237,11 @@ tailwind.config = {
 
 ### Baseline Entry (2026-09-26)
 - **Repo Restructuring & Audit**: Completed comprehensive audit of all HTML routes, Deno edge functions, client JS engines, and legal documents.
+- **Platform Directory Restructuring (`v3-dev`)**:
+  - Migrated legacy `assets/java_files/` to `js/` (`js/main.js`, `js/profile-engine.js`) and established `js/modules/`.
+  - Realigned master branding assets to `assets/branding/` (`Simple_Logo.jpg`, `Simple_Logo-removebg-preview.png`, `Simple_Logo-White.png`).
+  - Updated all HTML script tags and favicon/image asset references to new locations.
+  - Initialized `.ai/ARCHITECTURE.md` and `AGENTS.md` defining strict zero-build rules, preserved root HTML entry points, and multi-tenant RLS constraints.
 - **Standardized Multi-Tenant Field**: Confirmed full standardization on `company_id` across `profiles`, `companies`, `training_records`, and assessment tables.
 - **Crop-Pack Stacking Architecture (Layer 1, 2, 3)**:
   - *Layer 1 (Core Farm Safety)*: Universal farm modules (general safety, workshops, irrigation, fleet) accessible to all tiers without co-branding.
