@@ -6,7 +6,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
   "";
 
 const NOTIFICATION_RECIPIENTS = [
-  "simple.lucadudley@gmail.com",
+  "luca@simpleza.co.za",
 ];
 
 function timingSafeEqual(a: string, b: string) {
@@ -76,7 +76,7 @@ serve(async (req) => {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail);
     const replyToAddress = isValidEmail
       ? rawEmail
-      : "simple.lucadudley@gmail.com";
+      : "luca@simpleza.co.za";
 
     // 4. Sanitize all user-controlled text for HTML rendering
     const processorName = escapeHtml(

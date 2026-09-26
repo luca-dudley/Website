@@ -30,10 +30,10 @@ window.currentCompanyData = null; // full `companies` row incl. sponsored_crop_p
 // ============================================================================
 
 // Layer 1 (Universal Farm Core): neutral, never crop-gated, never co-branded.
-const CORE_NEUTRAL_SUBTAGS = ['general safety', 'machinery & workshop', 'pumping & irrigation'];
+const CORE_NEUTRAL_SUBTAGS = ['general safety', 'machinery & workshop', 'pumping & irrigation', 'vehicles & fleet'];
 
 // Layer 2 (Specialized Crop Packs): sub_tags containing these keywords belong to a crop pack.
-const CROP_PACK_KEYWORDS = ['Macadamia', 'Banana'];
+const CROP_PACK_KEYWORDS = ['Macadamia', 'Banana', 'Citrus'];
 
 // The single active Paystack plan code for the 25%-off Corporate-Subsidized
 // Enterprise tier (R337.50/mo). Companies on this plan code - or explicitly

@@ -81,7 +81,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               from: "Simple Solutions <compliance@simpleza.co.za>",
-              reply_to: "simple.lucadudley@gmail.com",
+              reply_to: "luca@simpleza.co.za",
               to: partner.contact_email,
               subject: `Supply Chain Compliance Digest: ${partner.name}`,
               html: `
